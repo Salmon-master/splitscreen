@@ -1,0 +1,24 @@
+#ifndef PLAYER_H_
+#define PLAYER_H_
+
+#include "game_object.h"
+
+// player class, used by the game to represnt the player
+class Player : public GameObject {
+ public:
+ private:
+  // speed vars
+  int speed_ = 200;
+  float rotation_speed_ = 0.05;
+
+ public:
+  Player();
+  // convert the speed(magnitude) and rotation(angle) into x and y components to
+  // feed to parent move function, and then move the player.
+  void Step(int delta_time);
+  void Rotate(bool direction);
+
+ private:
+};
+
+#endif  // !PLAYER_H_
