@@ -9,14 +9,14 @@ class Player : public GameObject {
  private:
   // speed vars
   int speed_ = 200;
-  float rotation_speed_ = 0.05;
+  float rotation_speed_ = 0.002;
 
  public:
   Player();
   // convert the speed(magnitude) and rotation(angle) into x and y components to
   // feed to parent move function, and then move the player.
   void Step(int delta_time);
-  void Rotate(bool direction);
+  void Rotate(bool direction, int delta_time);
 
  private:
 };

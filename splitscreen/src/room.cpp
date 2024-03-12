@@ -19,11 +19,15 @@ Room::Room() {
         std::cout << "  ";
       }
     }
+    walls.push_back(new Wall((map[0].size() - 1) * 128, y * 128));
     std::cout << std::endl;
+  }
+  for (int x = 0; x < map[0].size(); x++) {
+    walls.push_back(new Wall(x * 128, (map.size() - 1) * 128));
   }
 }
 
-std::vector<Wall*>* Room::GetWalls() { return &walls; }
+std::vector<Wall*> Room::GetWalls() { return walls; }
 
 Room::~Room() {
   for (Wall* wall : walls) {
@@ -53,8 +57,8 @@ std::vector<std::vector<Room::States>> Room::Generate() {
     for (int j = 0; j < 50; j++) {
       // random position
       bool placable = true;
-      int x = rand() % (width - room_width + 1) + 1;
-      int y = rand() % (width - room_width + 1) + 1;
+      int x = rand() % (width - room_width) + 1;
+      int y = rand() % (height - room_height) + 1;
       // checking if the room is placeble
       for (int l = 0; l < room_height; l++) {
         for (int f = 0; f < room_width; f++) {

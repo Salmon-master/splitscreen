@@ -16,11 +16,11 @@ void Player::Step(int delta_time) {
   this->Move(x, y);
 }
 
-void Player::Rotate(bool dir) {
+void Player::Rotate(bool dir, int delta_time) {
   if (dir == 1) {
-    rotation_ += rotation_speed_;
+    rotation_ += rotation_speed_ * delta_time;
   }
   if (dir == 0) {
-    rotation_ -= rotation_speed_;
+    rotation_ -= rotation_speed_ * delta_time;
   }
 }

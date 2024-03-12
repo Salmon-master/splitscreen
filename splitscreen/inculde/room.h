@@ -12,7 +12,7 @@ class Room {
  private:
  public:
   Room();
-  std::vector<Wall*>* GetWalls();
+  std::vector<Wall*> GetWalls();
   ~Room();
 
  private:

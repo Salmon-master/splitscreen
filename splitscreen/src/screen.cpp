@@ -37,7 +37,6 @@ void Screen::Render(std::vector<GameObject*> game_objects) {
     SDL_Rect render_rect = {(actual_rect.x - x_ + offset_.first),
                             (actual_rect.y - y_ + offset_.second),
                             actual_rect.w, actual_rect.h};
-    obj->rendered_ = false;
     // if the object is on screen, then render it
     if (render_rect.x > -1 * actual_rect.w && render_rect.x < 600 &&
         render_rect.y > -1 * actual_rect.h && render_rect.y < 500) {

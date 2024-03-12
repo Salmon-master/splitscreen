@@ -24,6 +24,7 @@
     <ClCompile Include="src\player.cpp" />
     <ClCompile Include="src\room.cpp" />
     <ClCompile Include="src\screen.cpp" />
+    <ClCompile Include="src\ui_bar.cpp" />
     <ClCompile Include="src\wall.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +32,7 @@
     <ClInclude Include="inculde\player.h" />
     <ClInclude Include="inculde\room.h" />
     <ClInclude Include="inculde\screen.h" />
+    <ClInclude Include="inculde\ui_bar.h" />
     <ClInclude Include="inculde\vector.h" />
     <ClInclude Include="inculde\wall.h" />
   </ItemGroup>
