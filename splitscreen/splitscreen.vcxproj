@@ -87,10 +87,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>.\bin\$(Platform)\$(Configuration)\</OutDir>
-    <LibraryPath>C:\SDL2\lib\x64;C:\SDL2_image\lib\x64;$(LibraryPath)</LibraryPath>
-    <ExternalIncludePath>C:\SDL2\include;C:\SDL2_image\include;$(ExternalIncludePath)</ExternalIncludePath>
-    <IncludePath>C:\Dev\splitscreen\splitscreen\inculde;$(IncludePath)</IncludePath>
+    <OutDir>.\bin$(Platform)\$(Configuration)\</OutDir>
+    <LibraryPath>C:\Users\hughb\Documents\Dev\CPP Libs\SDL2\lib\x64;C:\Users\hughb\Documents\Dev\CPP Libs\SDL2_image\lib\x64;$(LibraryPath)</LibraryPath>
+    <ExternalIncludePath>C:\Users\hughb\Documents\Dev\CPP Libs\SDL2\include;C:\Users\hughb\Documents\Dev\CPP Libs\SDL2_image\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <IncludePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\inculde;$(IncludePath)</IncludePath>
+    <SourcePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\src;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
