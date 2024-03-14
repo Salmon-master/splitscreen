@@ -1,19 +1,31 @@
 #include "ui_bar.h"
 
-UI_Bar::UI_Bar(int max_value, SDL_Color color, SDL_Rect rect) { 
+UIBar::UIBar(int max_value, SDL_Color color, SDL_Rect rect) { 
   rect_ = rect;
   color_ = color;
-  value_size_ = rect_.w / max_value;
-
+  max_value_ = max_value;
 }
 
-void UI_Bar::SetValue(int value) { value_ = value; }
+UIBar::~UIBar() { std::cout << "destroyed"; }
 
-void UI_Bar::ChangeValue(int delta_value) { value_ += delta_value; }
+void UIBar::SetValue(int value) { value_ = value; }
 
-std::pair<SDL_Rect, SDL_Color> UI_Bar::GetBar() { 
-  SDL_Rect bar = {rect_.x, rect_.y, value_size_ * value_, rect_.h};
-  return {bar, color_}; 
+void UIBar::ChangeValue(float delta_value) {
+  if (value_ < max_value_) {
+    value_ += delta_value;
+  }
 }
 
-SDL_Rect UI_Bar::GetRect() { return rect_; }
+std::pair<SDL_Rect*, SDL_Color> UIBar::GetBar() { 
+  SDL_Rect bar = {
+      rect_.x + border, rect_.y + border,
+      (rect_.w - (border * static_cast<float>(2))) / max_value_ * value_,
+      rect_.h - (border * 2)};
+  return {&bar, color_}; 
+}
+
+SDL_Rect* UIBar::GetRect() { return &rect_; }
+
+bool UIBar::Full() { return value_ >= max_value_; }
+
+float UIBar::GetValue() { return value_; }

@@ -8,6 +8,8 @@
 #include "screen.h"
 #include "wall.h"
 #include "room.h"
+#include "ui_bar.h"
+#include "bullet"
 
 int main(int argc, char* args[]) {
   bool run = true;
@@ -20,12 +22,14 @@ int main(int argc, char* args[]) {
   Screen screen1(100, 250);
   Screen screen2(600, 250);
   SDL_Event e;
+  UIBar* swtich_bar = nullptr;
 
   // game object intitilastion
   Player* player1 = new Player;
   Player* player2 = new Player;
   player1->SetPos(256, 256);
   player2->SetPos(256, 256);
+
 
   // testing code
   Room room;
@@ -41,7 +45,9 @@ int main(int argc, char* args[]) {
   screen2.Attach(player2);
   screen1.Attach(player1);
   // game vars 
-  Player* controlling = player1; 
+  Screen* controlling = &screen1;
+   
+  int swich_cooldown = 0;
 
   const Uint8* key_state = SDL_GetKeyboardState(NULL);
 
@@ -58,31 +64,57 @@ int main(int argc, char* args[]) {
         run = false;
       }
       if (e.type == SDL_KEYDOWN) {
-        if (e.key.keysym.sym == SDLK_v) {
-          if (controlling == player1) {
-            controlling = player2;
-          } else {
-            controlling = player1;
-          }
-        }
       }
     }
     SDL_PumpEvents();
     if (key_state[SDL_SCANCODE_W] == 1) {
-      controlling->Step(delta_time);
+      controlling->GetAttached()->Step(delta_time);
     }
     if (key_state[SDL_SCANCODE_A] == 1) {
-      controlling->Rotate(0, delta_time);
+      controlling->GetAttached()->Rotate(0, delta_time);
     }
     if (key_state[SDL_SCANCODE_D] == 1) {
-      controlling->Rotate(1, delta_time);
+      controlling->GetAttached()->Rotate(1, delta_time);
+    }
+    if (key_state[SDL_SCANCODE_SPACE] == 1) {
+      game_objects.push_back(new Bullet(player1))
+    }
+    if (key_state[SDL_SCANCODE_V] == 1) {
+      if (swtich_bar) {
+        swtich_bar->ChangeValue(2 * (delta_time / 10));
+        if (swtich_bar->Full()) {
+          swtich_bar->SetValue(0);
+          controlling->RemoveBar(swtich_bar);
+          swtich_bar = nullptr;
+          swich_cooldown = 1000;
+          if (controlling == &screen1) {
+            controlling = &screen2;
+          } else {
+            controlling = &screen1;
+          }
+        }
+      } else if(swich_cooldown <= 0) {
+        swtich_bar = controlling->AddBar(
+            100, {45, 136, 255}, {150, 225, 200, 50}, 3 * (delta_time / 10));
+      }
     }
 
 
     // game logic
     for (Wall* wall : walls) {
-      wall->Collision(controlling);
+      wall->Collision(controlling->GetAttached());
       wall->rendered_ = false;
+    }
+    if (swich_cooldown > 0) {
+      swich_cooldown -= delta_time;
+    }
+    if (swtich_bar) {
+      swtich_bar->ChangeValue(-1 * (delta_time / 10));
+      if (swtich_bar->GetValue() <= 0) {
+        controlling->RemoveBar(swtich_bar);
+        swtich_bar = nullptr;
+        swich_cooldown = 1000;
+      }
     }
 
     // rendering

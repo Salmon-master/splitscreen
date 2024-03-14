@@ -19,6 +19,9 @@ Screen::~Screen() {
   // clean up to avoid memory leaks
   SDL_DestroyRenderer(renderer_);
   SDL_DestroyWindow(win_);
+  for (UIBar* bar : bars_) {
+    delete bar;
+  }
 }
 
 void Screen::Render(std::vector<GameObject*> game_objects) {
@@ -50,14 +53,42 @@ void Screen::Render(std::vector<GameObject*> game_objects) {
       SDL_DestroyTexture(texture);
     }
   }
+  if (bars_.size() > 0) {
+    for (auto bar : bars_) {
+      SDL_SetRenderDrawColor(renderer_, background_color_.r,
+                             background_color_.g, background_color_.b, 1);
+      SDL_RenderFillRect(renderer_, bar->GetRect());
+      SDL_SetRenderDrawColor(renderer_, bar->GetBar().second.r,
+                             bar->GetBar().second.g, bar->GetBar().second.b, 1);
+      SDL_RenderFillRect(renderer_, bar->GetBar().first);
+    }
+    SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 1);
+  }
   // Update screen
   SDL_RenderPresent(renderer_);
 }
 
-void Screen::Attach(GameObject* target) {
+void Screen::Attach(Player* target) {
   // set target
   following_ = target;
   // set offset so target is centered on screen
   offset_.first = 250 - following_->GetCenter()->x;
   offset_.second = 250 - following_->GetCenter()->y;
 }
+UIBar* Screen::AddBar(int max_value, SDL_Color color, SDL_Rect rect,
+                      int value) {
+  bars_.push_back(new UIBar(max_value, color, rect));
+  bars_.back()->SetValue(value);
+  return bars_.back();
+}
+
+void Screen::RemoveBar(UIBar* bar_to_remove) {
+  for (UIBar* bar : bars_) {
+    if (bar == bar_to_remove) {
+      delete bar;
+      break;
+    }
+  }
+}
+
+Player* Screen::GetAttached() { return following_; }
