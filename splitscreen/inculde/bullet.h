@@ -5,7 +5,7 @@
 #include "player.h"
 #include "vector.h"
 
-class Bullet : public GameObject{
+class Bullet : public GameObject {
  public:
   Bullet(Player* shooter);
 

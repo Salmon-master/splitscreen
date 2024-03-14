@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bullet.cpp" />
+    <ClCompile Include="src\bullet.cpp" />
     <ClCompile Include="src\game_object.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\player.cpp" />
@@ -29,7 +29,7 @@
     <ClCompile Include="src\wall.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bullet.h" />
+    <ClInclude Include="inculde\bullet.h" />
     <ClInclude Include="inculde\game_object.h" />
     <ClInclude Include="inculde\player.h" />
     <ClInclude Include="inculde\room.h" />

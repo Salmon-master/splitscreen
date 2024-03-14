@@ -36,7 +36,7 @@
     <ClCompile Include="src\ui_bar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bullet.cpp">
+    <ClCompile Include="src\bullet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,7 +62,7 @@
     <ClInclude Include="inculde\ui_bar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="bullet.h">
+    <ClInclude Include="inculde\bullet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

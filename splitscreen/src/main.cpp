@@ -9,7 +9,8 @@
 #include "wall.h"
 #include "room.h"
 #include "ui_bar.h"
-#include "bullet"
+#include "bullet.h"
+
 
 int main(int argc, char* args[]) {
   bool run = true;
@@ -77,7 +78,7 @@ int main(int argc, char* args[]) {
       controlling->GetAttached()->Rotate(1, delta_time);
     }
     if (key_state[SDL_SCANCODE_SPACE] == 1) {
-      game_objects.push_back(new Bullet(player1))
+      game_objects.push_back(new Bullet(player1));
     }
     if (key_state[SDL_SCANCODE_V] == 1) {
       if (swtich_bar) {
