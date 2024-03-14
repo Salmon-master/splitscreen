@@ -9,7 +9,7 @@
 #include "wall.h"
 #include "room.h"
 #include "ui_bar.h"
-#include "bullet.h"
+#include "gun.h"
 
 
 int main(int argc, char* args[]) {
@@ -41,13 +41,13 @@ int main(int argc, char* args[]) {
   for (int i = 0; i < walls.size() - 1; i++) {
     game_objects.push_back(walls[i]);
   }
+  std::vector<Bullet*> bullets;
 
   // assign players to screens
   screen2.Attach(player2);
   screen1.Attach(player1);
   // game vars 
-  Screen* controlling = &screen1;
-   
+  Screen* controlling = &screen1;   
   int swich_cooldown = 0;
 
   const Uint8* key_state = SDL_GetKeyboardState(NULL);
@@ -78,7 +78,11 @@ int main(int argc, char* args[]) {
       controlling->GetAttached()->Rotate(1, delta_time);
     }
     if (key_state[SDL_SCANCODE_SPACE] == 1) {
-      game_objects.push_back(new Bullet(player1));
+      Bullet* bullet = controlling->GetAttached()->GetGun()->Shoot();
+      if (bullet) {
+        bullets.push_back(bullet);
+        game_objects.push_back(bullet);
+      }
     }
     if (key_state[SDL_SCANCODE_V] == 1) {
       if (swtich_bar) {
@@ -116,6 +120,9 @@ int main(int argc, char* args[]) {
         swtich_bar = nullptr;
         swich_cooldown = 1000;
       }
+    }
+    for (Bullet* bullet : bullets) {
+      bullet->Update();
     }
 
     // rendering

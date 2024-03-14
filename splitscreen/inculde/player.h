@@ -2,6 +2,7 @@
 #define PLAYER_H_
 
 #include "game_object.h"
+#include "gun.h"
 
 // player class, used by the game to represnt the player
 class Player : public GameObject {
@@ -10,6 +11,7 @@ class Player : public GameObject {
   // speed vars
   int speed_ = 200;
   float rotation_speed_ = 0.002;
+  Gun* gun_ = nullptr;
 
  public:
   Player();
@@ -17,6 +19,7 @@ class Player : public GameObject {
   // feed to parent move function, and then move the player.
   void Step(int delta_time);
   void Rotate(bool direction, int delta_time);
+  Gun* GetGun();
 
  private:
 };

@@ -8,10 +8,11 @@
 class Bullet : public GameObject {
  public:
   Bullet(Player* shooter);
+  bool Update();
 
  private:
   Vector velocity_ = {0, 0};
-  int speed_ = 100;
+  int speed_ = 10;
 };
 
 #endif  // !BULLET_H_

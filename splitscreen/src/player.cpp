@@ -5,6 +5,7 @@
 Player::Player() : GameObject(0, 0, "player") {
   // roataion center to center of player charter
   rotation_center_.y = (rect_.h - 28) + rect_.y;
+  gun_ = new Gun(0, this);
 }
 
 void Player::Step(int delta_time) {
@@ -24,3 +25,5 @@ void Player::Rotate(bool dir, int delta_time) {
     rotation_ -= rotation_speed_ * delta_time;
   }
 }
+
+Gun* Player::GetGun() { return gun_; }
