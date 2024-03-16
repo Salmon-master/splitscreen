@@ -33,6 +33,7 @@ class GameObject {
   int fps_ = 0;
   int last_step_ = 0;
   std::vector<int> state_que_ = {};
+  virtual void Cast();
 
  public:
   GameObject(int x, int y, std::string name);

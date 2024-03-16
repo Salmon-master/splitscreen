@@ -6,10 +6,16 @@
 struct Vector {
   float x = 0;
   float y = 0;
+
   float Norm() {
     float norm = sqrt(pow(x, 2) + pow(y, 2));
     return norm;
   }
+  Vector Normalised() {
+    Vector normlisied = {this->x / this->Norm(), this->y / this->Norm()};
+    return normlisied;
+  }
+  float Dot(Vector other) { return (this->x * other.x) + (this->y * other.y); }
 };
 
 #endif  // !VECTOR_H_

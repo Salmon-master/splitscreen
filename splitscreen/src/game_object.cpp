@@ -2,6 +2,8 @@
 
 #include <filesystem>
 
+void GameObject::Cast() {}
+
 GameObject::GameObject(int x, int y, std::string name) {
   // setting posistion
   rect_.x = x;

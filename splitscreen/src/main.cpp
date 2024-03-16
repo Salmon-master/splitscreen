@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <stack>
 
 #include "game_object.h"
 #include "player.h"
@@ -34,6 +35,7 @@ int main(int argc, char* args[]) {
 
   // testing code
   Room room;
+  Gun gun1(0, player1);
 
   // adding objects to lists
   std::vector<GameObject*> game_objects = {player1, player2};
@@ -121,8 +123,22 @@ int main(int argc, char* args[]) {
         swich_cooldown = 1000;
       }
     }
+
+    std::stack<Bullet*> to_remove;
     for (Bullet* bullet : bullets) {
-      bullet->Update();
+      if (bullet->Update(game_objects)) {
+        to_remove.push(bullet);
+        game_objects.erase(
+            std::remove(game_objects.begin(), game_objects.end(), bullet),
+            game_objects.end());
+      }
+    }
+    while (!to_remove.empty()) {
+      bullets.erase(
+          std::remove(bullets.begin(), bullets.end(), to_remove.top()),
+          bullets.end());
+      delete to_remove.top();
+      to_remove.pop();
     }
 
     // rendering

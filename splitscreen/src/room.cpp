@@ -14,9 +14,6 @@ Room::Room() {
     for (int x = 0; x < map[0].size() - 1; x++) {
       if (map[y][x] == Empty || map[y][x] == NextToArea) {
         walls.push_back(new Wall(x * 128, y * 128));
-        std::cout << "00";
-      } else {
-        std::cout << "  ";
       }
     }
     walls.push_back(new Wall((map[0].size() - 1) * 128, y * 128));

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bullet.cpp" />
+    <ClCompile Include="src\enemy.cpp" />
     <ClCompile Include="src\game_object.cpp" />
     <ClCompile Include="src\gun.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -31,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inculde\bullet.h" />
+    <ClInclude Include="inculde\enemy.h" />
     <ClInclude Include="inculde\game_object.h" />
     <ClInclude Include="inculde\gun.h" />
     <ClInclude Include="inculde\player.h" />
@@ -93,7 +95,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>.\bin$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>.\bin\$(Platform)\$(Configuration)\</OutDir>
     <LibraryPath>C:\Users\hughb\Documents\Dev\CPP Libs\SDL2\lib\x64;C:\Users\hughb\Documents\Dev\CPP Libs\SDL2_image\lib\x64;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>C:\Users\hughb\Documents\Dev\CPP Libs\SDL2\include;C:\Users\hughb\Documents\Dev\CPP Libs\SDL2_image\include;$(ExternalIncludePath)</ExternalIncludePath>
     <IncludePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\inculde;$(IncludePath)</IncludePath>

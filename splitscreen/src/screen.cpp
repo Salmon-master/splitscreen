@@ -83,12 +83,8 @@ UIBar* Screen::AddBar(int max_value, SDL_Color color, SDL_Rect rect,
 }
 
 void Screen::RemoveBar(UIBar* bar_to_remove) {
-  for (UIBar* bar : bars_) {
-    if (bar == bar_to_remove) {
-      delete bar;
-      break;
-    }
-  }
+  bars_.erase(std::remove(bars_.begin(), bars_.end(), bar_to_remove), bars_.end());
+  delete bar_to_remove;
 }
 
 Player* Screen::GetAttached() { return following_; }

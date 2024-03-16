@@ -5,10 +5,12 @@
 #include "player.h"
 #include "vector.h"
 
+class Player;
+
 class Bullet : public GameObject {
  public:
   Bullet(Player* shooter);
-  bool Update();
+  bool Update(std::vector<GameObject*>* objects);
 
  private:
   Vector velocity_ = {0, 0};

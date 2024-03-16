@@ -4,6 +4,9 @@
 #include "player.h"
 #include "bullet.h"
 
+class Player;
+class Bullet;
+
 class Gun {
  public:
   Gun(int type, Player* player);

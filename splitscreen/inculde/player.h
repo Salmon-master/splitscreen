@@ -4,6 +4,8 @@
 #include "game_object.h"
 #include "gun.h"
 
+// foward declations
+class Gun;
 // player class, used by the game to represnt the player
 class Player : public GameObject {
  public:
