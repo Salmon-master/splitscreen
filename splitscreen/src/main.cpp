@@ -126,7 +126,7 @@ int main(int argc, char* args[]) {
 
     std::stack<Bullet*> to_remove;
     for (Bullet* bullet : bullets) {
-      if (bullet->Update(game_objects)) {
+      if (bullet->Update(&game_objects)) {
         to_remove.push(bullet);
         game_objects.erase(
             std::remove(game_objects.begin(), game_objects.end(), bullet),

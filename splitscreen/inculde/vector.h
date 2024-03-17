@@ -16,6 +16,9 @@ struct Vector {
     return normlisied;
   }
   float Dot(Vector other) { return (this->x * other.x) + (this->y * other.y); }
+  Vector Scaled(float scalar) {
+    return {this->x * scalar, this->y * scalar};
+  }
 };
 
 #endif  // !VECTOR_H_
