@@ -33,7 +33,8 @@ Room::~Room() {
 }
 
 std::vector<std::vector<Room::States>> Room::Generate() {
-  srand(time(0));
+  // srand(time(0));
+  srand(34560);
   std::vector<std::vector<Room::States>> output;
   // generate blank feild
   int width = (rand() % (40 - 20 + 1)) + 20;

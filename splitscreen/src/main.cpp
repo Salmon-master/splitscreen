@@ -11,6 +11,7 @@
 #include "room.h"
 #include "ui_bar.h"
 #include "gun.h"
+#include "enemy.h"
 
 
 int main(int argc, char* args[]) {
@@ -36,9 +37,10 @@ int main(int argc, char* args[]) {
   // testing code
   Room room;
   Gun gun1(0, player1);
+  Enemy* enemy1 = new Enemy(512, 512, 1);
 
   // adding objects to lists
-  std::vector<GameObject*> game_objects = {player1, player2};
+  std::vector<GameObject*> game_objects = {player1, player2, enemy1};
   std::vector<Wall*> walls = room.GetWalls();
   for (int i = 0; i < walls.size() - 1; i++) {
     game_objects.push_back(walls[i]);
@@ -108,6 +110,7 @@ int main(int argc, char* args[]) {
 
 
     // game logic
+    enemy1->AI(game_objects);
     for (Wall* wall : walls) {
       wall->Collision(controlling->GetAttached());
       wall->rendered_ = false;

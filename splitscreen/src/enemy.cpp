@@ -2,10 +2,12 @@
 
 #include <algorithm>
 #include <iostream>
+#include <string>
 
 #include "wall.h"
 
-Enemy::Enemy(int x, int y, int type) : GameObject(x, y, "enemy_" + type) {
+Enemy::Enemy(int x, int y, int type)
+    : GameObject(x, y, "enemy_" + std::to_string(type)) {
   SetPos(x, y);
   for (size_t i = 0; i < num_rays_; i++) {
     float angle = (i * 2 * M_PI) / num_rays_;
@@ -23,16 +25,46 @@ bool Enemy::Damage(int amount) {
 }
 
 void Enemy::AI(std::vector<GameObject*> game_objects) {
+  std::vector<GameObject*> danger_objects;
+  std::vector<GameObject*> interest_objects;
   for (GameObject* obj : game_objects) {
     Player* player_type = dynamic_cast<Player*>(obj);
     Bullet* bullet_type = dynamic_cast<Bullet*>(obj);
+    Wall* wall_type = dynamic_cast<Wall*>(obj);
+    Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
+    if (wall_type) {
+      if (Vector{obj->GetRect().x - rect_.x, obj->GetRect().y - rect_.y}
+              .Norm() < search_range_) {
+        danger_objects.push_back(obj);
+      }
+    }
+    if (player_type) {
+      if (Vector{obj->GetRect().x - rect_.x, obj->GetRect().y - rect_.y}
+              .Norm() <= search_range_) {
+        interest_objects.push_back(obj);
+      }
+    }
   }
+  std::vector<float> interest =
+      SetInterest(Vector{interest_objects[0]->GetRect().x - rect_.x,
+                         interest_objects[0]->GetRect().y - rect_.y});
+  std::vector<float> danger = SetDanger(danger_objects);
+  for (int i = 0; i < num_rays_; i++) {
+    interest[i] -= danger[i];
+  }
+  Vector chosen_dir = {0, 0};
+  for (int i = 0; i < num_rays_; i++) {
+    chosen_dir.x += interest[i] * ray_directions_[i].x;
+    chosen_dir.y += interest[i] * ray_directions_[i].y;
+  }
+  Move(chosen_dir.x * speed_, chosen_dir.y * speed_);
 }
 
 std::vector<float> Enemy::SetInterest(Vector direction) {
   std::vector<float> interest_aray(num_rays_);
   for (int i = 0; i < num_rays_; i++) {
-    float interest = ray_directions_->Dot(direction.Normalised());
+    float interest =
+        ray_directions_[i].Normalised().Dot(direction.Normalised());
     interest_aray[i] = std::max(0.0f, interest);
   }
   return interest_aray;
