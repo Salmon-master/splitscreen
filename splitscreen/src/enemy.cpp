@@ -40,14 +40,16 @@ void Enemy::AI(std::vector<GameObject*> game_objects) {
     }
     if (player_type) {
       if (Vector{obj->GetRect().x - rect_.x, obj->GetRect().y - rect_.y}
-              .Norm() <= search_range_) {
+              .Norm() <= search_range_ * 2) {
         interest_objects.push_back(obj);
       }
     }
   }
-  std::vector<float> interest =
-      SetInterest(Vector{interest_objects[0]->GetRect().x - rect_.x,
-                         interest_objects[0]->GetRect().y - rect_.y});
+  std::vector<float> interest(num_rays_);
+  if (!interest_objects.empty()) {
+    interest = SetInterest(Vector{interest_objects[0]->GetRect().x - rect_.x,
+                       interest_objects[0]->GetRect().y - rect_.y});
+  }
   std::vector<float> danger = SetDanger(danger_objects);
   for (int i = 0; i < num_rays_; i++) {
     interest[i] -= danger[i];
@@ -57,7 +59,7 @@ void Enemy::AI(std::vector<GameObject*> game_objects) {
     chosen_dir.x += interest[i] * ray_directions_[i].x;
     chosen_dir.y += interest[i] * ray_directions_[i].y;
   }
-  Move(chosen_dir.x * speed_, chosen_dir.y * speed_);
+  Move(chosen_dir.x * speed_ / 1000, chosen_dir.y * speed_ / 1000);
 }
 
 std::vector<float> Enemy::SetInterest(Vector direction) {
@@ -75,8 +77,9 @@ std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
   for (int i = 0; i < num_rays_; i++) {
     // calculating cast ray
     std::pair<SDL_Point, SDL_Point> ray = {
-        SDL_Point{(int)ray_directions_[i].Scaled(search_range_).x,
-                  (int)ray_directions_[i].Scaled(search_range_).y},
+        SDL_Point{
+            (int)ray_directions_[i].Scaled(search_range_).x + (int)rect_.x,
+            (int)ray_directions_[i].Scaled(search_range_).y + (int)rect_.y},
         SDL_Point{(int)rect_.x, (int)rect_.y}};
     // iterates through all given game objects and checks for dangerous objects
     // in ray path
@@ -97,11 +100,17 @@ std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
         if (Intersect(line.first, line.second, ray.first, ray.second)) {
           // if there is an intersection set the danger equal to the inverse
           // distance between the enemy and that object, times a constant
-          Vector diffrence = {rect_.x - obj->GetRect().x,
-                              rect_.y - obj->GetRect().y};
+          Vector diffrence = {r.x - rect_.x,
+                              r.y - rect_.y};
           danger = pow(diffrence.Norm(), -1) * 10;
         }
         danger_aray[i] = danger;
+        if (danger != 0.0f) {
+          break;
+        }
+      }
+      if (danger_aray[i] != 0.0f) {
+         break;
       }
     }
   }
@@ -113,12 +122,18 @@ bool Enemy::Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2) {
   // https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/,
   // checks orientation of the two tragnes formed by the lines, if diffrent the
   // the lines intersect
-  int o1 = (q1.y - p1.y) * (p2.x - q1.x) - (q1.x - p1.x) * (p2.y - q1.y);
-  int o2 = (q1.y - p1.y) * (q2.x - q1.x) - (q1.x - p1.x) * (q2.y - q1.y);
-  int o3 = (q2.y - p2.y) * (p1.x - q2.x) - (q2.x - p2.x) * (p1.y - q2.y);
-  int o4 = (q2.y - p2.y) * (q1.x - q2.x) - (q2.x - p2.x) * (q1.y - q2.y);
+  int o1 = Orientation(p1, q1, p2);
+  int o2 = Orientation(p1, q1, q2);
+  int o3 = Orientation(p2, q2, p1);
+  int o4 = Orientation(p2, q2, q1); 
   if (o1 != o2 && o3 != o4) {
     return true;
   };
   return false;
+}
+
+int Enemy::Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3) {
+  int val = (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y);
+  if (val == 0) return 0;  // collinear
+  return (val > 0) ? 1 : 2;  // clock or counterclock wise
 }
