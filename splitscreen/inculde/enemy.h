@@ -29,10 +29,10 @@ class Enemy : public GameObject {
   // line 2 = p2-q2
   bool Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2);
   int health_ = 100;
-  int speed_ = 200;
-  static const int num_rays_ = 32;
+  int speed_ = 1500;
+  static const int num_rays_ = 16;
   Vector ray_directions_[num_rays_];
-  int search_range_ = 200;
+  int search_range_ = 160;
   int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);
 };
 

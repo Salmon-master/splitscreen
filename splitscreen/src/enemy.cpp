@@ -33,14 +33,17 @@ void Enemy::AI(std::vector<GameObject*> game_objects) {
     Wall* wall_type = dynamic_cast<Wall*>(obj);
     Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
     if (wall_type) {
-      if (Vector{obj->GetRect().x - rect_.x, obj->GetRect().y - rect_.y}
+      if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
+                     (rect_.x + rotation_center_.x),
+                 (obj->GetRect().y + obj->GetCenter()->y) -
+                     (rect_.y + rotation_center_.y)}
               .Norm() < search_range_) {
         danger_objects.push_back(obj);
       }
     }
     if (player_type) {
       if (Vector{obj->GetRect().x - rect_.x, obj->GetRect().y - rect_.y}
-              .Norm() <= search_range_ * 2) {
+              .Norm() <= search_range_ * 4) {
         interest_objects.push_back(obj);
       }
     }
@@ -59,7 +62,8 @@ void Enemy::AI(std::vector<GameObject*> game_objects) {
     chosen_dir.x += interest[i] * ray_directions_[i].x;
     chosen_dir.y += interest[i] * ray_directions_[i].y;
   }
-  Move(chosen_dir.x * speed_ / 1000, chosen_dir.y * speed_ / 1000);
+  Move(chosen_dir.Normalised().x * speed_ / 1000,
+       chosen_dir.Normalised().y * speed_ / 1000);
 }
 
 std::vector<float> Enemy::SetInterest(Vector direction) {
@@ -100,9 +104,10 @@ std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
         if (Intersect(line.first, line.second, ray.first, ray.second)) {
           // if there is an intersection set the danger equal to the inverse
           // distance between the enemy and that object, times a constant
-          Vector diffrence = {r.x - rect_.x,
-                              r.y - rect_.y};
-          danger = pow(diffrence.Norm(), -1) * 10;
+          Vector diffrence = {(r.x + obj->GetCenter()->x) - (rect_.x + rotation_center_.x),
+                              (r.y + obj->GetCenter()->y) - (rect_.y + rotation_center_.y)};
+          // danger = pow(diffrence.Norm(), -0.5) * 100;
+          danger = pow(diffrence.Norm() - search_range_, 2) * (1 / pow(92 - search_range_, 2));
         }
         danger_aray[i] = danger;
         if (danger != 0.0f) {
