@@ -14,7 +14,7 @@ class Enemy : public GameObject {
   bool Damage(int amount);
   // calclate the direction the enemy wants to go in, interpritation of alorightm
   // at https://kidscancode.org/godot_recipes/3.x/ai/context_map/
-  void AI(std::vector<GameObject*> game_objects);
+  void AI(std::vector<GameObject*> game_objects, int delta);
 
  private:
   // helper function to AI, caculates the interest array and returns it given a
@@ -29,10 +29,11 @@ class Enemy : public GameObject {
   // line 2 = p2-q2
   bool Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2);
   int health_ = 100;
-  int speed_ = 1500;
+  int speed_ = 100;
   static const int num_rays_ = 16;
   Vector ray_directions_[num_rays_];
-  int search_range_ = 160;
+  int search_range_ = 128;
+  float steer_force_ = 0.2;
   int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);
 };
 

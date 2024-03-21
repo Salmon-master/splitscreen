@@ -110,7 +110,7 @@ int main(int argc, char* args[]) {
 
 
     // game logic
-    enemy1->AI(game_objects);
+    enemy1->AI(game_objects, delta_time);
     for (Wall* wall : walls) {
       wall->Collision(controlling->GetAttached());
       wall->rendered_ = false;
