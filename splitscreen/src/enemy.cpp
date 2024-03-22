@@ -19,99 +19,105 @@ Enemy::Enemy(int x, int y, int type)
 bool Enemy::Damage(int amount) {
   bool rv = false;
   health_ -= amount;
-  health_bar_->ChangeValue(-amount);
   if (health_ <= 0) {
     rv = true;
+    dead_ = true;
+    health_bar_->SetValue(0);
+  } else {
+    health_bar_->SetValue(health_);
   }
   return rv;
 }
 
 void Enemy::AI(std::vector<GameObject*> game_objects, int delta) {
-  if (delta == 0) {
-    delta = 1;
-  }
-  std::vector<GameObject*> danger_objects;
-  std::vector<GameObject*> interest_objects;
-  for (GameObject* obj : game_objects) {
-    Player* player_type = dynamic_cast<Player*>(obj);
-    Bullet* bullet_type = dynamic_cast<Bullet*>(obj);
-    Wall* wall_type = dynamic_cast<Wall*>(obj);
-    Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
-    if (wall_type) {
-      if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
-                     (rect_.x + rotation_center_.x),
-                 (obj->GetRect().y + obj->GetCenter()->y) -
-                     (rect_.y + rotation_center_.y)}
-              .Norm() < search_range_) {
-        danger_objects.push_back(obj);
+  if (!dead_) {
+    if (delta == 0) {
+      delta = 1;
+    }
+    std::vector<GameObject*> danger_objects;
+    std::vector<GameObject*> interest_objects;
+    for (GameObject* obj : game_objects) {
+      Player* player_type = dynamic_cast<Player*>(obj);
+      Bullet* bullet_type = dynamic_cast<Bullet*>(obj);
+      Wall* wall_type = dynamic_cast<Wall*>(obj);
+      Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
+      if (wall_type) {
+        if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
+                       (rect_.x + rotation_center_.x),
+                   (obj->GetRect().y + obj->GetCenter()->y) -
+                       (rect_.y + rotation_center_.y)}
+                .Norm() < search_range_) {
+          danger_objects.push_back(obj);
+        }
+      }
+      if (player_type) {
+        if (Vector{obj->GetRect().x - rect_.x, obj->GetRect().y - rect_.y}
+                .Norm() <= search_range_ * 4) {
+          interest_objects.push_back(obj);
+        }
       }
     }
-    if (player_type) {
-      if (Vector{obj->GetRect().x - rect_.x, obj->GetRect().y - rect_.y}
-              .Norm() <= search_range_ * 4) {
-        interest_objects.push_back(obj);
+    std::vector<float> interest(num_rays_);
+    if (!interest_objects.empty()) {
+      interest =
+          SetInterest(Vector{interest_objects[0]->GetRect().x - rect_.x,
+                             interest_objects[0]->GetRect().y - rect_.y});
+    }
+    std::vector<float> danger = SetDanger(danger_objects);
+    for (int i = 0; i < num_rays_; i++) {
+      if (danger[i] != 0.0f) {
+        interest[i] = danger[i];
       }
     }
-  }
-  std::vector<float> interest(num_rays_);
-  if (!interest_objects.empty()) {
-    interest = SetInterest(Vector{interest_objects[0]->GetRect().x - rect_.x,
-                                  interest_objects[0]->GetRect().y - rect_.y});
-  }
-  std::vector<float> danger = SetDanger(danger_objects);
-  for (int i = 0; i < num_rays_; i++) {
-    if (danger[i] != 0.0f) {
-      interest[i] = danger[i];
+    Vector chosen_dir = {0, 0};
+    for (int i = 0; i < num_rays_; i++) {
+      chosen_dir.x += interest[i] * ray_directions_[i].x;
+      chosen_dir.y += interest[i] * ray_directions_[i].y;
     }
-  }
-  Vector chosen_dir = {0, 0};
-  for (int i = 0; i < num_rays_; i++) {
-    chosen_dir.x += interest[i] * ray_directions_[i].x;
-    chosen_dir.y += interest[i] * ray_directions_[i].y;
-  }
-  Vector steer = {((chosen_dir.Normalised().x) - velocity_.x) * steer_force_,
-                  ((chosen_dir.Normalised().y) - velocity_.y) * steer_force_};
-  Vector chosen_direction = {velocity_.x + steer.x, velocity_.y + steer.y};
-  Move(((chosen_direction.Normalised().x * speed_ * delta) / 1000),
-       ((chosen_direction.Normalised().y * speed_ * delta) / 1000));
-  velocity_ = {(chosen_direction.Normalised().x * speed_ * delta) / 1000,
-               (chosen_direction.Normalised().y * speed_ * delta) / 1000};
+    Vector steer = {((chosen_dir.Normalised().x) - velocity_.x) * steer_force_,
+                    ((chosen_dir.Normalised().y) - velocity_.y) * steer_force_};
+    Vector chosen_direction = {velocity_.x + steer.x, velocity_.y + steer.y};
+    Move(((chosen_direction.Normalised().x * speed_ * delta) / 1000),
+         ((chosen_direction.Normalised().y * speed_ * delta) / 1000));
+    velocity_ = {(chosen_direction.Normalised().x * speed_ * delta) / 1000,
+                 (chosen_direction.Normalised().y * speed_ * delta) / 1000};
 
-  float new_rotation = atan(velocity_.y / velocity_.x);
-  if (chosen_direction.y > 0) {
-    if (chosen_direction.x < 0) {
-      new_rotation += M_PI;
+    float new_rotation = atan(velocity_.y / velocity_.x);
+    if (chosen_direction.y > 0) {
+      if (chosen_direction.x < 0) {
+        new_rotation += M_PI;
+      } else {
+        new_rotation += M_PI * 2;
+      }
     } else {
+      if (chosen_direction.x < 0) {
+        new_rotation += M_PI;
+      }
+    }
+    if (new_rotation < 0) {
       new_rotation += M_PI * 2;
     }
-  } else {
-    if (chosen_direction.x < 0) {
-      new_rotation += M_PI;
+    new_rotation += M_PI / 2;
+    if (new_rotation >= 2 * M_PI) {
+      new_rotation -= 2 * M_PI;
     }
-  }
-  if (new_rotation < 0) {
-    new_rotation += M_PI * 2;
-  }
-  new_rotation += M_PI / 2;
-  if (new_rotation >= 2 * M_PI) {
-    new_rotation -= 2 * M_PI;
-  }
-  if (abs(new_rotation - rotation_) > M_PI) {
-    float amount =
-        ((2 * M_PI) - abs(new_rotation - rotation_)) * steer_force_ / 5;
-    if (rotation_ > new_rotation) {
-      rotation_ += amount;
+    if (abs(new_rotation - rotation_) > M_PI) {
+      float amount =
+          ((2 * M_PI) - abs(new_rotation - rotation_)) * steer_force_ / 5;
+      if (rotation_ > new_rotation) {
+        rotation_ += amount;
+      } else {
+        rotation_ -= amount;
+      }
     } else {
-      rotation_ -= amount;
+      rotation_ += ((new_rotation - rotation_) * steer_force_ / 5);
     }
-  } else {
-    rotation_ += ((new_rotation - rotation_) * steer_force_ / 5);
-  }
-  if (rotation_ >= 2 * M_PI) {
-    rotation_ -= 2 * M_PI;
-  }
-  if (rotation_ <= 0) {
-    rotation_ += 2 * M_PI;
+    if (rotation_ >= 2 * M_PI) {
+      rotation_ -= 2 * M_PI;
+    }
+    if (rotation_ <= 0) {
+      rotation_ += 2 * M_PI;
+    }
   }
 }
 
@@ -121,9 +127,11 @@ UIBar* Enemy::CreateBar() {
   health_bar_ =
       new UIBar(max_health_, {135, 211, 124},
                 SDL_Rect{(int)rect_.x, ((int)rect_.y - 10), (int)rect_.w, 10});
-  health_bar_->SetValue(max_health_ / 2);
+  health_bar_->SetValue(max_health_);
   return health_bar_;
 }
+
+Enemy::~Enemy() { delete health_bar_; }
 
 std::vector<float> Enemy::SetInterest(Vector direction) {
   std::vector<float> interest_aray(num_rays_);

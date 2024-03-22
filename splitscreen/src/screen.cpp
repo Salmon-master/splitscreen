@@ -1,6 +1,7 @@
 #include "screen.h"
 
 #include <cmath>
+#include <stack>
 
 #include "enemy.h"
 
@@ -53,27 +54,38 @@ void Screen::Render(std::vector<GameObject*> game_objects) {
       SDL_RenderCopyEx(renderer_, texture, NULL, &render_rect, angle,
                        obj->GetCenter(), SDL_FLIP_NONE);
       SDL_DestroyTexture(texture);
-      Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
-      if (enemy_type) {
-        if (enemy_type->GetBar() == nullptr) {
-          bars_.push_back(enemy_type->CreateBar());
-        }
-        SDL_FRect rect = enemy_type->GetRect();
-        enemy_type->GetBar()->SetPos(rect.x - x_ + offset_.first,
-                                     (rect.y + 20) - y_ + offset_.second);
+    }
+    Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
+    if (enemy_type) {
+      if (enemy_type->GetBar() == nullptr) {
+        bars_.push_back(enemy_type->CreateBar());
       }
+      SDL_FRect rect = enemy_type->GetRect();
+      enemy_type->GetBar()->SetPos(rect.x - x_ + offset_.first,
+                                   (rect.y + 20) - y_ + offset_.second);
     }
   }
   if (bars_.size() > 0) {
+    std::stack<UIBar*> to_remove;
     for (auto bar : bars_) {
-      SDL_SetRenderDrawColor(renderer_, background_color_.r,
-                             background_color_.g, background_color_.b, 1);
-      SDL_RenderFillRect(renderer_, bar->GetRect());
-      SDL_SetRenderDrawColor(renderer_, bar->GetBar().second.r,
-                             bar->GetBar().second.g, bar->GetBar().second.b, 1);
-      SDL_RenderFillRect(renderer_, bar->GetBar().first);
+      if (!bar) {
+        to_remove.push(bar);
+      } else {
+        SDL_SetRenderDrawColor(renderer_, background_color_.r,
+                               background_color_.g, background_color_.b, 1);
+        SDL_RenderFillRect(renderer_, bar->GetRect());
+        SDL_SetRenderDrawColor(renderer_, bar->GetBar().second.r,
+                               bar->GetBar().second.g, bar->GetBar().second.b,
+                               1);
+        SDL_RenderFillRect(renderer_, bar->GetBar().first);
+      }
     }
     SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 1);
+    while (!to_remove.empty()) {
+      bars_.erase(std::remove(bars_.begin(), bars_.end(), to_remove.top()),
+                  bars_.end());
+      to_remove.pop();
+    }
   }
   // Update screen
   SDL_RenderPresent(renderer_);

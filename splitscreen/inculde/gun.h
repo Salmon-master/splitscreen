@@ -12,9 +12,10 @@ class Gun {
   Gun(int type, Player* player);
   Bullet* Shoot();
  private:
-  int cooldown_ = 100;
+  int cooldown_ = 200;
   int last_shot_ = 0;
   int type_ = 0;
+  int damage_ = 5;
   Player* held_by_ = nullptr;
 };
 

@@ -18,6 +18,7 @@ class Enemy : public GameObject {
   void AI(std::vector<GameObject*> game_objects, int delta);
   UIBar* GetBar();
   UIBar* CreateBar();
+  ~Enemy();
 
  private:
   // helper function to AI, caculates the interest array and returns it given a
@@ -33,13 +34,14 @@ class Enemy : public GameObject {
   bool Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2);
   int health_ = 100;
   int max_health_ = 100;
-  int speed_ = 100;
+  int speed_ = 60;
   static const int num_rays_ = 16;
   Vector ray_directions_[num_rays_];
   int search_range_ = 128;
   float steer_force_ = 0.2;
   int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);
   UIBar* health_bar_ = nullptr;
+  bool dead_= false;
 };
 
 #endif  // !ENEMY_H_
