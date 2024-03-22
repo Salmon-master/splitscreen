@@ -29,3 +29,13 @@ SDL_Rect* UIBar::GetRect() { return &rect_; }
 bool UIBar::Full() { return value_ >= max_value_; }
 
 float UIBar::GetValue() { return value_; }
+
+void UIBar::Move(int x, int y) {
+  rect_.x += x;
+  rect_.y += y;
+}
+
+void UIBar::SetPos(int x, int y) {
+  rect_.x = x;
+  rect_.y = y;
+}

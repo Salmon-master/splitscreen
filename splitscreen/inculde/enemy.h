@@ -5,6 +5,7 @@
 
 #include "game_object.h"
 #include "vector.h"
+#include "ui_bar.h"
 
 //  a class represneting the enmeyies in the game
 class Enemy : public GameObject {
@@ -15,6 +16,8 @@ class Enemy : public GameObject {
   // calclate the direction the enemy wants to go in, interpritation of alorightm
   // at https://kidscancode.org/godot_recipes/3.x/ai/context_map/
   void AI(std::vector<GameObject*> game_objects, int delta);
+  UIBar* GetBar();
+  UIBar* CreateBar();
 
  private:
   // helper function to AI, caculates the interest array and returns it given a
@@ -29,12 +32,14 @@ class Enemy : public GameObject {
   // line 2 = p2-q2
   bool Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2);
   int health_ = 100;
+  int max_health_ = 100;
   int speed_ = 100;
   static const int num_rays_ = 16;
   Vector ray_directions_[num_rays_];
   int search_range_ = 128;
   float steer_force_ = 0.2;
   int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);
+  UIBar* health_bar_ = nullptr;
 };
 
 #endif  // !ENEMY_H_

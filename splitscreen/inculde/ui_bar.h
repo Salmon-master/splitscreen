@@ -15,6 +15,8 @@ class UIBar {
   SDL_Rect* GetRect();
   bool Full();
   float GetValue();
+  void Move(int x, int y);
+  void SetPos(int x, int y);
 
  private:
   SDL_Rect rect_ = {0, 0, 0, 0};

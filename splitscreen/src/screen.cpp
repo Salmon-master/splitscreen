@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "enemy.h"
+
 Screen::Screen(int x, int y) {
   // window creation using SDL
   win_ = SDL_CreateWindow("Window", x, y, 500, 500, 0);
@@ -51,6 +53,15 @@ void Screen::Render(std::vector<GameObject*> game_objects) {
       SDL_RenderCopyEx(renderer_, texture, NULL, &render_rect, angle,
                        obj->GetCenter(), SDL_FLIP_NONE);
       SDL_DestroyTexture(texture);
+      Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
+      if (enemy_type) {
+        if (enemy_type->GetBar() == nullptr) {
+          bars_.push_back(enemy_type->CreateBar());
+        }
+        SDL_FRect rect = enemy_type->GetRect();
+        enemy_type->GetBar()->SetPos(rect.x - x_ + offset_.first,
+                                     (rect.y + 20) - y_ + offset_.second);
+      }
     }
   }
   if (bars_.size() > 0) {
@@ -83,7 +94,8 @@ UIBar* Screen::AddBar(int max_value, SDL_Color color, SDL_Rect rect,
 }
 
 void Screen::RemoveBar(UIBar* bar_to_remove) {
-  bars_.erase(std::remove(bars_.begin(), bars_.end(), bar_to_remove), bars_.end());
+  bars_.erase(std::remove(bars_.begin(), bars_.end(), bar_to_remove),
+              bars_.end());
   delete bar_to_remove;
 }
 

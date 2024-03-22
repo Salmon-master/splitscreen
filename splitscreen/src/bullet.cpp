@@ -1,5 +1,6 @@
 #include "bullet.h"
 
+#include "enemy.h"
 
 Bullet::Bullet(Player* shooter)
     : GameObject(shooter->GetCenter()->x + shooter->GetRect().x + 
@@ -19,6 +20,7 @@ bool Bullet::Update(std::vector<GameObject*>* objects) {
   for (GameObject* obj : *objects) {
     Player* player_type = dynamic_cast<Player*>(obj);
     Bullet* bullet_type = dynamic_cast<Bullet*>(obj);
+    Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
     if (!player_type && !bullet_type) {
       int x_diff = abs((obj->GetCenter()->x + obj->GetRect().x) -
                        (rotation_center_.x + rect_.x));
@@ -28,6 +30,8 @@ bool Bullet::Update(std::vector<GameObject*>* objects) {
         destruct = true;
         break;
       }
+    }
+    if (enemy_type) {
     }
   }
   return destruct;

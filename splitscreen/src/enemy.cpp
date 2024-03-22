@@ -19,6 +19,7 @@ Enemy::Enemy(int x, int y, int type)
 bool Enemy::Damage(int amount) {
   bool rv = false;
   health_ -= amount;
+  health_bar_->ChangeValue(-amount);
   if (health_ <= 0) {
     rv = true;
   }
@@ -75,6 +76,7 @@ void Enemy::AI(std::vector<GameObject*> game_objects, int delta) {
        ((chosen_direction.Normalised().y * speed_ * delta) / 1000));
   velocity_ = {(chosen_direction.Normalised().x * speed_ * delta) / 1000,
                (chosen_direction.Normalised().y * speed_ * delta) / 1000};
+
   float new_rotation = atan(velocity_.y / velocity_.x);
   if (chosen_direction.y > 0) {
     if (chosen_direction.x < 0) {
@@ -111,6 +113,16 @@ void Enemy::AI(std::vector<GameObject*> game_objects, int delta) {
   if (rotation_ <= 0) {
     rotation_ += 2 * M_PI;
   }
+}
+
+UIBar* Enemy::GetBar() { return health_bar_; }
+
+UIBar* Enemy::CreateBar() {
+  health_bar_ =
+      new UIBar(max_health_, {135, 211, 124},
+                SDL_Rect{(int)rect_.x, ((int)rect_.y - 10), (int)rect_.w, 10});
+  health_bar_->SetValue(max_health_ / 2);
+  return health_bar_;
 }
 
 std::vector<float> Enemy::SetInterest(Vector direction) {
