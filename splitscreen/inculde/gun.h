@@ -15,7 +15,7 @@ class Gun {
   int cooldown_ = 200;
   int last_shot_ = 0;
   int type_ = 0;
-  int damage_ = 5;
+  int damage_ = 20;
   Player* held_by_ = nullptr;
 };
 

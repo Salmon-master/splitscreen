@@ -59,6 +59,8 @@ void Screen::Render(std::vector<GameObject*> game_objects) {
     if (enemy_type) {
       if (enemy_type->GetBar() == nullptr) {
         bars_.push_back(enemy_type->CreateBar());
+      } else if (std::count(bars_.begin(), bars_.end(), enemy_type->GetBar()) == 0) {
+        bars_.push_back(enemy_type->GetBar());
       }
       SDL_FRect rect = enemy_type->GetRect();
       enemy_type->GetBar()->SetPos(rect.x - x_ + offset_.first,

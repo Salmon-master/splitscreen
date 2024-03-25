@@ -48,18 +48,18 @@ bool Bullet::Update(std::vector<GameObject*>* objects) {
           to_remove.push(obj);
         }
         destruct = true;
+        break;
       }
     }
-    while (!to_remove.empty()) {
-      GameObject* removed = to_remove.top();
-      Enemy* enemy_type = dynamic_cast<Enemy*>(to_remove.top());
-      to_remove.pop();
-      objects->erase(
-          std::remove(objects->begin(), objects->end(), removed),
-          objects->end());
-      if (enemy_type) {
-        delete enemy_type;
-      }
+  }
+  while (!to_remove.empty()) {
+    GameObject* removed = to_remove.top();
+    Enemy* enemy_type = dynamic_cast<Enemy*>(to_remove.top());
+    to_remove.pop();
+    objects->erase(std::remove(objects->begin(), objects->end(), removed),
+                   objects->end());
+    if (enemy_type) {
+      delete enemy_type;
     }
   }
   return destruct;
