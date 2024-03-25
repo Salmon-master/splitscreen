@@ -50,11 +50,23 @@ void Enemy::AI(std::vector<GameObject*> game_objects, int delta) {
           danger_objects.push_back(obj);
         }
       }
+      if (enemy_type) {
+        if (enemy_type != this) {
+          if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
+                         (rect_.x + rotation_center_.x),
+                     (obj->GetRect().y + obj->GetCenter()->y) -
+                         (rect_.y + rotation_center_.y)}
+                  .Norm() < search_range_) {
+            danger_objects.push_back(obj);
+          }
+        }
+      }
       if (player_type) {
         if (Vector{obj->GetRect().x - rect_.x, obj->GetRect().y - rect_.y}
                 .Norm() <= search_range_ * 4) {
           interest_objects.push_back(obj);
         }
+        
       }
     }
     std::vector<float> interest(num_rays_);
@@ -179,9 +191,13 @@ std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
           } else {
             diffrence = abs(line.first.y - (rect_.y + rotation_center_.y));
           }
-          danger = ((search_range_ - r.w) - diffrence) * 0.03;
-          // danger = pow(diffrence.Norm(), -0.5) * 100;
-          // danger = 1;
+          Wall* wall_type = dynamic_cast<Wall*>(obj);
+          Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
+          if (wall_type) {
+            danger = ((search_range_ - r.w) - diffrence) * 0.03;
+          } else if (enemy_type) {
+            danger = -0.001;
+          }
         }
         danger_aray[i] = danger;
         if (danger != 0.0f) {

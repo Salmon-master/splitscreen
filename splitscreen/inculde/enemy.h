@@ -34,11 +34,11 @@ class Enemy : public GameObject {
   bool Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2);
   int health_ = 100;
   int max_health_ = 100;
-  int speed_ = 60;
+  int speed_ = 80;
   static const int num_rays_ = 16;
   Vector ray_directions_[num_rays_];
   int search_range_ = 128;
-  float steer_force_ = 0.2;
+  float steer_force_ = 0.24;
   int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);
   UIBar* health_bar_ = nullptr;
   bool dead_= false;

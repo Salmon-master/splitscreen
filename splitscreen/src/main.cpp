@@ -38,11 +38,10 @@ int main(int argc, char* args[]) {
   Room room;
   Gun gun1(0, player1);
   Enemy* enemy1 = new Enemy(512, 512, 1);
-  Enemy* enemy2 = new Enemy(512, 256, 1);
-  Enemy* enemy3 = new Enemy(256, 512, 1);
+  Enemy* enemy2 = new Enemy(512, 255, 1);
 
   // adding objects to lists
-  std::vector<GameObject*> game_objects = {player1, player2, enemy1, enemy2, enemy3};
+  std::vector<GameObject*> game_objects = {player1, player2, enemy1, enemy2};
   std::vector<Wall*> walls = room.GetWalls();
   for (int i = 0; i < walls.size() - 1; i++) {
     game_objects.push_back(walls[i]);
@@ -114,7 +113,6 @@ int main(int argc, char* args[]) {
     // game logic
     enemy1->AI(game_objects, delta_time);
     enemy2->AI(game_objects, delta_time);
-    enemy3->AI(game_objects, delta_time);
     for (Wall* wall : walls) {
       wall->Collision(controlling->GetAttached());
       wall->rendered_ = false;
