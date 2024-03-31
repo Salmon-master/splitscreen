@@ -3,9 +3,11 @@
 
 #include <vector>
 
+#include "bullet.h"
 #include "game_object.h"
-#include "vector.h"
+#include "gun.h"
 #include "ui_bar.h"
+#include "vector.h"
 
 //  a class represneting the enmeyies in the game
 class Enemy : public GameObject {
@@ -13,9 +15,10 @@ class Enemy : public GameObject {
   Enemy(int x, int y, int type);
   // subtract from health, retuns true if health is below 0, false if not
   bool Damage(int amount);
-  // calclate the direction the enemy wants to go in, interpritation of alorightm
-  // at https://kidscancode.org/godot_recipes/3.x/ai/context_map/
-  void AI(std::vector<GameObject*> game_objects, int delta);
+  // calclate the direction the enemy wants to go in, interpritation of
+  // alorightm at https://kidscancode.org/godot_recipes/3.x/ai/context_map/
+  void AI(std::vector<GameObject*>* game_objects, int delta,
+          std::vector<Bullet*>* bullets, std::vector<Player*> players);
   UIBar* GetBar();
   UIBar* CreateBar();
   ~Enemy();
@@ -34,14 +37,18 @@ class Enemy : public GameObject {
   bool Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2);
   int health_ = 100;
   int max_health_ = 100;
-  int speed_ = 80;
-  static const int num_rays_ = 16;
+  float speed_ = 80;
+  int attack_range_ = 128;
+  static const int num_rays_ = 8;
   Vector ray_directions_[num_rays_];
   int search_range_ = 128;
-  float steer_force_ = 0.24;
+  float steer_force_ = 0.35;
   int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);
   UIBar* health_bar_ = nullptr;
-  bool dead_= false;
+  bool dead_ = false;
+  Bullet* Attack(Vector location);
+  Gun* gun_ = nullptr;
+  float SetRotationFromVector(Vector rotation);
 };
 
 #endif  // !ENEMY_H_

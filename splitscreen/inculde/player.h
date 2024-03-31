@@ -3,6 +3,7 @@
 
 #include "game_object.h"
 #include "gun.h"
+#include "ui_bar.h"
 
 // foward declations
 class Gun;
@@ -14,6 +15,8 @@ class Player : public GameObject {
   int speed_ = 200;
   float rotation_speed_ = 0.002;
   Gun* gun_ = nullptr;
+  int damage_ = 0;
+  UIBar damage_bar_;
 
  public:
   Player();
@@ -22,6 +25,8 @@ class Player : public GameObject {
   void Step(int delta_time);
   void Rotate(bool direction, int delta_time);
   Gun* GetGun();
+  bool Damage(int amount);
+  UIBar* GetBar();
 
  private:
 };

@@ -2,7 +2,7 @@
 
 #include <SDL.h>
 
-Gun::Gun(int type, Player* player) { held_by_ = player; }
+Gun::Gun(int type, GameObject* holder) { held_by_ = holder; }
 
 Bullet* Gun::Shoot() {
   Bullet* rv = nullptr;

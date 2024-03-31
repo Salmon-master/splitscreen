@@ -13,38 +13,66 @@ Room::Room() {
   for (int y = 0; y < map.size() - 1; y++) {
     for (int x = 0; x < map[0].size() - 1; x++) {
       if (map[y][x] == Empty || map[y][x] == NextToArea) {
-        walls.push_back(new Wall(x * 128, y * 128));
+        walls_.push_back(new Wall(x * 128, y * 128));
+      } else {
+        free_.push_back({(x * 128) + 64, (y * 128) + 64});
       }
     }
-    walls.push_back(new Wall((map[0].size() - 1) * 128, y * 128));
+    walls_.push_back(new Wall((map[0].size() - 1) * 128, y * 128));
     std::cout << std::endl;
   }
   for (int x = 0; x < map[0].size(); x++) {
-    walls.push_back(new Wall(x * 128, (map.size() - 1) * 128));
+    walls_.push_back(new Wall(x * 128, (map.size() - 1) * 128));
   }
 }
 
-std::vector<Wall*> Room::GetWalls() { return walls; }
+std::vector<Wall*> Room::GetWalls() { return walls_; }
+
+std::vector<std::pair<int, int>> Room::GetFree() {
+  return free_;
+}
 
 Room::~Room() {
-  for (Wall* wall : walls) {
+  for (Wall* wall : walls_) {
     delete wall;
   }
 }
 
 std::vector<std::vector<Room::States>> Room::Generate() {
-  // srand(time(0));
-  srand(34560);
+  srand(time(0));
+  // srand(34560);
   std::vector<std::vector<Room::States>> output;
   // generate blank feild
-  int width = (rand() % (40 - 20 + 1)) + 20;
-  int height = (rand() % (40 - 20 + 1)) + 20;
+  int width = (rand() % (22 - 12 + 1)) + 12;
+  int height = (rand() % (22 - 12 + 1)) + 12;
   std::vector<Room::States> push;
   for (int i = 0; i < width; i++) {
     push.push_back(Empty);
   }
   for (int i = 0; i < height; i++) {
     output.push_back(push);
+  }
+  // starting room generation
+  for (int l = 0; l < 5; l++) {
+    for (int f = 0; f < 5; f++) {
+      if (l < 0 || l >= 4 || f < 0 || f >= 4) {
+        output[l + 1][1 + f] = NextToArea;
+
+      } else {
+        output[l + 1][1 + f] = Area;
+      }
+    }
+  }
+  // end room generation
+  for (int l = 0; l < 5; l++) {
+    for (int f = 0; f < 5; f++) {
+      if (l < 0 || l >= 4 || f < 0 || f >= 4) {
+        output[l + 1][1 + f] = NextToArea;
+
+      } else {
+        output[l + 1][1 + f] = Area;
+      }
+    }
   }
   // room generation
   for (int i = 0; i < (rand() % (20 - 10 + 1)) + 10; i++) {

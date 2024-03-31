@@ -9,14 +9,14 @@ class Bullet;
 
 class Gun {
  public:
-  Gun(int type, Player* player);
+  Gun(int type, GameObject* holder);
   Bullet* Shoot();
  private:
-  int cooldown_ = 200;
+  int cooldown_ = 300;
   int last_shot_ = 0;
   int type_ = 0;
-  int damage_ = 20;
-  Player* held_by_ = nullptr;
+  int damage_ = 10;
+  GameObject* held_by_ = nullptr;
 };
 
 #endif  // !GUN_H_

@@ -9,13 +9,14 @@ class Player;
 
 class Bullet : public GameObject {
  public:
-  Bullet(Player* shooter, int damage);
+  Bullet(GameObject* shooter, int damage);
   bool Update(std::vector<GameObject*>* objects);
 
  private:
   Vector velocity_ = {0, 0};
-  int speed_ = 10;
+  int speed_ = 30;
   int damage_;
+  GameObject* shooter_;
 };
 
 #endif  // !BULLET_H_

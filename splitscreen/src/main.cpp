@@ -36,18 +36,29 @@ int main(int argc, char* args[]) {
 
   // testing code
   Room room;
-  Gun gun1(0, player1);
-  Enemy* enemy1 = new Enemy(512, 512, 1);
-  Enemy* enemy2 = new Enemy(512, 255, 1);
+
 
   // adding objects to lists
-  std::vector<GameObject*> game_objects = {player1, player2, enemy1, enemy2};
+  std::vector<GameObject*> game_objects = {player1, player2};
   std::vector<Wall*> walls = room.GetWalls();
   for (int i = 0; i < walls.size() - 1; i++) {
     game_objects.push_back(walls[i]);
   }
   std::vector<Bullet*> bullets;
 
+  // eniemies 
+  std::vector<std::pair<int, int>> free = room.GetFree(); 
+  std::vector<Enemy*> enemies;
+  int size = (((rand() % (61)) + 70) / 100.0f) * (free.size() / 12);
+  for (int i = 0; i < size; i++) {
+    int random = rand() % free.size();
+    Enemy* enemy = new Enemy(free[random].first,
+                  free[random].second, 1);
+    free.erase(free.begin() + random);
+    enemy->Move(-1 * enemy->GetCenter()->x, -1 * enemy->GetCenter()->y);
+    enemies.push_back(enemy);
+    game_objects.push_back(enemy);
+  }
   // assign players to screens
   screen2.Attach(player2);
   screen1.Attach(player1);
@@ -111,8 +122,9 @@ int main(int argc, char* args[]) {
 
 
     // game logic
-    enemy1->AI(game_objects, delta_time);
-    enemy2->AI(game_objects, delta_time);
+    for (Enemy* enemy : enemies) {
+        enemy->AI(&game_objects, delta_time, &bullets, {player1, player2});
+    }
     for (Wall* wall : walls) {
       wall->Collision(controlling->GetAttached());
       wall->rendered_ = false;

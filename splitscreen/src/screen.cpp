@@ -99,6 +99,8 @@ void Screen::Attach(Player* target) {
   // set offset so target is centered on screen
   offset_.first = 250 - following_->GetCenter()->x;
   offset_.second = 250 - following_->GetCenter()->y;
+  bars_.push_back(following_->GetBar());
+  bars_.back()->SetPos(10, 450);
 }
 UIBar* Screen::AddBar(int max_value, SDL_Color color, SDL_Rect rect,
                       int value) {
