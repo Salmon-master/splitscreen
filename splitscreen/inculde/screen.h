@@ -4,11 +4,10 @@
 #include <iostream>
 #include <vector>
 
-#include "SDL.h"
-
 #include "game_object.h"
-#include "ui_bar.h"
 #include "player.h"
+#include "SDL.h"
+#include "ui_bar.h"
 
 // object to control a window on screen, used by the main.cc to create a window,
 // so use instantiate the object with a screen position (top left corner) and
@@ -36,7 +35,7 @@ class Screen {
   ~Screen();
   // render all objects in veiw of camrea on screen, called in main method every
   // frame
-  void Render(std::vector<GameObject*> game_ojbects);
+  void Render(std::vector<std::vector<GameObject*>> game_ojbects);
   // bind camrea position of object position
   void Attach(Player* target);
   UIBar* AddBar(int max_value, SDL_Color color, SDL_Rect rect, int value);

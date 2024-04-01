@@ -3,6 +3,7 @@
 #include <stack>
 
 #include "enemy.h"
+#include "main.h"
 #include "wall.h"
 
 Bullet::Bullet(GameObject* shooter, int damage)
@@ -20,50 +21,58 @@ Bullet::Bullet(GameObject* shooter, int damage)
   shooter_ = shooter;
 }
 
-bool Bullet::Update(std::vector<GameObject*>* objects) {
+bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
   bool destruct = false;
   Move(velocity_.x, velocity_.y);
   std::stack<GameObject*> to_remove;
-  for (GameObject* obj : *objects) {
-    if (obj != shooter_) {
-      Player* player_type = dynamic_cast<Player*>(obj);
-      Bullet* bullet_type = dynamic_cast<Bullet*>(obj);
-      Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
-      Wall* wall_type = dynamic_cast<Wall*>(obj);
-      if (wall_type) {
-        int x_diff = abs((obj->GetCenter()->x + obj->GetRect().x) -
-                         (rotation_center_.x + rect_.x));
-        int y_diff = abs((obj->GetCenter()->y + obj->GetRect().y) -
-                         (rotation_center_.y + rect_.y));
-        if (x_diff < obj->GetRect().w / 2 && y_diff < obj->GetRect().h / 2) {
-          destruct = true;
-          break;
-        }
-      }
-      if (enemy_type) {
-        Vector diff = {(rotation_center_.x + rect_.x) -
-                           (obj->GetCenter()->x + obj->GetRect().x),
-                       (rotation_center_.y + rect_.y) -
-                           (obj->GetCenter()->y + obj->GetRect().y)};
-        if (diff.Norm() <= obj->GetCenter()->x) {
-          if (enemy_type->Damage(damage_)) {
-            to_remove.push(obj);
+  for (int i = 0; i < objects->size() - 1; i++) {
+    for (GameObject* obj : objects->at(i)) {
+      if (obj != shooter_) {
+        if (i == kWalls) {
+          int x_diff = abs((obj->GetCenter()->x + obj->GetRect().x) -
+                           (rotation_center_.x + rect_.x));
+          int y_diff = abs((obj->GetCenter()->y + obj->GetRect().y) -
+                           (rotation_center_.y + rect_.y));
+          if (x_diff < obj->GetRect().w / 2 && y_diff < obj->GetRect().h / 2) {
+            destruct = true;
+            break;
           }
-          destruct = true;
-          break;
         }
-      }
-      if (player_type) {
-        Vector diff = {(rotation_center_.x + rect_.x) -
-                           (obj->GetCenter()->x + obj->GetRect().x),
-                       (rotation_center_.y + rect_.y) -
-                           (obj->GetCenter()->y + obj->GetRect().y)};
-        if (diff.Norm() <= obj->GetCenter()->x) {
-          if (player_type->Damage(damage_)) {
-            to_remove.push(obj);
+        if (i == kEnemies) {
+          Enemy* enemy = dynamic_cast<Enemy*>(obj);
+          if (enemy) {
+            Vector diff = {(rotation_center_.x + rect_.x) -
+                               (obj->GetCenter()->x + obj->GetRect().x),
+                           (rotation_center_.y + rect_.y) -
+                               (obj->GetCenter()->y + obj->GetRect().y)};
+            if (diff.Norm() <= obj->GetCenter()->x) {
+              if (enemy->Damage(damage_)) {
+                to_remove.push(obj);
+              }
+              destruct = true;
+              break;
+            }
+          } else {
+            throw 10 + kEnemies;
           }
-          destruct = true;
-          break;
+        }
+        if (i == kPlayers) {
+          Player* player = dynamic_cast<Player*>(obj);
+          if (player) {
+            Vector diff = {(rotation_center_.x + rect_.x) -
+                               (obj->GetCenter()->x + obj->GetRect().x),
+                           (rotation_center_.y + rect_.y) -
+                               (obj->GetCenter()->y + obj->GetRect().y)};
+            if (diff.Norm() <= obj->GetCenter()->x) {
+              if (player->Damage(damage_)) {
+                to_remove.push(obj);
+              }
+              destruct = true;
+              break;
+            }
+          } else {
+            throw 10 + kPlayers;
+          }
         }
       }
     }
@@ -72,8 +81,11 @@ bool Bullet::Update(std::vector<GameObject*>* objects) {
     GameObject* removed = to_remove.top();
     Enemy* enemy_type = dynamic_cast<Enemy*>(to_remove.top());
     to_remove.pop();
-    objects->erase(std::remove(objects->begin(), objects->end(), removed),
-                   objects->end());
+    for (int i = kPlayers; i < kBullets; i++) {
+      objects->at(i).erase(
+          std::remove(objects->at(i).begin(), objects->at(i).end(), removed),
+          objects->at(i).end());
+    }
     if (enemy_type) {
       delete enemy_type;
     }

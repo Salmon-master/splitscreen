@@ -10,7 +10,7 @@ class Player;
 class Bullet : public GameObject {
  public:
   Bullet(GameObject* shooter, int damage);
-  bool Update(std::vector<GameObject*>* objects);
+  bool Update(std::vector<std::vector<GameObject*>>* objects);
 
  private:
   Vector velocity_ = {0, 0};

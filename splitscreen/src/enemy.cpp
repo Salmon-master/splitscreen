@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 
+#include "main.h"
 #include "wall.h"
 
 Enemy::Enemy(int x, int y, int type)
@@ -33,14 +34,17 @@ bool Enemy::Damage(int amount) {
   return rv;
 }
 
-void Enemy::AI(std::vector<GameObject*>* game_objects, int delta,
-               std::vector<Bullet*>* bullets, std::vector<Player*> players) {
+void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
   std::vector<Vector> diff;
-  for (Player* player : players) {
-    diff.push_back({(player->GetRect().x + player->GetCenter()->x) -
-                        (rect_.x + rotation_center_.x),
-                    (player->GetRect().y + player->GetCenter()->y) -
-                        (rect_.y + rotation_center_.y)});
+  for (GameObject* player : game_objects->at(kPlayers)) {
+    if (dynamic_cast<Player*>(player)) {
+      diff.push_back({(player->GetRect().x + player->GetCenter()->x) -
+                          (rect_.x + rotation_center_.x),
+                      (player->GetRect().y + player->GetCenter()->y) -
+                          (rect_.y + rotation_center_.y)});
+    } else {
+      throw 10;
+    }
   }
 
   if (!dead_ && (diff[0].Norm() < 500 || diff[1].Norm() < 500)) {
@@ -49,22 +53,9 @@ void Enemy::AI(std::vector<GameObject*>* game_objects, int delta,
     }
     std::vector<GameObject*> danger_objects;
     std::vector<Vector> interest_objects;
-    for (GameObject* obj : *game_objects) {
-      Player* player_type = dynamic_cast<Player*>(obj);
-      Bullet* bullet_type = dynamic_cast<Bullet*>(obj);
-      Wall* wall_type = dynamic_cast<Wall*>(obj);
-      Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
-      if (wall_type) {
-        if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
-                       (rect_.x + rotation_center_.x),
-                   (obj->GetRect().y + obj->GetCenter()->y) -
-                       (rect_.y + rotation_center_.y)}
-                .Norm() < search_range_) {
-          danger_objects.push_back(obj);
-        }
-      }
-      if (enemy_type) {
-        if (enemy_type != this) {
+    for (int i = 0; i < game_objects->size() - 1; i++) {
+      for (GameObject* obj : game_objects->at(i)) {
+        if (i == kWalls) {
           if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
                          (rect_.x + rotation_center_.x),
                      (obj->GetRect().y + obj->GetCenter()->y) -
@@ -73,33 +64,43 @@ void Enemy::AI(std::vector<GameObject*>* game_objects, int delta,
             danger_objects.push_back(obj);
           }
         }
-      }
-      if (player_type) {
-        Vector diff = {(obj->GetRect().x + obj->GetCenter()->x) -
+        if (i == kEnemies) {
+          if (obj != this) {
+            if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
                            (rect_.x + rotation_center_.x),
                        (obj->GetRect().y + obj->GetCenter()->y) -
-                           (rect_.y + rotation_center_.y)};
-        if (diff.Norm() <= search_range_ * 3) {
-          if (health_ > max_health_ / 4) {
-            interest_objects.push_back(
-                Vector{obj->GetRect().x - rect_.x, obj->GetRect().y - rect_.y});
-            if (diff.Norm() <= attack_range_) {
-              Bullet* bullet = Attack(diff);
-              if (speed_ > 3) {
-                speed_ *= 0.95;
-              }
-              if (bullet) {
-                bullets->push_back(bullet);
-                game_objects->push_back(bullet);
+                           (rect_.y + rotation_center_.y)}
+                    .Norm() < search_range_) {
+              danger_objects.push_back(obj);
+            }
+          }
+        }
+        if (i == kPlayers) {
+          Vector diff = {(obj->GetRect().x + obj->GetCenter()->x) -
+                             (rect_.x + rotation_center_.x),
+                         (obj->GetRect().y + obj->GetCenter()->y) -
+                             (rect_.y + rotation_center_.y)};
+          if (diff.Norm() <= search_range_ * 3) {
+            if (health_ > max_health_ / 4) {
+              interest_objects.push_back(Vector{obj->GetRect().x - rect_.x,
+                                                obj->GetRect().y - rect_.y});
+              if (diff.Norm() <= attack_range_) {
+                Bullet* bullet = Attack(diff);
+                if (speed_ > 3) {
+                  speed_ *= 0.95;
+                }
+                if (bullet) {
+                  game_objects->at(kBullets).push_back(bullet);
+                }
+              } else {
+                speed_ = 80;
               }
             } else {
-              speed_ = 80;
+              speed_ = 100;
+              interest_objects.push_back(
+                  Vector{(obj->GetRect().x - rect_.x) * -1,
+                         (obj->GetRect().y - rect_.y) * -1});
             }
-          } else {
-            speed_ = 100;
-            interest_objects.push_back(
-                Vector{(obj->GetRect().x - rect_.x) * -1,
-                       (obj->GetRect().y - rect_.y) * -1});
           }
         }
       }
@@ -217,11 +218,11 @@ std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
           if (wall_type) {
             danger = ((search_range_ - r.w) - diffrence) * 0.025;
           } else if (enemy_type) {
-            danger = -0.001;
+            danger = -0.001f;
           }
         }
         danger_aray[i] = danger;
-        if (danger != 0.0f && danger != -0.001) {
+        if (danger != 0.0f && danger != -0.001f) {
           break;
         }
       }

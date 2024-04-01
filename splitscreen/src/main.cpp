@@ -1,18 +1,20 @@
+#include "main.h"
+
 #include <SDL.h>
 
 #include <iostream>
-#include <vector>
 #include <stack>
+#include <vector>
 
-#include "game_object.h"
-#include "player.h"
-#include "screen.h"
-#include "wall.h"
-#include "room.h"
-#include "ui_bar.h"
-#include "gun.h"
 #include "enemy.h"
-
+#include "game_object.h"
+#include "gun.h"
+#include "player.h"
+#include "room.h"
+#include "screen.h"
+#include "ship.h"
+#include "ui_bar.h"
+#include "wall.h"
 
 int main(int argc, char* args[]) {
   bool run = true;
@@ -33,37 +35,20 @@ int main(int argc, char* args[]) {
   player1->SetPos(256, 256);
   player2->SetPos(256, 256);
 
+  // adding objects to lists
+  std::vector<std::vector<GameObject*>> game_objects = {{}, {}, {}, {}};
+  game_objects[kPlayers].push_back(player1);
+  game_objects[kPlayers].push_back(player2);
 
   // testing code
-  Room room;
-
-
-  // adding objects to lists
-  std::vector<GameObject*> game_objects = {player1, player2};
-  std::vector<Wall*> walls = room.GetWalls();
-  for (int i = 0; i < walls.size() - 1; i++) {
-    game_objects.push_back(walls[i]);
-  }
-  std::vector<Bullet*> bullets;
-
-  // eniemies 
-  std::vector<std::pair<int, int>> free = room.GetFree(); 
-  std::vector<Enemy*> enemies;
-  int size = (((rand() % (61)) + 70) / 100.0f) * (free.size() / 12);
-  for (int i = 0; i < size; i++) {
-    int random = rand() % free.size();
-    Enemy* enemy = new Enemy(free[random].first,
-                  free[random].second, 1);
-    free.erase(free.begin() + random);
-    enemy->Move(-1 * enemy->GetCenter()->x, -1 * enemy->GetCenter()->y);
-    enemies.push_back(enemy);
-    game_objects.push_back(enemy);
-  }
+  Ship ship1(&game_objects);
+  // std::vector<Enemy*> enemies = ship1.GetEnemies();
+  // eniemies
   // assign players to screens
   screen2.Attach(player2);
   screen1.Attach(player1);
-  // game vars 
-  Screen* controlling = &screen1;   
+  // game vars
+  Screen* controlling = &screen1;
   int swich_cooldown = 0;
 
   const Uint8* key_state = SDL_GetKeyboardState(NULL);
@@ -81,6 +66,12 @@ int main(int argc, char* args[]) {
         run = false;
       }
       if (e.type == SDL_KEYDOWN) {
+        if (e.key.keysym.sym == SDLK_SPACE) {
+          Bullet* bullet = controlling->GetAttached()->GetGun()->Shoot();
+          if (bullet) {
+            game_objects[kBullets].push_back(bullet);
+          }
+        }
       }
     }
     SDL_PumpEvents();
@@ -96,8 +87,7 @@ int main(int argc, char* args[]) {
     if (key_state[SDL_SCANCODE_SPACE] == 1) {
       Bullet* bullet = controlling->GetAttached()->GetGun()->Shoot();
       if (bullet) {
-        bullets.push_back(bullet);
-        game_objects.push_back(bullet);
+        game_objects[kBullets].push_back(bullet);
       }
     }
     if (key_state[SDL_SCANCODE_V] == 1) {
@@ -114,20 +104,27 @@ int main(int argc, char* args[]) {
             controlling = &screen1;
           }
         }
-      } else if(swich_cooldown <= 0) {
+      } else if (swich_cooldown <= 0) {
         swtich_bar = controlling->AddBar(
             100, {45, 136, 255}, {150, 225, 200, 50}, 3 * (delta_time / 10));
       }
     }
 
-
     // game logic
-    for (Enemy* enemy : enemies) {
-        enemy->AI(&game_objects, delta_time, &bullets, {player1, player2});
+    for (GameObject* obj : game_objects[kEnemies]) {
+      Enemy* enemy = dynamic_cast<Enemy*>(obj);
+      if (enemy) {
+        enemy->AI(&game_objects, delta_time);
+      }
     }
-    for (Wall* wall : walls) {
-      wall->Collision(controlling->GetAttached());
-      wall->rendered_ = false;
+    for (GameObject* obj : game_objects[kWalls]) {
+      Wall* wall = dynamic_cast<Wall*>(obj);
+      if (wall) {
+        wall->Collision(controlling->GetAttached());
+        wall->rendered_ = false;
+      } else {
+        throw 10;
+      }
     }
     if (swich_cooldown > 0) {
       swich_cooldown -= delta_time;
@@ -142,18 +139,21 @@ int main(int argc, char* args[]) {
     }
 
     std::stack<Bullet*> to_remove;
-    for (Bullet* bullet : bullets) {
-      if (bullet->Update(&game_objects)) {
-        to_remove.push(bullet);
-        game_objects.erase(
-            std::remove(game_objects.begin(), game_objects.end(), bullet),
-            game_objects.end());
+    for (GameObject* obj : game_objects[kBullets]) {
+      Bullet* bullet = dynamic_cast<Bullet*>(obj);
+      if (bullet) {
+        if (bullet->Update(&game_objects)) {
+          to_remove.push(bullet);
+        }
+      } else {
+        throw 10;
       }
     }
     while (!to_remove.empty()) {
-      bullets.erase(
-          std::remove(bullets.begin(), bullets.end(), to_remove.top()),
-          bullets.end());
+      std::vector<GameObject*>* bullets = &game_objects[kBullets];
+      bullets->erase(
+          std::remove(bullets->begin(), bullets->end(), to_remove.top()),
+          bullets->end());
       delete to_remove.top();
       to_remove.pop();
     }
@@ -170,10 +170,13 @@ int main(int argc, char* args[]) {
     if (delta_time < pow(frame_cap * 1000, -1)) {
       SDL_Delay(pow(frame_cap * 1000, -1) - delta_time);
     }
+    // error catching
   }
   // destruct to avoid memory leaks and uninitlise
-  for (GameObject* obj : game_objects) {
-    delete obj;
+  for (std::vector<GameObject*> type_vector : game_objects) {
+    for (GameObject* obj : type_vector) {
+      delete obj;
+    }
   }
   screen1.~Screen();
   screen2.~Screen();

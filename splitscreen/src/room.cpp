@@ -28,9 +28,7 @@ Room::Room() {
 
 std::vector<Wall*> Room::GetWalls() { return walls_; }
 
-std::vector<std::pair<int, int>> Room::GetFree() {
-  return free_;
-}
+std::vector<std::pair<int, int>> Room::GetFree() { return free_; }
 
 Room::~Room() {
   for (Wall* wall : walls_) {
@@ -40,7 +38,6 @@ Room::~Room() {
 
 std::vector<std::vector<Room::States>> Room::Generate() {
   srand(time(0));
-  // srand(34560);
   std::vector<std::vector<Room::States>> output;
   // generate blank feild
   int width = (rand() % (22 - 12 + 1)) + 12;
@@ -52,30 +49,32 @@ std::vector<std::vector<Room::States>> Room::Generate() {
   for (int i = 0; i < height; i++) {
     output.push_back(push);
   }
-  // starting room generation
-  for (int l = 0; l < 5; l++) {
-    for (int f = 0; f < 5; f++) {
-      if (l < 0 || l >= 4 || f < 0 || f >= 4) {
-        output[l + 1][1 + f] = NextToArea;
+  // 3x3 end room generation
+  for (int l = height - 5; l < height; l++) {
+    for (int f = width - 5; f < width; f++) {
+      if (l == height - 5 || l == height || f == width - 5 ||
+          f == width) {
+        output[l][f] = NextToArea;
 
       } else {
-        output[l + 1][1 + f] = Area;
+        output[l][f] = Area;
       }
     }
   }
-  // end room generation
+  // 3x3 starting room generation
   for (int l = 0; l < 5; l++) {
     for (int f = 0; f < 5; f++) {
-      if (l < 0 || l >= 4 || f < 0 || f >= 4) {
-        output[l + 1][1 + f] = NextToArea;
+      if (l == 0 || l == 5 || f == 0 || f == 5) {
+        output[l][f] = NextToArea;
 
       } else {
-        output[l + 1][1 + f] = Area;
+        output[l][f] = Area;
       }
     }
   }
   // room generation
-  for (int i = 0; i < (rand() % (20 - 10 + 1)) + 10; i++) {
+  int area = width * height;
+  for (int i = 0; i < area / 12; i++) {
     // random room size
     int room_width = (rand() % ((width / 4) - (width / 8) + 1)) + (width / 8);
     int room_height =

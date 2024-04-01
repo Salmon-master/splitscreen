@@ -27,7 +27,7 @@ Screen::~Screen() {
   }
 }
 
-void Screen::Render(std::vector<GameObject*> game_objects) {
+void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
   // renderer setup
   SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
   SDL_RenderClear(renderer_);
@@ -37,7 +37,8 @@ void Screen::Render(std::vector<GameObject*> game_objects) {
     y_ = following_->GetRect().y;
   }
   // iterate through all game objects, rendering all if conditions met
-  for (GameObject* obj : game_objects) {
+  for (std::vector<GameObject*> type_vector : game_objects) {
+    for (GameObject* obj : type_vector) {
     // calcuate position on screen
     SDL_FRect actual_rect = obj->GetRect();
     SDL_Rect render_rect = {(actual_rect.x - x_ + offset_.first),
@@ -57,14 +58,16 @@ void Screen::Render(std::vector<GameObject*> game_objects) {
     }
     Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
     if (enemy_type) {
-      if (enemy_type->GetBar() == nullptr) {
+      if (!enemy_type->GetBar()) {
         bars_.push_back(enemy_type->CreateBar());
-      } else if (std::count(bars_.begin(), bars_.end(), enemy_type->GetBar()) == 0) {
+      } else if (std::count(bars_.begin(), bars_.end(), enemy_type->GetBar()) ==
+                 0) {
         bars_.push_back(enemy_type->GetBar());
       }
       SDL_FRect rect = enemy_type->GetRect();
       enemy_type->GetBar()->SetPos(rect.x - x_ + offset_.first,
                                    (rect.y + 20) - y_ + offset_.second);
+    }
     }
   }
   if (bars_.size() > 0) {
