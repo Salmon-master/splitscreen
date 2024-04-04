@@ -101,7 +101,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>.\bin\$(Platform)\$(Configuration)\</OutDir>
-    <LibraryPath>C:\Users\hughb\Documents\Dev\CPP Libs\SDL2_image\lib\x64;C:\Users\hughb\Documents\Dev\CPP Libs\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\lib\x64;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>
     </ExternalIncludePath>
     <SourcePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\src;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\src;$(SourcePath);$(SourcePath)</SourcePath>
@@ -111,7 +111,7 @@
     <OutDir>.\bin\$(Platform)\$(Configuration)\</OutDir>
     <ExternalIncludePath>
     </ExternalIncludePath>
-    <LibraryPath>C:\Users\hughb\Documents\Dev\CPP Libs\SDL2_image\lib\x64;C:\Users\hughb\Documents\Dev\CPP Libs\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\lib\x64;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
     <SourcePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\src;$(VC_SourcePath);;$(SourcePath)</SourcePath>
     <IncludePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\inculde;$(IncludePath)</IncludePath>
   </PropertyGroup>

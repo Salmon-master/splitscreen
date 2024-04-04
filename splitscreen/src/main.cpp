@@ -64,7 +64,7 @@ int main(int argc, char* args[]) {
     // inputs
     if (SDL_PollEvent(&e)) {
       if (e.type == SDL_QUIT) {
-        run = false;
+        //run = false;
       }
       if (e.type == SDL_KEYDOWN) {
         if (e.key.keysym.sym == SDLK_SPACE) {
