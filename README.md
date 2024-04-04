@@ -4,4 +4,4 @@ For all class header douments where the delerations of the class's method and me
 
 See splitscreen/src for the defintions(in seperate .cpp files, with corresponding names to the .h files) of all these methods delared in the .h files, look here for all acutual code and comments regarding the execution of said code.
 
-For all documetation provided, see [splitscreen/docs]
+For all documetation provided, see [splitscreen/docs](splitscreen/docs)
