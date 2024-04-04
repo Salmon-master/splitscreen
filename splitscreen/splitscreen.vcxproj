@@ -104,14 +104,14 @@
     <LibraryPath>C:\Users\hughb\Documents\Dev\CPP Libs\SDL2_image\lib\x64;C:\Users\hughb\Documents\Dev\CPP Libs\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>C:\Users\hughb\Documents\Dev\CPP Libs\SDL2_image\include;C:\Users\hughb\Documents\Dev\CPP Libs\SDL2\include</ExternalIncludePath>
     <SourcePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\src;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\src;$(SourcePath);$(SourcePath)</SourcePath>
-    <IncludePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\inculde;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\inculde;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>.\bin\$(Platform)\$(Configuration)\</OutDir>
     <ExternalIncludePath>C:\Users\hughb\Documents\Dev\CPP Libs\SDL2_image\include;C:\Users\hughb\Documents\Dev\CPP Libs\SDL2\include</ExternalIncludePath>
     <LibraryPath>C:\Users\hughb\Documents\Dev\CPP Libs\SDL2_image\lib\x64;C:\Users\hughb\Documents\Dev\CPP Libs\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
     <SourcePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\src;$(VC_SourcePath);;$(SourcePath)</SourcePath>
-    <IncludePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\inculde;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\inculde;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
