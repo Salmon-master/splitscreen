@@ -1,7 +1,7 @@
 # splitscreen
 
 ## Header files
-For all class header douments where the deleration of the class and its methods and member variables, stored see [splitscreen/inculde](splitscreen/inculde). Where all class/method/memeber variable declartions are located in seperate .h files. Look here for comments about the overall purpose of classes, memeber functions and variables.
+For all class header douments where the deleration of the class and its methods and member variables, see [splitscreen/inculde](splitscreen/inculde). Where all class/method/memeber variable declartions are located in seperate .h files. Look here for comments about the overall purpose of classes, memeber functions and variables.
 
 - See [here](https://google.github.io/styleguide/cppguide.html#Class_Comments) for class comment style
 - See [here](https://google.github.io/styleguide/cppguide.html#Function_Comments) for method/function comments commenting style
