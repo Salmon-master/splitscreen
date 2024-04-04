@@ -41,6 +41,7 @@ class Screen {
   UIBar* AddBar(int max_value, SDL_Color color, SDL_Rect rect, int value);
   void RemoveBar(UIBar* bar_to_remove);
   Player* GetAttached();
+  std::vector<UIBar*>* GetBars();
 
  private:
 };

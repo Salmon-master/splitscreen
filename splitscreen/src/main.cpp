@@ -15,8 +15,10 @@
 #include "ship.h"
 #include "ui_bar.h"
 #include "wall.h"
+#include "door.h"
 
 int main(int argc, char* args[]) {
+  srand(time(0));
   bool run = true;
   // intlising SDL with window and renderer, errors are thrown if initilaides
   // incorrectly
@@ -30,23 +32,23 @@ int main(int argc, char* args[]) {
   UIBar* swtich_bar = nullptr;
 
   // game object intitilastion
-  Player* player1 = new Player;
-  Player* player2 = new Player;
-  player1->SetPos(256, 256);
-  player2->SetPos(256, 256);
+  Player player1;
+  Player player2;
+  player1.SetPos(256, 256);
+  player2.SetPos(256, 256);
 
   // adding objects to lists
-  std::vector<std::vector<GameObject*>> game_objects = {{}, {}, {}, {}};
-  game_objects[kPlayers].push_back(player1);
-  game_objects[kPlayers].push_back(player2);
+  std::vector<std::vector<GameObject*>> game_objects = {{}, {}, {}, {}, {}};
+  game_objects[kPlayers].push_back(&player1);
+  game_objects[kPlayers].push_back(&player2);
 
   // testing code
   Ship ship1(&game_objects);
-  // std::vector<Enemy*> enemies = ship1.GetEnemies();
+  
   // eniemies
   // assign players to screens
-  screen2.Attach(player2);
-  screen1.Attach(player1);
+  screen2.Attach(&player2);
+  screen1.Attach(&player1);
   // game vars
   Screen* controlling = &screen1;
   int swich_cooldown = 0;
@@ -57,7 +59,6 @@ int main(int argc, char* args[]) {
   int delta_time = 0;
   int last = 0;
   const int frame_cap = 30;
-
   // mian game loop
   while (run) {
     // inputs
@@ -111,21 +112,76 @@ int main(int argc, char* args[]) {
     }
 
     // game logic
+
+    // unlocking of doors
+    if (game_objects[kEnemies].size() == 0) {
+      Door* door = dynamic_cast<Door*>(game_objects[kDoors].back());
+      if (!door->GetState()) {
+        door->Open();
+      }
+    }
+
+    // level advancing
+    for (GameObject* obj : game_objects[kPlayers]) {
+      Player* player = dynamic_cast<Player*>(obj);
+      if (player) {
+        SDL_FRect rect = player->GetRect();
+        if (rect.x < 0 || rect.y < 0) {
+          if(!ship1.MoveRoom(false)){
+            player1.SetPos(ship1.GetDimensions().first - 256,
+                            ship1.GetDimensions().second - 256);
+            player2.SetPos(ship1.GetDimensions().first - 256,
+                            ship1.GetDimensions().second - 256);
+          } else {
+            run = false;
+          }
+          break;
+        }
+        if (rect.x > ship1.GetDimensions().first + 64 ||
+            rect.y > ship1.GetDimensions().second + 64) {
+          if (!ship1.MoveRoom(true)) {
+            player1.SetPos(256, 256);
+            player2.SetPos(256, 256);
+          } else {
+            run = false;
+          }
+          break;
+          
+        }
+      } else {
+        std::cout << "incorrect type allocated to list" << std::endl;;
+      }
+    }
+    
+
+    // enemy AI
     for (GameObject* obj : game_objects[kEnemies]) {
       Enemy* enemy = dynamic_cast<Enemy*>(obj);
       if (enemy) {
         enemy->AI(&game_objects, delta_time);
       }
     }
+    // wall collision
     for (GameObject* obj : game_objects[kWalls]) {
       Wall* wall = dynamic_cast<Wall*>(obj);
       if (wall) {
         wall->Collision(controlling->GetAttached());
         wall->rendered_ = false;
       } else {
-        throw 10;
+        std::cout << "incorrect type allocated to list" << std::endl;;
       }
     }
+    // door collision
+    for (GameObject* obj : game_objects[kDoors]) {
+      Door* door = dynamic_cast<Door*>(obj);
+      if (door) {
+        bool colliding = door->Collide(controlling->GetAttached());
+        door->rendered_ = false;
+      } else {
+        std::cout << "incorrect type allocated to list" << std::endl;;
+      }
+    }
+    // switching players
     if (swich_cooldown > 0) {
       swich_cooldown -= delta_time;
     }
@@ -137,7 +193,7 @@ int main(int argc, char* args[]) {
         swich_cooldown = 1000;
       }
     }
-
+    // bullets
     std::stack<Bullet*> to_remove;
     for (GameObject* obj : game_objects[kBullets]) {
       Bullet* bullet = dynamic_cast<Bullet*>(obj);
@@ -146,7 +202,7 @@ int main(int argc, char* args[]) {
           to_remove.push(bullet);
         }
       } else {
-        throw 10;
+        std::cout << "incorrect type allocated to list" << std::endl;;
       }
     }
     while (!to_remove.empty()) {
@@ -171,15 +227,7 @@ int main(int argc, char* args[]) {
       SDL_Delay(pow(frame_cap * 1000, -1) - delta_time);
     }
     // error catching
-  }
-  // destruct to avoid memory leaks and uninitlise
-  for (std::vector<GameObject*> type_vector : game_objects) {
-    for (GameObject* obj : type_vector) {
-      delete obj;
-    }
-  }
-  screen1.~Screen();
-  screen2.~Screen();
+  }// uninitlise
   SDL_Quit();
   return 0;
 }

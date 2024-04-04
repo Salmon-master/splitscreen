@@ -2,6 +2,7 @@
 #define SHIP_H_
 
 #include <vector>
+#include <iostream>
 
 #include "enemy.h"
 #include "game_object.h"
@@ -11,6 +12,8 @@ class Ship {
  public:
   Ship(std::vector<std::vector<GameObject*>>* game_objects);
   ~Ship();
+  std::pair<int, int> GetDimensions();
+  bool MoveRoom(bool dir);
 
  private:
   std::vector<Room*> rooms_;

@@ -3,9 +3,7 @@
 #include <cmath>
 
 Player::Player()
-    : GameObject(0, 0, "player"),
-      damage_bar_(500, {110, 59, 173},
-                  SDL_Rect{(int)rect_.x, (int)rect_.y, 250, 40}) {
+    : GameObject(0, 0, "player") {
   // roataion center to center of player charter
   rotation_center_.y = (rect_.h - 28) + rect_.y;
   gun_ = new Gun(0, this);
@@ -36,11 +34,11 @@ bool Player::Damage(int amount) {
   damage_ += amount;
   if (damage_ >= 500) {
     rv = true;
-    damage_bar_.SetValue(0);
+    damage_bar_->SetValue(0);
   } else {
-    damage_bar_.SetValue(damage_);
+    damage_bar_->SetValue(damage_);
   }
   return rv;
 }
 
-UIBar* Player::GetBar() { return &damage_bar_; }
+UIBar* Player::GetBar() { return damage_bar_; }

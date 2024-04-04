@@ -3,6 +3,7 @@
 #include <random>
 
 #include "main.h"
+#include "door.h"
 
 Ship::Ship(std::vector<std::vector<GameObject*>>* game_objects) {
   game_objects_ = game_objects;
@@ -18,30 +19,62 @@ Ship::~Ship() {
   }
 }
 
-void Ship::LoadRoom(int room_number) {
-  // deleteing old wall objects
-  for (Wall* wall : rooms_[room_number_]->GetWalls()) {
-    game_objects_->at(kWalls).erase(
-        std::remove(game_objects_->at(kWalls).begin(),
-                    game_objects_->at(kWalls).end(), wall),
-        game_objects_->at(kWalls).end());
+std::pair<int, int> Ship::GetDimensions() {
+  return {rooms_[room_number_]->GetWalls().back()->GetRect().x,
+          rooms_[room_number_]->GetWalls().back()->GetRect().y
+  };
+}
+
+bool Ship::MoveRoom(bool dir) {
+  bool rv = false;
+  int to_be_loaded = room_number_;
+  if (dir) {
+    if (room_number_ <= rooms_.size() - 1) {
+      to_be_loaded++;
+    } else {
+      rv = true;
+    }
+  } else {
+    if (room_number_ >= 1) {
+      to_be_loaded--;
+    } else {
+      rv = true;
+    }
   }
+  if (to_be_loaded != room_number_) {
+    LoadRoom(to_be_loaded);
+  }
+  return rv;
+}
+
+void Ship::LoadRoom(int room_number) {
+  // deleteing all old wall and door objects
+  game_objects_->at(kWalls).clear();
+  game_objects_->at(kDoors).clear();
+  // removing old enmy objects from game object list
+  game_objects_->at(kEnemies).clear();
+  
   // upadting room index
   room_number_ = room_number;
   Room* room = rooms_[room_number_];
   // loading in new walls
-  std::vector<Wall*> walls = room->GetWalls();
-  for (Wall* wall : walls) {
-    game_objects_->at(kWalls).push_back(wall);
+  std::vector<GameObject*> walls = room->GetWalls();
+  for (GameObject* obj : walls) {
+    int type = NULL;
+    if (dynamic_cast<Wall*>(obj)) {
+      type = kWalls;
+    }
+    if (dynamic_cast<Door*>(obj)) {
+      type = kDoors;
+    }
+    game_objects_->at(type).push_back(obj);
   }
   // loading in enemies
-  std::vector<std::pair<int, int>> free = room->GetFree();
-  int size = (((rand() % (61)) + 70) / 100.0f) * (free.size() / 12);
-  for (int i = 0; i < size; i++) {
-    int random = rand() % free.size();
-    Enemy* enemy = new Enemy(free[random].first, free[random].second, 1);
-    free.erase(free.begin() + random);
-    enemy->Move(-1 * enemy->GetCenter()->x, -1 * enemy->GetCenter()->y);
-    game_objects_->at(kEnemies).push_back(enemy);
+  for (Enemy* enemy : *rooms_[room_number_]->GetEnemies()) {
+    if (enemy) {
+      game_objects_->at(kEnemies).push_back(enemy);
+    }
   }
+    
+
 }

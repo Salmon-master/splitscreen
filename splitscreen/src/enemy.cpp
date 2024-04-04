@@ -7,9 +7,10 @@
 #include "main.h"
 #include "wall.h"
 
-Enemy::Enemy(int x, int y, int type)
+Enemy::Enemy(int x, int y, int type, Room* room)
     : GameObject(x, y, "enemy_" + std::to_string(type)) {
   SetPos(x, y);
+  room_ = room;
   for (size_t i = 0; i < num_rays_; i++) {
     float angle = (i * 2 * M_PI) / num_rays_;
     ray_directions_[i] = {cos(angle), sin(angle)};
@@ -43,7 +44,8 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
                       (player->GetRect().y + player->GetCenter()->y) -
                           (rect_.y + rotation_center_.y)});
     } else {
-      throw 10;
+      std::cout << "incorrect type allocated to list" << std::endl;
+      +kPlayers;
     }
   }
 
@@ -86,7 +88,7 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
                                                 obj->GetRect().y - rect_.y});
               if (diff.Norm() <= attack_range_) {
                 Bullet* bullet = Attack(diff);
-                if (speed_ > 3) {
+                if (speed_ > 1) {
                   speed_ *= 0.95;
                 }
                 if (bullet) {
@@ -155,17 +157,39 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
   }
 }
 
-UIBar* Enemy::GetBar() { return health_bar_; }
+UIBar* Enemy::GetBar(Screen* screen) {
+  if (std::count(on_screen_.begin(), on_screen_.end(), screen) == 0) {
+    on_screen_.push_back(screen);
+  }
+  return health_bar_; }
 
-UIBar* Enemy::CreateBar() {
+UIBar* Enemy::CreateBar(Screen* screen) {
   health_bar_ =
       new UIBar(max_health_, {135, 211, 124},
                 SDL_Rect{(int)rect_.x, ((int)rect_.y - 10), (int)rect_.w, 10});
   health_bar_->SetValue(max_health_);
+  if (std::count(on_screen_.begin(), on_screen_.end(), screen) == 0) {
+    on_screen_.push_back(screen);
+  }
   return health_bar_;
 }
 
-Enemy::~Enemy() { delete health_bar_; }
+Enemy::~Enemy() {
+  if (room_->GetEnemies()->size() != 0) {
+    std::vector<Enemy*>* room_emenies = room_->GetEnemies();
+    room_emenies->erase(
+        std::remove(room_emenies->begin(), room_emenies->end(), this),
+        room_emenies->end());
+  }
+  std::cout << "enemy destroyed!" << std::endl;
+  for (Screen* screen : on_screen_) {
+    std::vector<UIBar*>* bars = screen->GetBars();
+    bars->erase(
+        std::remove(bars->begin(), bars->end(), health_bar_),
+        bars->end());
+  }
+  delete health_bar_;
+}
 
 std::vector<float> Enemy::SetInterest(Vector direction) {
   std::vector<float> interest_aray(num_rays_);

@@ -6,7 +6,9 @@ UIBar::UIBar(int max_value, SDL_Color color, SDL_Rect rect) {
   max_value_ = max_value;
 }
 
-UIBar::~UIBar() { std::cout << "destroyed"; }
+UIBar::~UIBar() {
+  std::cout << "destroyed bar" << std::endl;
+}
 
 void UIBar::SetValue(int value) { value_ = value; }
 

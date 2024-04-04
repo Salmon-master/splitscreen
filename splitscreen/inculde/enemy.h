@@ -8,18 +8,22 @@
 #include "gun.h"
 #include "ui_bar.h"
 #include "vector.h"
+#include "room.h"
+#include "screen.h"
+
+class Room;
 
 //  a class represneting the enmeyies in the game
 class Enemy : public GameObject {
  public:
-  Enemy(int x, int y, int type);
+  Enemy(int x, int y, int type, Room* room);
   // subtract from health, retuns true if health is below 0, false if not
   bool Damage(int amount);
   // calclate the direction the enemy wants to go in, interpritation of
   // alorightm at https://kidscancode.org/godot_recipes/3.x/ai/context_map/
   void AI(std::vector<std::vector<GameObject*>>* game_objects, int delta);
-  UIBar* GetBar();
-  UIBar* CreateBar();
+  UIBar* GetBar(Screen* screen);
+  UIBar* CreateBar(Screen* screen);
   ~Enemy();
 
  private:
@@ -34,8 +38,8 @@ class Enemy : public GameObject {
   // line 1 = p1-q1
   // line 2 = p2-q2
   bool Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2);
-  int health_ = 100;
-  int max_health_ = 100;
+  int health_ = 10;
+  int max_health_ = 10;
   float speed_ = 80;
   int attack_range_ = 128;
   static const int num_rays_ = 8;
@@ -48,6 +52,8 @@ class Enemy : public GameObject {
   Bullet* Attack(Vector location);
   Gun* gun_ = nullptr;
   float SetRotationFromVector(Vector rotation);
+  Room* room_  = nullptr;
+  std::vector<Screen*> on_screen_;
 };
 
 #endif  // !ENEMY_H_

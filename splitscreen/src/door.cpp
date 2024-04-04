@@ -1,16 +1,16 @@
-// Copyright (C) 2024 Hugh Thompson
+#include "door.h"
 
-#include "wall.h"
+Door::Door(int x, int y) : GameObject(x, y, "door") { open_ = false; }
 
-#include <algorithm>
-#include <cmath>
+bool Door::Open() {
+  open_ = !open_;
+  return open_;
+}
 
-Wall::Wall(int x, int y) : GameObject(x, y, "wall") {}
-
-bool Wall::Collision(GameObject* obj) {
+bool Door::Collide(GameObject* obj) {
   bool rv = false;
-  // if not rendered, no point in wasting memory
-  if (rendered_) {
+  // if not rendered, no point in wasting memory, and if closed
+  if (rendered_ && !open_) {
     std::pair<bool, bool> move = {false, false};
     Vector diff = {(obj->GetCenter()->x + obj->GetRect().x) -
                        (rect_.x + rotation_center_.x),
@@ -53,3 +53,5 @@ bool Wall::Collision(GameObject* obj) {
   }
   return rv;
 }
+
+bool Door::GetState() { return open_; }

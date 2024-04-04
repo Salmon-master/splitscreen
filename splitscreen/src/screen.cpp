@@ -58,14 +58,14 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
     }
     Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
     if (enemy_type) {
-      if (!enemy_type->GetBar()) {
-        bars_.push_back(enemy_type->CreateBar());
-      } else if (std::count(bars_.begin(), bars_.end(), enemy_type->GetBar()) ==
+      if (!enemy_type->GetBar(this)) {
+        bars_.push_back(enemy_type->CreateBar(this));
+      } else if (std::count(bars_.begin(), bars_.end(), enemy_type->GetBar(this)) ==
                  0) {
-        bars_.push_back(enemy_type->GetBar());
+        bars_.push_back(enemy_type->GetBar(this));
       }
       SDL_FRect rect = enemy_type->GetRect();
-      enemy_type->GetBar()->SetPos(rect.x - x_ + offset_.first,
+      enemy_type->GetBar(this)->SetPos(rect.x - x_ + offset_.first,
                                    (rect.y + 20) - y_ + offset_.second);
     }
     }
@@ -119,3 +119,5 @@ void Screen::RemoveBar(UIBar* bar_to_remove) {
 }
 
 Player* Screen::GetAttached() { return following_; }
+
+std::vector<UIBar*>* Screen::GetBars() { return &bars_; }

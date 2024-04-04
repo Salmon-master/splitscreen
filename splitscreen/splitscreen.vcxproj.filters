@@ -48,6 +48,9 @@
     <ClCompile Include="src\ship.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\door.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inculde\vector.h">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inculde\main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inculde\door.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

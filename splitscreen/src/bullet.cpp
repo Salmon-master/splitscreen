@@ -53,7 +53,7 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
               break;
             }
           } else {
-            throw 10 + kEnemies;
+            std::cout << "incorrect type allocated to list" << std::endl; + kEnemies;
           }
         }
         if (i == kPlayers) {
@@ -71,7 +71,7 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
               break;
             }
           } else {
-            throw 10 + kPlayers;
+            std::cout << "incorrect type allocated to list" << std::endl;;
           }
         }
       }
@@ -79,15 +79,19 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
   }
   while (!to_remove.empty()) {
     GameObject* removed = to_remove.top();
-    Enemy* enemy_type = dynamic_cast<Enemy*>(to_remove.top());
     to_remove.pop();
     for (int i = kPlayers; i < kBullets; i++) {
       objects->at(i).erase(
           std::remove(objects->at(i).begin(), objects->at(i).end(), removed),
           objects->at(i).end());
-    }
-    if (enemy_type) {
-      delete enemy_type;
+      if (i == kEnemies) {
+        Enemy* enemy = dynamic_cast<Enemy*>(removed);
+        if (enemy) {
+          delete enemy;
+        } else{
+          std::cout << "incorrect type allocated to list " << std::endl;
+        }
+      }
     }
   }
   return destruct;
