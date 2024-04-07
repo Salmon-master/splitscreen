@@ -14,3 +14,6 @@ See [splitscreen/src](splitscreen/src) for the defintions(in seperate .cpp files
 
 ## Documentation
 For all documetation provided, see [splitscreen/docs](splitscreen/docs).
+
+## Execution
+
