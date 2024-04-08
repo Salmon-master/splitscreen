@@ -1,7 +1,10 @@
+// Copyright 2024 Hugh Thompson
+
 #ifndef SCREEN_H_
 #define SCREEN_H_
 
 #include <iostream>
+#include <utility>
 #include <vector>
 
 #include "game_object.h"
@@ -15,7 +18,6 @@
 // vector of game objects as an argument. the screen camrea postion can be set
 // to the location of a game object using the attach method.
 class Screen {
- public:
  private:
   // window data
   SDL_Window* win_;

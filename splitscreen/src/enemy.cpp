@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #include "enemy.h"
 
 #include <algorithm>
@@ -11,8 +13,8 @@ Enemy::Enemy(int x, int y, int type, Room* room)
     : GameObject(x, y, "enemy_" + std::to_string(type)) {
   SetPos(x, y);
   room_ = room;
-  for (size_t i = 0; i < num_rays_; i++) {
-    float angle = (i * 2 * M_PI) / num_rays_;
+  for (size_t i = 0; i < kNumRays; i++) {
+    float angle = (i * 2 * M_PI) / kNumRays;
     ray_directions_[i] = {cos(angle), sin(angle)};
   }
   rotation_center_.y = (rect_.h - 28);
@@ -38,7 +40,7 @@ bool Enemy::Damage(int amount) {
 void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
   std::vector<Vector> diff;
   for (GameObject* player : game_objects->at(kPlayers)) {
-    if (dynamic_cast<Player*>(player)) {
+    if (static_cast<Player*>(player)) {
       diff.push_back({(player->GetRect().x + player->GetCenter()->x) -
                           (rect_.x + rotation_center_.x),
                       (player->GetRect().y + player->GetCenter()->y) -
@@ -107,20 +109,20 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
         }
       }
     }
-    std::vector<float> interest(num_rays_);
+    std::vector<float> interest(kNumRays);
     if (!interest_objects.empty()) {
       interest = SetInterest(interest_objects[0]);
     } else {
       interest = SetInterest({0, 0});
     }
     std::vector<float> danger = SetDanger(danger_objects);
-    for (int i = 0; i < num_rays_; i++) {
+    for (int i = 0; i < kNumRays; i++) {
       if (danger[i] != 0.0f) {
         interest[i] = danger[i];
       }
     }
     Vector chosen_dir = {0, 0};
-    for (int i = 0; i < num_rays_; i++) {
+    for (int i = 0; i < kNumRays; i++) {
       chosen_dir.x += interest[i] * ray_directions_[i].x;
       chosen_dir.y += interest[i] * ray_directions_[i].y;
     }
@@ -161,12 +163,14 @@ UIBar* Enemy::GetBar(Screen* screen) {
   if (std::count(on_screen_.begin(), on_screen_.end(), screen) == 0) {
     on_screen_.push_back(screen);
   }
-  return health_bar_; }
+  return health_bar_;
+}
 
 UIBar* Enemy::CreateBar(Screen* screen) {
-  health_bar_ =
-      new UIBar(max_health_, {135, 211, 124},
-                SDL_Rect{(int)rect_.x, ((int)rect_.y - 10), (int)rect_.w, 10});
+  health_bar_ = new UIBar(
+      max_health_, {135, 211, 124},
+      SDL_Rect{static_cast<int>(rect_.x), static_cast<int>(rect_.y - 10),
+               static_cast<int>(rect_.w), 10});
   health_bar_->SetValue(max_health_);
   if (std::count(on_screen_.begin(), on_screen_.end(), screen) == 0) {
     on_screen_.push_back(screen);
@@ -184,16 +188,15 @@ Enemy::~Enemy() {
   std::cout << "enemy destroyed!" << std::endl;
   for (Screen* screen : on_screen_) {
     std::vector<UIBar*>* bars = screen->GetBars();
-    bars->erase(
-        std::remove(bars->begin(), bars->end(), health_bar_),
-        bars->end());
+    bars->erase(std::remove(bars->begin(), bars->end(), health_bar_),
+                bars->end());
   }
   delete health_bar_;
 }
 
 std::vector<float> Enemy::SetInterest(Vector direction) {
-  std::vector<float> interest_aray(num_rays_);
-  for (int i = 0; i < num_rays_; i++) {
+  std::vector<float> interest_aray(kNumRays);
+  for (int i = 0; i < kNumRays; i++) {
     float interest =
         ray_directions_[i].Normalised().Dot(direction.Normalised());
     interest_aray[i] = std::max(0.0f, interest);
@@ -202,16 +205,16 @@ std::vector<float> Enemy::SetInterest(Vector direction) {
 }
 
 std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
-  std::vector<float> danger_aray(num_rays_);
-  for (int i = 0; i < num_rays_; i++) {
+  std::vector<float> danger_aray(kNumRays);
+  for (int i = 0; i < kNumRays; i++) {
     // calculating cast ray
     std::pair<SDL_Point, SDL_Point> ray = {
-        SDL_Point{(int)ray_directions_[i].Scaled(search_range_).x +
-                      (int)rect_.x + rotation_center_.x,
-                  (int)ray_directions_[i].Scaled(search_range_).y +
-                      (int)rect_.y + rotation_center_.y},
-        SDL_Point{(int)rect_.x + rotation_center_.y,
-                  (int)rect_.y + rotation_center_.y}};
+        SDL_Point{static_cast<int>(ray_directions_[i].Scaled(search_range_).x) +
+                      static_cast<int>(rect_.x + rotation_center_.x),
+                  static_cast<int>(ray_directions_[i].Scaled(search_range_).y) +
+                      static_cast<int>(rect_.y + rotation_center_.y)},
+        SDL_Point{static_cast<int>(rect_.x + rotation_center_.y),
+                  static_cast<int>(rect_.y + rotation_center_.y)}};
     // iterates through all given game objects and checks for dangerous objects
     // in ray path
     for (GameObject* obj : objects) {
@@ -237,8 +240,8 @@ std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
           } else {
             diffrence = abs(line.first.y - (rect_.y + rotation_center_.y));
           }
-          Wall* wall_type = dynamic_cast<Wall*>(obj);
-          Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
+          Wall* wall_type = static_cast<Wall*>(obj);
+          Enemy* enemy_type = static_cast<Enemy*>(obj);
           if (wall_type) {
             danger = ((search_range_ - r.w) - diffrence) * 0.025;
           } else if (enemy_type) {
@@ -269,7 +272,7 @@ bool Enemy::Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2) {
   int o4 = Orientation(p2, q2, q1);
   if (o1 != o2 && o3 != o4) {
     return true;
-  };
+  }
   return false;
 }
 

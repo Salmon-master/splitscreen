@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #ifndef PLAYER_H_
 #define PLAYER_H_
 
@@ -16,8 +18,7 @@ class Player : public GameObject {
   float rotation_speed_ = 0.002;
   Gun* gun_ = nullptr;
   int damage_ = 0;
-  UIBar* damage_bar_ = new UIBar(
-      500, {110, 59, 173}, SDL_Rect{(int)rect_.x, (int)rect_.y, 250, 40});
+  UIBar* damage_bar_ = nullptr;
 
  public:
   Player();

@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #ifndef DOOR_H_
 #define DOOR_H_
 

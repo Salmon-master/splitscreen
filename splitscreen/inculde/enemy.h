@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #ifndef ENEMY_H_
 #define ENEMY_H_
 
@@ -42,8 +44,8 @@ class Enemy : public GameObject {
   int max_health_ = 10;
   float speed_ = 80;
   int attack_range_ = 128;
-  static const int num_rays_ = 8;
-  Vector ray_directions_[num_rays_];
+  static const int kNumRays = 8;
+  Vector ray_directions_[kNumRays];
   int search_range_ = 128;
   float steer_force_ = 0.35;
   int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);

@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #ifndef VECTOR_H_
 #define VECTOR_H_
 

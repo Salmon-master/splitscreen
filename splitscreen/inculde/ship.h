@@ -1,8 +1,11 @@
+// Copyright 2024 Hugh Thompson
+
 #ifndef SHIP_H_
 #define SHIP_H_
 
-#include <vector>
 #include <iostream>
+#include <utility>
+#include <vector>
 
 #include "enemy.h"
 #include "game_object.h"
@@ -10,7 +13,7 @@
 
 class Ship {
  public:
-  Ship(std::vector<std::vector<GameObject*>>* game_objects);
+  explicit Ship(std::vector<std::vector<GameObject*>>* game_objects);
   ~Ship();
   std::pair<int, int> GetDimensions();
   bool MoveRoom(bool dir);

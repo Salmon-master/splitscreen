@@ -1,8 +1,11 @@
+// Copyright 2024 Hugh Thompson
+
 #ifndef GAME_OBJECT_H_
 #define GAME_OBJECT_H_
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include "SDL.h"
 #include "SDL_image.h"

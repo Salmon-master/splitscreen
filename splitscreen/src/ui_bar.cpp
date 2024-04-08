@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #include "ui_bar.h"
 
 UIBar::UIBar(int max_value, SDL_Color color, SDL_Rect rect) { 

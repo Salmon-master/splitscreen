@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #include "bullet.h"
 
 #include <stack>
@@ -53,7 +55,8 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
               break;
             }
           } else {
-            std::cout << "incorrect type allocated to list" << std::endl; + kEnemies;
+            std::cout << "incorrect type allocated to list" << std::endl;
+            +kEnemies;
           }
         }
         if (i == kPlayers) {
@@ -71,7 +74,7 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
               break;
             }
           } else {
-            std::cout << "incorrect type allocated to list" << std::endl;;
+            std::cout << "incorrect type allocated to list" << std::endl;
           }
         }
       }
@@ -88,7 +91,7 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
         Enemy* enemy = dynamic_cast<Enemy*>(removed);
         if (enemy) {
           delete enemy;
-        } else{
+        } else {
           std::cout << "incorrect type allocated to list " << std::endl;
         }
       }

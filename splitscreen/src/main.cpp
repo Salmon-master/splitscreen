@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #include "main.h"
 
 #include <SDL.h>
@@ -6,6 +8,7 @@
 #include <stack>
 #include <vector>
 
+#include "door.h"
 #include "enemy.h"
 #include "game_object.h"
 #include "gun.h"
@@ -15,7 +18,6 @@
 #include "ship.h"
 #include "ui_bar.h"
 #include "wall.h"
-#include "door.h"
 
 int main(int argc, char* args[]) {
   srand(time(0));
@@ -44,7 +46,6 @@ int main(int argc, char* args[]) {
 
   // testing code
   Ship ship1(&game_objects);
-  
   // eniemies
   // assign players to screens
   screen2.Attach(&player2);
@@ -59,12 +60,12 @@ int main(int argc, char* args[]) {
   int delta_time = 0;
   int last = 0;
   const int frame_cap = 30;
-  // mian game loop
+  // main game loop
   while (run) {
     // inputs
     if (SDL_PollEvent(&e)) {
       if (e.type == SDL_QUIT) {
-        //run = false;
+        run = false;
       }
       if (e.type == SDL_KEYDOWN) {
         if (e.key.keysym.sym == SDLK_SPACE) {
@@ -127,11 +128,11 @@ int main(int argc, char* args[]) {
       if (player) {
         SDL_FRect rect = player->GetRect();
         if (rect.x < 0 || rect.y < 0) {
-          if(!ship1.MoveRoom(false)){
+          if (!ship1.MoveRoom(false)) {
             player1.SetPos(ship1.GetDimensions().first - 256,
-                            ship1.GetDimensions().second - 256);
+                           ship1.GetDimensions().second - 256);
             player2.SetPos(ship1.GetDimensions().first - 256,
-                            ship1.GetDimensions().second - 256);
+                           ship1.GetDimensions().second - 256);
           } else {
             run = false;
           }
@@ -146,13 +147,11 @@ int main(int argc, char* args[]) {
             run = false;
           }
           break;
-          
         }
       } else {
-        std::cout << "incorrect type allocated to list" << std::endl;;
+        std::cout << "incorrect type allocated to list" << std::endl;
       }
     }
-    
 
     // enemy AI
     for (GameObject* obj : game_objects[kEnemies]) {
@@ -168,7 +167,7 @@ int main(int argc, char* args[]) {
         wall->Collision(controlling->GetAttached());
         wall->rendered_ = false;
       } else {
-        std::cout << "incorrect type allocated to list" << std::endl;;
+        std::cout << "incorrect type allocated to list" << std::endl;
       }
     }
     // door collision
@@ -178,7 +177,7 @@ int main(int argc, char* args[]) {
         bool colliding = door->Collide(controlling->GetAttached());
         door->rendered_ = false;
       } else {
-        std::cout << "incorrect type allocated to list" << std::endl;;
+        std::cout << "incorrect type allocated to list" << std::endl;
       }
     }
     // switching players
@@ -202,7 +201,7 @@ int main(int argc, char* args[]) {
           to_remove.push(bullet);
         }
       } else {
-        std::cout << "incorrect type allocated to list" << std::endl;;
+        std::cout << "incorrect type allocated to list" << std::endl;
       }
     }
     while (!to_remove.empty()) {
@@ -227,7 +226,7 @@ int main(int argc, char* args[]) {
       SDL_Delay(pow(frame_cap * 1000, -1) - delta_time);
     }
     // error catching
-  }// uninitlise
+  }  // uninitlise
   SDL_Quit();
   return 0;
 }

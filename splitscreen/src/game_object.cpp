@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #include "game_object.h"
 
 #include <filesystem>
@@ -54,10 +56,10 @@ SDL_Surface* GameObject::GetSurface() {
   // t since last this function called, and chages animation to next in que if
   // applicple when animaion repeats.
   if (surfaces_[state_].size() != 1) {
-    int ticks = (int)SDL_GetTicks64();
+    int ticks = SDL_GetTicks64();
     int delta_time = ticks - last_step_;
     if (delta_time != 0) {
-      int mspf = std::pow(((float)fps_ / 1000), -1);
+      int mspf = std::pow((static_cast<float>(fps_) / 1000), -1);
       int step = delta_time / mspf;
       if (step >= 1) {
         frame_ += step;

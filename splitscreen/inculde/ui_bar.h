@@ -1,7 +1,10 @@
+// Copyright 2024 Hugh Thompson
+
 #ifndef UI_BAR_H_
 #define UI_BAR_H_
 
 #include <iostream>
+#include <utility>
 
 #include "SDL.h"
 

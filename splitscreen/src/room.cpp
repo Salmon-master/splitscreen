@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #include "room.h"
 
 #include <time.h>

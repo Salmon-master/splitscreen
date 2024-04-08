@@ -1,7 +1,10 @@
+// Copyright 2024 Hugh Thompson
+
 #ifndef ROOM_H_
 #define ROOM_H_
 
 #include <vector>
+#include <utility>
 
 #include "SDL.h"
 #include "wall.h"
@@ -10,8 +13,6 @@
 class Enemy;
 
 class Room {
- public:
- private:
  public:
   Room();
   std::vector<GameObject*> GetWalls();

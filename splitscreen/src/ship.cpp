@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #include "ship.h"
 
 #include <random>

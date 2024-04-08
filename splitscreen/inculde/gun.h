@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #ifndef GUN_H_
 #define GUN_H_
 

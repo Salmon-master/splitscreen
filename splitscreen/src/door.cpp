@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #include "door.h"
 
 Door::Door(int x, int y) : GameObject(x, y, "door") { open_ = false; }
@@ -43,7 +45,6 @@ bool Door::Collide(GameObject* obj) {
                         diff.x / abs(diff.x));
           move.second = (obj->GetVelocity().y / abs(obj->GetVelocity().y) !=
                          diff.y / abs(diff.y));
-          ;
         }
       }
     }
