@@ -43,7 +43,6 @@ bool Wall::Collision(GameObject* obj) {
                         diff.x / abs(diff.x));
           move.second = (obj->GetVelocity().y / abs(obj->GetVelocity().y) !=
                          diff.y / abs(diff.y));
-          ;
         }
       }
     }

@@ -41,35 +41,35 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
   // iterate through all game objects, rendering all if conditions met
   for (std::vector<GameObject*> type_vector : game_objects) {
     for (GameObject* obj : type_vector) {
-    // calcuate position on screen
-    SDL_FRect actual_rect = obj->GetRect();
-    SDL_Rect render_rect = {(actual_rect.x - x_ + offset_.first),
-                            (actual_rect.y - y_ + offset_.second),
-                            actual_rect.w, actual_rect.h};
-    // if the object is on screen, then render it
-    if (render_rect.x > -1 * actual_rect.w && render_rect.x < 600 &&
-        render_rect.y > -1 * actual_rect.h && render_rect.y < 500) {
-      // render object on screen
-      obj->rendered_ = true;
-      SDL_Texture* texture =
-          SDL_CreateTextureFromSurface(renderer_, obj->GetSurface());
-      float angle = obj->GetRotation() * (180 / M_PI);
-      SDL_RenderCopyEx(renderer_, texture, NULL, &render_rect, angle,
-                       obj->GetCenter(), SDL_FLIP_NONE);
-      SDL_DestroyTexture(texture);
-    }
-    Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
-    if (enemy_type) {
-      if (!enemy_type->GetBar(this)) {
-        bars_.push_back(enemy_type->CreateBar(this));
-      } else if (std::count(bars_.begin(), bars_.end(), enemy_type->GetBar(this)) ==
-                 0) {
-        bars_.push_back(enemy_type->GetBar(this));
+      // calcuate position on screen
+      SDL_FRect actual_rect = obj->GetRect();
+      SDL_Rect render_rect = {(actual_rect.x - x_ + offset_.first),
+                              (actual_rect.y - y_ + offset_.second),
+                              actual_rect.w, actual_rect.h};
+      // if the object is on screen, then render it
+      if (render_rect.x > -1 * actual_rect.w && render_rect.x < 600 &&
+          render_rect.y > -1 * actual_rect.h && render_rect.y < 500) {
+        // render object on screen
+        obj->rendered_ = true;
+        SDL_Texture* texture =
+            SDL_CreateTextureFromSurface(renderer_, obj->GetSurface());
+        float angle = obj->GetRotation() * (180 / M_PI);
+        SDL_RenderCopyEx(renderer_, texture, NULL, &render_rect, angle,
+                         obj->GetCenter(), SDL_FLIP_NONE);
+        SDL_DestroyTexture(texture);
       }
-      SDL_FRect rect = enemy_type->GetRect();
-      enemy_type->GetBar(this)->SetPos(rect.x - x_ + offset_.first,
-                                   (rect.y + 20) - y_ + offset_.second);
-    }
+      Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
+      if (enemy_type) {
+        if (!enemy_type->GetBar(this)) {
+          bars_.push_back(enemy_type->CreateBar(this));
+        } else if (std::count(bars_.begin(), bars_.end(),
+                              enemy_type->GetBar(this)) == 0) {
+          bars_.push_back(enemy_type->GetBar(this));
+        }
+        SDL_FRect rect = enemy_type->GetRect();
+        enemy_type->GetBar(this)->SetPos(rect.x - x_ + offset_.first,
+                                         (rect.y + 20) - y_ + offset_.second);
+      }
     }
   }
   if (bars_.size() > 0) {
@@ -109,12 +109,14 @@ void Screen::Attach(Player* target) {
 }
 UIBar* Screen::AddBar(int max_value, SDL_Color color, SDL_Rect rect,
                       int value) {
+  std::cout << "addbar" << std::endl;
   bars_.push_back(new UIBar(max_value, color, rect));
   bars_.back()->SetValue(value);
   return bars_.back();
 }
 
 void Screen::RemoveBar(UIBar* bar_to_remove) {
+  std::cout << "killbar" << std::endl;
   bars_.erase(std::remove(bars_.begin(), bars_.end(), bar_to_remove),
               bars_.end());
   delete bar_to_remove;

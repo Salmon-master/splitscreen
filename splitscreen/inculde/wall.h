@@ -10,12 +10,14 @@
 #include "player.h"
 
 // An in game wall peice, can collide with other objects using the collide
-// method, used to add visable wall objects to the game
+// method, used to add visable wall objects to the game.
 class Wall : public GameObject {
  public:
   Wall(int x, int y);
-  // check for collision, and then move obj accordingly.
-  // Will check for circular collision aginst rectangular wall
+  // Used for checking collision for collision against a game  object, and then
+  // move obj accordingly. Will check for circular collision aginst rectangular
+  // wall. teh inputted object is teh one that the collision check will be
+  // performed against
   bool Collision(GameObject* obj);
 
  private:

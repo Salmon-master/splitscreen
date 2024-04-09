@@ -8,8 +8,9 @@ Player::Player() : GameObject(0, 0, "player") {
   // roataion center to center of player charter
   rotation_center_.y = (rect_.h - 28) + rect_.y;
   gun_ = new Gun(0, this);
-  damage_bar_ =
-      new UIBar(500, {110, 59, 173}, {(int)rect_.x, (int)rect_.y, 250, 40});
+  damage_bar_ = new UIBar(
+      500, {110, 59, 173},
+      {static_cast<int>(rect_.x), static_cast<int>(rect_.y), 250, 40});
 }
 
 void Player::Step(int delta_time) {

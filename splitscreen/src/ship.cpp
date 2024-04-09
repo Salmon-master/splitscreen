@@ -55,7 +55,6 @@ void Ship::LoadRoom(int room_number) {
   game_objects_->at(kDoors).clear();
   // removing old enmy objects from game object list
   game_objects_->at(kEnemies).clear();
-  
   // upadting room index
   room_number_ = room_number;
   Room* room = rooms_[room_number_];
@@ -77,6 +76,4 @@ void Ship::LoadRoom(int room_number) {
       game_objects_->at(kEnemies).push_back(enemy);
     }
   }
-    
-
 }

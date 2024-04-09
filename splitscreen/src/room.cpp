@@ -54,8 +54,9 @@ std::vector<Enemy*>* Room::GetEnemies() { return &enemies_; }
 std::vector<std::pair<int, int>> Room::GetFree() { return free_; }
 
 Room::~Room() {
-  // as enemy deconstructor deletes itself from enemy list, the enemies cannot be
-  // deleted while iterating over that list as it chnages size while iterating.
+  // as enemy deconstructor deletes itself from enemy list, the enemies cannot
+  // be deleted while iterating over that list as it chnages size while
+  // iterating.
   std::stack<Enemy*> delete_stack;
   for (Enemy* enemy : enemies_) {
     delete_stack.push(enemy);

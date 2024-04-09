@@ -95,8 +95,8 @@ int main(int argc, char* args[]) {
     if (key_state[SDL_SCANCODE_V] == 1) {
       if (swtich_bar) {
         swtich_bar->ChangeValue(2 * (delta_time / 10));
+        std::cout << swtich_bar->GetValue() << std::endl;
         if (swtich_bar->Full()) {
-          swtich_bar->SetValue(0);
           controlling->RemoveBar(swtich_bar);
           swtich_bar = nullptr;
           swich_cooldown = 1000;
