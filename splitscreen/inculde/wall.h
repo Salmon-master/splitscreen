@@ -16,7 +16,7 @@ class Wall : public GameObject {
   Wall(int x, int y);
   // Used for checking collision for collision against a game  object, and then
   // move obj accordingly. Will check for circular collision aginst rectangular
-  // wall. teh inputted object is teh one that the collision check will be
+  // wall. the inputted object is teh one that the collision check will be
   // performed against
   bool Collision(GameObject* obj);
 

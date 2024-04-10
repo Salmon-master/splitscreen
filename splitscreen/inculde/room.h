@@ -3,22 +3,24 @@
 #ifndef ROOM_H_
 #define ROOM_H_
 
-#include <vector>
 #include <utility>
+#include <vector>
 
+#include "enemy.h"
 #include "SDL.h"
 #include "wall.h"
-#include "enemy.h"
 
 class Enemy;
-
+// A class used to represent room with the game, it is composed of wall of
+// objects arranged into a 2d dunegon layout, with enemies populating that
+// layout, used as a part of a ship object.
 class Room {
  public:
   Room();
   std::vector<GameObject*> GetWalls();
   std::vector<Enemy*>* GetEnemies();
-  // retuns the locations that are empty for enemy spawing, used by teh ship
-  // class to spawn eneimes
+  // retuns the locations that are empty for enemy spawing, used to spawn
+  // eneimes
   std::vector<std::pair<int, int>> GetFree();
   ~Room();
   // retruns wether or not room has been visited by the player, also sets that

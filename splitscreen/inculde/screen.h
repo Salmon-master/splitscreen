@@ -47,7 +47,9 @@ class Screen {
   // bind camrea position to the inputted player's position, and disply the
   // health of that player on screen
   void Attach(Player* target);
+  // adds a bar to teh list of bars, and consequently to the screen
   UIBar* AddBar(int max_value, SDL_Color color, SDL_Rect rect, int value);
+  // removes a given bar form the screen object.
   void RemoveBar(UIBar* bar_to_remove);
   Player* GetAttached();
   std::vector<UIBar*>* GetBars();

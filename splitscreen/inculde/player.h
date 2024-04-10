@@ -9,28 +9,35 @@
 
 // foward declations
 class Gun;
-// player class, used by the game to represnt the player
+// player class, used by the game to represnt a robot within the game
 class Player : public GameObject {
- public:
  private:
   // speed vars
   int speed_ = 200;
   float rotation_speed_ = 0.002;
+  // assigned in constructor
   Gun* gun_ = nullptr;
+  // basically health
   int damage_ = 0;
+  // assigned in consturctor
   UIBar* damage_bar_ = nullptr;
 
  public:
   Player();
   // convert the speed(magnitude) and rotation(angle) into x and y components to
-  // feed to parent move function, and then move the player.
+  // feed to parent move function, and then move the player.(smoothed with delta
+  // time)
   void Step(int delta_time);
+  // change the rotation of the player, true is colcokwise, false is
+  // anticlockwise, will rotate the player based upon the rotation speed and is
+  // smoothed by delta time.
   void Rotate(bool direction, int delta_time);
   Gun* GetGun();
+  // called when teh player receives damage, retuns wether or not the player is
+  // alive.
   bool Damage(int amount);
   UIBar* GetBar();
 
- private:
 };
 
 #endif  // !PLAYER_H_
