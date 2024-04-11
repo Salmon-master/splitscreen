@@ -36,6 +36,7 @@ Gun* Player::GetGun() { return gun_; }
 bool Player::Damage(int amount) {
   bool rv = false;
   damage_ += amount;
+  // conditions based on if the player has reached the maximim damage
   if (damage_ >= 500) {
     rv = true;
     damage_bar_->SetValue(0);

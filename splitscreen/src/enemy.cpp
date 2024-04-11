@@ -11,22 +11,26 @@
 
 Enemy::Enemy(int x, int y, int type, Room* room)
     : GameObject(x, y, "enemy_" + std::to_string(type)) {
+  // var initilaistion
   SetPos(x, y);
   room_ = room;
+  rotation_center_.y = (rect_.h - 28);
+  gun_ = new Gun(0, this);
+  // setting up AI
   for (size_t i = 0; i < kNumRays; i++) {
     float angle = (i * 2 * M_PI) / kNumRays;
     ray_directions_[i] = {cos(angle), sin(angle)};
   }
-  rotation_center_.y = (rect_.h - 28);
-  gun_ = new Gun(0, this);
 }
 
 bool Enemy::Damage(int amount) {
   bool rv = false;
   health_ -= amount;
+  // speed boost if on low health
   if (health_ < max_health_ / 4) {
     speed_ *= 1.3;
   }
+  // cehcking if the enemy is dead
   if (health_ <= 0) {
     rv = true;
     dead_ = true;
@@ -38,7 +42,9 @@ bool Enemy::Damage(int amount) {
 }
 
 void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
+  //
   std::vector<Vector> diff;
+  // looping through players and adding to lists
   for (GameObject* player : game_objects->at(kPlayers)) {
     if (static_cast<Player*>(player)) {
       diff.push_back({(player->GetRect().x + player->GetCenter()->x) -
@@ -47,18 +53,20 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
                           (rect_.y + rotation_center_.y)});
     } else {
       std::cout << "incorrect type allocated to list" << std::endl;
-      +kPlayers;
     }
   }
-
+  // cehcking if in range of player
   if (!dead_ && (diff[0].Norm() < 500 || diff[1].Norm() < 500)) {
     if (delta == 0) {
       delta = 1;
     }
+    // buffer lists of objects
     std::vector<GameObject*> danger_objects;
     std::vector<Vector> interest_objects;
+    // iterating through all game objects and adding them to the buffer lists
     for (int i = 0; i < game_objects->size() - 1; i++) {
       for (GameObject* obj : game_objects->at(i)) {
+        // if wall in search range, add to danger
         if (i == kWalls) {
           if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
                          (rect_.x + rotation_center_.x),
@@ -68,6 +76,7 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
             danger_objects.push_back(obj);
           }
         }
+        // if other enemy in search range, add to danger
         if (i == kEnemies) {
           if (obj != this) {
             if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
@@ -79,6 +88,8 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
             }
           }
         }
+        // if player in range, add to interest, if low health, add inverse to
+        // interest, if in attack range attack
         if (i == kPlayers) {
           Vector diff = {(obj->GetRect().x + obj->GetCenter()->x) -
                              (rect_.x + rotation_center_.x),
@@ -109,23 +120,28 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
         }
       }
     }
+    // set interest
     std::vector<float> interest(kNumRays);
     if (!interest_objects.empty()) {
       interest = SetInterest(interest_objects[0]);
     } else {
       interest = SetInterest({0, 0});
     }
+    // set dangeer
     std::vector<float> danger = SetDanger(danger_objects);
+    // combine interest and danger
     for (int i = 0; i < kNumRays; i++) {
       if (danger[i] != 0.0f) {
         interest[i] = danger[i];
       }
     }
+    // calculate net direction
     Vector chosen_dir = {0, 0};
     for (int i = 0; i < kNumRays; i++) {
       chosen_dir.x += interest[i] * ray_directions_[i].x;
       chosen_dir.y += interest[i] * ray_directions_[i].y;
     }
+    // steering calculations
     if (chosen_dir.x != 0 && chosen_dir.y != 0) {
       Vector steer = {
           ((chosen_dir.Normalised().x) - velocity_.x) * steer_force_,
@@ -160,6 +176,7 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
 }
 
 UIBar* Enemy::GetBar(Screen* screen) {
+  // add bar to screen's bars if not already on there
   if (std::count(on_screen_.begin(), on_screen_.end(), screen) == 0) {
     on_screen_.push_back(screen);
   }
@@ -167,11 +184,13 @@ UIBar* Enemy::GetBar(Screen* screen) {
 }
 
 UIBar* Enemy::CreateBar(Screen* screen) {
+  // bar initilaisation
   health_bar_ = new UIBar(
       max_health_, {135, 211, 124},
       SDL_Rect{static_cast<int>(rect_.x), static_cast<int>(rect_.y - 10),
                static_cast<int>(rect_.w), 10});
   health_bar_->SetValue(max_health_);
+  // if not on screen, add to on screen
   if (std::count(on_screen_.begin(), on_screen_.end(), screen) == 0) {
     on_screen_.push_back(screen);
   }
@@ -179,6 +198,7 @@ UIBar* Enemy::CreateBar(Screen* screen) {
 }
 
 Enemy::~Enemy() {
+  // remove enmies in a memory safe way
   if (room_->GetEnemies()->size() != 0) {
     std::vector<Enemy*>* room_emenies = room_->GetEnemies();
     room_emenies->erase(
@@ -186,6 +206,7 @@ Enemy::~Enemy() {
         room_emenies->end());
   }
   std::cout << "enemy destroyed!" << std::endl;
+  // removing health bar in a meomory safe way
   for (Screen* screen : on_screen_) {
     std::vector<UIBar*>* bars = screen->GetBars();
     bars->erase(std::remove(bars->begin(), bars->end(), health_bar_),
@@ -195,6 +216,9 @@ Enemy::~Enemy() {
 }
 
 std::vector<float> Enemy::SetInterest(Vector direction) {
+  // reurns the chosen dirction represneted in the form of all the rays in the
+  // ray dirctions scaled so that the sum of theese rays is equal to the
+  // inputted dirctions.
   std::vector<float> interest_aray(kNumRays);
   for (int i = 0; i < kNumRays; i++) {
     float interest =

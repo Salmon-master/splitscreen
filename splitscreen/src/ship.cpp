@@ -9,9 +9,11 @@
 
 Ship::Ship(std::vector<std::vector<GameObject*>>* game_objects) {
   game_objects_ = game_objects;
+  // room generation, from 5 to 10 rooms generated
   for (int i = 0; i < (rand() % 6) + 5; i++) {
     rooms_.push_back(new Room());
   }
+  // loads inital room into gameobjects
   LoadRoom(0);
 }
 
@@ -30,6 +32,7 @@ std::pair<int, int> Ship::GetDimensions() {
 bool Ship::MoveRoom(bool dir) {
   bool rv = false;
   int to_be_loaded = room_number_;
+  // increment room if input is positive, decermesemt teh room if negitave.
   if (dir) {
     if (room_number_ <= rooms_.size() - 1) {
       to_be_loaded++;
@@ -43,6 +46,7 @@ bool Ship::MoveRoom(bool dir) {
       rv = true;
     }
   }
+  // load new room
   if (to_be_loaded != room_number_) {
     LoadRoom(to_be_loaded);
   }
@@ -53,7 +57,7 @@ void Ship::LoadRoom(int room_number) {
   // deleteing all old wall and door objects
   game_objects_->at(kWalls).clear();
   game_objects_->at(kDoors).clear();
-  // removing old enmy objects from game object list
+  // removing old enemy objects from game object list
   game_objects_->at(kEnemies).clear();
   // upadting room index
   room_number_ = room_number;

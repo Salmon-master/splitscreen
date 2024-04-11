@@ -225,8 +225,7 @@ int main(int argc, char* args[]) {
     if (delta_time < pow(frame_cap * 1000, -1)) {
       SDL_Delay(pow(frame_cap * 1000, -1) - delta_time);
     }
-    // error catching
-  }  // uninitlise
+  }
   SDL_Quit();
   return 0;
 }

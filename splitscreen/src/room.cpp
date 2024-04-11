@@ -12,7 +12,7 @@
 #include "vector.h"
 
 Room::Room() {
-  // convertin genretaed map into walls
+  // convereting genretaed map into walls9
   std::vector<std::vector<Room::States>> map = Generate();
   for (int y = 0; y < map.size() - 1; y++) {
     for (int x = 0; x < map[0].size() - 1; x++) {
