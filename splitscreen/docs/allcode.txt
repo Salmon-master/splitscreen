@@ -1,0 +1,2125 @@
+// Copyright 2024 Hugh Thompson
+
+#ifndef BULLET_H_
+#define BULLET_H_
+
+#include "game_object.h"
+#include "player.h"
+#include "vector"
+#include "vector.h"
+
+class Player;
+
+// a class used to represent an in game bullet
+class Bullet : public GameObject {
+ public:
+  Bullet(GameObject* shooter, int damage);
+  // used in main game loop to step the bullet foward by veclocity and check for
+  // collisions between the current list of gameobjects(input)
+  bool Update(std::vector<std::vector<GameObject*>>* objects);
+
+ private:
+  // the velocity of the bulet, set in constuctor.
+  Vector velocity_ = {0, 0};
+  // bullet speed
+  int speed_ = 30;
+  // damage of the bullet, set in constctor
+  int damage_;
+  // a reference to the object that the gun that shot this bullet belongs to.
+  GameObject* shooter_;
+};
+
+#endif  // !BULLET_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef DOOR_H_
+#define DOOR_H_
+
+#include "game_object.h"
+
+// a class used to represnt a door in the game
+class Door : public GameObject {
+ public:
+  Door(int x, int y);
+  // switch the current state of the door, retuns the state of the door, true.
+  // for open, false for closed
+  bool Open();
+  // check for collison between this door and the inputted game object.
+  bool Collide(GameObject* obj);
+  // retuns the state of the door. True for open, false for closed.
+  bool GetState();
+
+ private:
+   // the current state of the door. True for open, false for closed.
+  bool open_ = false;
+};
+
+#endif  // !DOOR_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef ENEMY_H_
+#define ENEMY_H_
+
+#include <vector>
+
+#include "bullet.h"
+#include "game_object.h"
+#include "gun.h"
+#include "room.h"
+#include "screen.h"
+#include "ui_bar.h"
+#include "vector.h"
+
+class Room;
+
+//  a class represneting the enemies in the game
+class Enemy : public GameObject {
+ public:
+  Enemy(int x, int y, int type, Room* room);
+  // subtract from health, retuns true if health is below 0, false if not
+  bool Damage(int amount);
+  // calclate the direction the enemy wants to go in, interpritation of
+  // alorightm at https://kidscancode.org/godot_recipes/3.x/ai/context_map/
+  void AI(std::vector<std::vector<GameObject*>>* game_objects, int delta);
+  UIBar* GetBar(Screen* screen);
+  // used to initailsie the enemies health bar
+  UIBar* CreateBar(Screen* screen);
+  ~Enemy();
+
+ private:
+  // helper function to AI, caculates the interest array and returns it given a
+  // direction of interest
+  std::vector<float> SetInterest(Vector direction);
+  // helper function to AI, caculates the danger array and returns it given a
+  // list of game objects that are dangerous
+  std::vector<float> SetDanger(std::vector<GameObject*> objects);
+  // checks if two line segments intersect, used mainly for ray casting , line
+  // segments are given by two sets points(start and end) of each line
+  // line 1 = p1-q1
+  // line 2 = p2-q2
+  bool Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2);
+  // the health of teh enemy
+  int health_ = 10;
+  // the staring health of the enemy
+  int max_health_ = 10;
+  // movement speed
+  float speed_ = 80;
+  // range of attack
+  int attack_range_ = 128;
+  // Used in AI and associated functions to do AI
+  static const int kNumRays = 8;
+  Vector ray_directions_[kNumRays];
+  int search_range_ = 128;
+  float steer_force_ = 0.35;
+  // retuns the orenatation of three points, could be either colcokwise(1),
+  // anitclockwise(2) or colinear(0)
+  int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);
+  // a pointer to the enemies health bar, initiaised in addbar
+  UIBar* health_bar_ = nullptr;
+  // wether or not the enenmy is alive
+  bool dead_ = false;
+  // Deals with the enemies attack mechanics
+  Bullet* Attack(Vector location);
+  // reference to the wepon used by this enemy, initiased in constructor
+  Gun* gun_ = nullptr;
+  // returns a rotation is radians from the vertical (from 0 to 2PI Rad) given a
+  // vector.
+  float SetRotationFromVector(Vector rotation);
+  // a pointer to the room which the enemy is in, initised in consctor
+  Room* room_ = nullptr;
+  // which screen/s the enemy is currently rendered on.
+  std::vector<Screen*> on_screen_;
+};
+
+#endif  // !ENEMY_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef GAME_OBJECT_H_
+#define GAME_OBJECT_H_
+
+#include <iostream>
+#include <vector>
+#include <string>
+
+#include "SDL.h"
+#include "SDL_image.h"
+#include "vector.h"
+
+// Base class for all and any objects which are rendered to a screen, used
+// mainly as an interface with the screens so that one one type has to be
+// rendered, and most functionalty concerning loading of images and posistion
+// manipulation is also included.
+class GameObject {
+ public:
+  // ture if rendered on a screen, if not false
+  bool rendered_ = false;
+
+ protected:
+  // cartesian control variables
+  SDL_FRect rect_ = {0, 0, 0, 0};
+  float rotation_ = 0;
+  SDL_Point rotation_center_ = {0, 0};
+  // still cartesian control, but is a reference of the pervious movment off the
+  // object
+  Vector velocity_ = {0, 0};
+  // all frames of all animations indexed by animation and frame number
+  std::vector<std::vector<SDL_Surface*>> surfaces_;
+  // animation control vars
+  int state_ = 0;
+  int frame_ = 0;
+  int fps_ = 0;
+  int last_step_ = 0;
+  std::vector<int> state_que_ = {};
+  virtual void Cast();
+
+ public:
+  GameObject(int x, int y, std::string name);
+  // location modiying and setting
+  void SetPos(int x, int y);
+  void Move(float x, float y);
+  // calculate animation and retrun frame that needs to be rendered, used by
+  // screen class to get surfaces to render
+  SDL_Surface* GetSurface();
+  // both below functions used by the main game loop in the input sections to
+  // update what animation needs to be run, animations can either be run
+  // immedatly(SetState()) and interupt the current one, or run after the
+  // current animation is finished playing (QueState()).
+  void Setstate(int state);
+  void QueState(int state);
+  // private acessors
+  SDL_FRect GetRect();
+  float GetRotation();
+  SDL_Point* GetCenter();
+  Vector GetVelocity();
+
+ private:
+};
+
+#endif  // !GAME_OBJECT_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef GUN_H_
+#define GUN_H_
+
+#include "bullet.h"
+#include "player.h"
+
+class Player;
+class Bullet;
+
+// a class used to represnt the weapon held by either an enemy or player, used
+// by either of these classes to controll what anyting relating to the combat
+// element of the game.
+class Gun {
+ public:
+  Gun(int type, GameObject* holder);
+  // shoots a bullet in the current direction of the entity holding, returns a
+  // pointer to this bullet fired.
+  Bullet* Shoot();
+
+ private:
+  // how long between shots the gun is allowed to fire.
+  int cooldown_ = 300;
+  // timestamp for when the gun was last fired in ms snce the SDL initilisation
+  int last_shot_ = 0;
+  // an int relating to the type of gun (NOT IMPLEMTED YET)
+  int type_ = 0;
+  // damage done by the bullets this weapon fires
+  int damage_ = 10;
+  // the gameobject that is firing the weapon, used to get a direction of where
+  // the bullet should shoot.
+  GameObject* held_by_ = nullptr;
+};
+
+#endif  // !GUN_H_
+// Copyright 2024 Hugh Thompson
+
+#pragma once
+// enumerated indexes of the game object types in gameobjects
+enum Types { kPlayers = 0, kWalls = 1, kEnemies = 2, kBullets = 3, kDoors = 4 };
+// Copyright 2024 Hugh Thompson
+
+#ifndef PLAYER_H_
+#define PLAYER_H_
+
+#include "game_object.h"
+#include "gun.h"
+#include "ui_bar.h"
+
+// foward declations
+class Gun;
+// player class, used by the game to represnt a robot within the game
+class Player : public GameObject {
+ private:
+  // speed vars
+  int speed_ = 200;
+  float rotation_speed_ = 0.002;
+  // assigned in constructor
+  Gun* gun_ = nullptr;
+  // basically health
+  int damage_ = 0;
+  // assigned in consturctor
+  UIBar* damage_bar_ = nullptr;
+
+ public:
+  Player();
+  // convert the speed(magnitude) and rotation(angle) into x and y components to
+  // feed to parent move function, and then move the player.(smoothed with delta
+  // time)
+  void Step(int delta_time);
+  // change the rotation of the player, true is colcokwise, false is
+  // anticlockwise, will rotate the player based upon the rotation speed and is
+  // smoothed by delta time.
+  void Rotate(bool direction, int delta_time);
+  Gun* GetGun();
+  // called when teh player receives damage, retuns wether or not the player is
+  // alive.
+  bool Damage(int amount);
+  UIBar* GetBar();
+
+};
+
+#endif  // !PLAYER_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef ROOM_H_
+#define ROOM_H_
+
+#include <utility>
+#include <vector>
+
+#include "enemy.h"
+#include "SDL.h"
+#include "wall.h"
+
+class Enemy;
+// A class used to represent room with the game, it is composed of wall of
+// objects arranged into a 2d dunegon layout, with enemies populating that
+// layout, used as a part of a ship object.
+class Room {
+ public:
+  Room();
+  std::vector<GameObject*> GetWalls();
+  std::vector<Enemy*>* GetEnemies();
+  // retuns the locations that are empty for enemy spawing, used to spawn
+  // eneimes
+  std::vector<std::pair<int, int>> GetFree();
+  ~Room();
+  // retruns wether or not room has been visited by the player, also sets that
+  // the room has been visited. Used by the ship class to spawn in enemies.
+  bool Visit();
+
+ private:
+  // enum of possible states that a tile in the map can be
+  enum States { kEmpty = 0, kNextToArea, kCorridor, kArea, kDoor };
+  // generate a room to be used as part of a ship, given a diffculty
+  std::vector<std::vector<States>> Generate();
+  // returns the coordinates of the cells immedatly ajacendt to the inputted
+  // cell
+  std::vector<SDL_Point> GetSurroundingCells(int x, int y);
+  // wall objects creaed from map generation
+  std::vector<GameObject*> walls_ = {};
+  // a list of free spaces (global coorinates at center of space)
+  std::vector<std::pair<int, int>> free_;
+  bool visited_ = false;
+  // enemy objects from map generation
+  std::vector<Enemy*> enemies_ = {};
+};
+
+#endif  // !ROOM_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef SCREEN_H_
+#define SCREEN_H_
+
+#include <iostream>
+#include <utility>
+#include <vector>
+
+#include "game_object.h"
+#include "player.h"
+#include "SDL.h"
+#include "ui_bar.h"
+
+// object to control a window on screen, used by the main.cc to create a window,
+// so use instantiate the object with a screen position (top left corner) and
+// and then render objects to the screen using the render function that takes a
+// vector of game objects as an argument. the screen camrea postion can be set
+// to the location of a game object using the attach method.
+class Screen {
+ private:
+  // SDL window data
+  SDL_Window* win_;
+  // SDL window data
+  SDL_Renderer* renderer_;
+  // an ID for when the need to distunguish between windows
+  int window_id_;
+  // camera pos
+  float x_ = 0;
+  float y_ = 0;
+  // object following
+  Player* following_ = nullptr;
+  // the camera offset
+  std::pair<int, int> offset_ = {0, 0};
+  // the list of UI_Bars this screen should currently be displaying
+  std::vector<UIBar*> bars_;
+  // the background color for all bars on this screen
+  const SDL_Color background_color_ = {26, 34, 38};
+
+ public:
+  // inputs are the loction of the screen object's window on the actual screen
+  Screen(int x, int y);
+  ~Screen();
+  // render all objects in veiw of camrea on screen, called in main method every
+  // frame
+  void Render(std::vector<std::vector<GameObject*>> game_ojbects);
+  // bind camrea position to the inputted player's position, and disply the
+  // health of that player on screen
+  void Attach(Player* target);
+  // adds a bar to teh list of bars, and consequently to the screen
+  UIBar* AddBar(int max_value, SDL_Color color, SDL_Rect rect, int value);
+  // removes a given bar form the screen object.
+  void RemoveBar(UIBar* bar_to_remove);
+  Player* GetAttached();
+  std::vector<UIBar*>* GetBars();
+
+ private:
+};
+
+#endif  // !SCREEN_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef SHIP_H_
+#define SHIP_H_
+
+#include <iostream>
+#include <utility>
+#include <vector>
+
+#include "enemy.h"
+#include "game_object.h"
+#include "room.h"
+
+// A collection of rooms, and an acessible way to naviate through them. Used by
+// the main script to generate rooms, load them in and navigate through them
+class Ship {
+ public:
+  // the constuctor, the input is a pointer to the current list of gameobjects
+  // used, sorted by type, so that it may be modified to add, remove and modify
+  // game objects from the game, maked explicit as it is a single paramter
+  // constuctor
+  explicit Ship(std::vector<std::vector<GameObject*>>* game_objects);
+  ~Ship();
+  // Retuns the dimensions, in px of the current room
+  std::pair<int, int> GetDimensions();
+  // if the input is true, the current room will advance by 1, if false, the
+  // current room will decrease by 1.
+  // Retuns whether or not this navigation is outside the range of the number of
+  // rooms.
+  // Used by the main game lopop when the player needs to be moved to the next
+  // or previous level
+  bool MoveRoom(bool dir);
+
+ private:
+  // A vector of pointers to the rooms in a ship
+  std::vector<Room*> rooms_;
+  // an index value of which room is currenlty loaded in / being played
+  unsigned int room_number_ = 0;
+  // a reference to the game object list
+  std::vector<std::vector<GameObject*>>* game_objects_;
+  // Loads in the room number inputted, this will remove the currenlty loaded
+  // room's game objects from the game object list, and add the new room's ones
+  // in the correct positions
+  void LoadRoom(int room_number);
+};
+
+#endif  // !SHIP_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef UI_BAR_H_
+#define UI_BAR_H_
+
+#include <iostream>
+#include <utility>
+
+#include "SDL.h"
+
+// a class used to display infomation to the player in the form of a bar, theese
+// bars are assigned to an induvidular screen object which will display them.
+class UIBar {
+ public:
+  UIBar(int max_value, SDL_Color color, SDL_Rect rect);
+  ~UIBar();
+  void SetValue(int value);
+  void ChangeValue(float delta_value);
+  // returns the a rect and color of the coloured part of teh bar, called in the
+  // render method in the screen object to display the bar
+  std::pair<SDL_Rect*, SDL_Color> GetBar();
+  SDL_Rect* GetRect();
+  // retruns wether or not this bar's value is equal to the max value of that
+  // bar
+  bool Full();
+  float GetValue();
+  // modifies the position of the bar on the screen by the inputted amount
+  void Move(int x, int y);
+  void SetPos(int x, int y);
+
+ private:
+  // rectangle of the bar, used for display purposes
+  SDL_Rect rect_ = {0, 0, 0, 0};
+  // color of the bar, used for display purposes
+  SDL_Color color_ = {255, 0, 0};
+  // current value of the bar. used for display and game object purposes, can be
+  // externally acessed via the GetValue() method
+  float value_ = 0;
+  // the maximum value the bar can be, defined in teh constuctor and used for
+  // diplay purposes and to cehck if the bar is full
+  float max_value_ = 0;
+  // The border size(in px) between the colored bit of teh bar and the background.
+  static const int border = 2;
+};
+
+#endif  // !UI_BAR_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef VECTOR_H_
+#define VECTOR_H_
+
+#include <cmath>
+// a structure containing a 2d vector mathmatical/physics sense.
+struct Vector {
+  float x = 0;
+  float y = 0;
+  // retuns the length or normal of the vector
+  float Norm() {
+    float norm = sqrt(pow(x, 2) + pow(y, 2));
+    return norm;
+  }
+  // retuns the vector, but scaled so that the normal is a length of 1
+  Vector Normalised() {
+    Vector normlisied = {this->x / this->Norm(), this->y / this->Norm()};
+    return normlisied;
+  }
+  // retuns teh dot product of this vector and another inputted vector
+  float Dot(Vector other) { return (this->x * other.x) + (this->y * other.y); }
+  // retuns this vector, but scaled by the input
+  Vector Scaled(float scalar) {
+    return {this->x * scalar, this->y * scalar};
+  }
+};
+
+#endif  // !VECTOR_H_
+// Copyright (C) 2024 Hugh Thompson
+
+#ifndef WALL_H_
+#define WALL_H_
+
+#include <iostream>
+#include <vector>
+
+#include "game_object.h"
+#include "player.h"
+
+// An in game wall peice, can collide with other objects using the collide
+// method, used to add visable wall objects to the game.
+class Wall : public GameObject {
+ public:
+  Wall(int x, int y);
+  // Used for checking collision for collision against a game  object, and then
+  // move obj accordingly. Will check for circular collision aginst rectangular
+  // wall. the inputted object is teh one that the collision check will be
+  // performed against
+  bool Collision(GameObject* obj);
+
+ private:
+};
+
+#endif  // !WALL_H_
+// Copyright 2024 Hugh Thompson
+
+#include "bullet.h"
+
+#include <stack>
+
+#include "enemy.h"
+#include "main.h"
+#include "wall.h"
+
+Bullet::Bullet(GameObject* shooter, int damage)
+    : GameObject(
+          shooter->GetCenter()->x + shooter->GetRect().x +
+              (sin(shooter->GetRotation()) * shooter->GetCenter()->y),
+          shooter->GetCenter()->y + shooter->GetRect().y +
+              (cos(shooter->GetRotation()) * shooter->GetCenter()->y * -1),
+          "bullet") {
+  // setting kinematic properites
+  float x = sin(shooter->GetRotation()) * speed_;
+  float y = cos(shooter->GetRotation()) * speed_ * -1;
+  rotation_ = shooter->GetRotation();
+  velocity_ = {x, y};
+  // setting bullet properties
+  damage_ = damage;
+  shooter_ = shooter;
+}
+
+bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
+  bool destruct = false;
+  // step
+  Move(velocity_.x, velocity_.y);
+  std::stack<GameObject*> to_remove;
+  // iterate though all objects to check for collisions
+  for (int i = 0; i < objects->size() - 1; i++) {
+    for (GameObject* obj : objects->at(i)) {
+      // dont interact with self
+      if (obj != shooter_) {
+        // walls
+        if (i == kWalls) {
+          int x_diff = abs((obj->GetCenter()->x + obj->GetRect().x) -
+                           (rotation_center_.x + rect_.x));
+          int y_diff = abs((obj->GetCenter()->y + obj->GetRect().y) -
+                           (rotation_center_.y + rect_.y));
+          if (x_diff < obj->GetRect().w / 2 && y_diff < obj->GetRect().h / 2) {
+            destruct = true;
+            break;
+          }
+        }
+        // enemies take damage
+        if (i == kEnemies) {
+          Enemy* enemy = dynamic_cast<Enemy*>(obj);
+          if (enemy) {
+            Vector diff = {(rotation_center_.x + rect_.x) -
+                               (obj->GetCenter()->x + obj->GetRect().x),
+                           (rotation_center_.y + rect_.y) -
+                               (obj->GetCenter()->y + obj->GetRect().y)};
+            if (diff.Norm() <= obj->GetCenter()->x) {
+              if (enemy->Damage(damage_)) {
+                to_remove.push(obj);
+              }
+              destruct = true;
+              break;
+            }
+          } else {
+            std::cout << "incorrect type allocated to list" << std::endl;
+            +kEnemies;
+          }
+        }
+        // players take damage, 
+        if (i == kPlayers) {
+          Player* player = dynamic_cast<Player*>(obj);
+          if (player) {
+            Vector diff = {(rotation_center_.x + rect_.x) -
+                               (obj->GetCenter()->x + obj->GetRect().x),
+                           (rotation_center_.y + rect_.y) -
+                               (obj->GetCenter()->y + obj->GetRect().y)};
+            if (diff.Norm() <= obj->GetCenter()->x) {
+              if (player->Damage(damage_)) {
+                to_remove.push(obj);
+              }
+              destruct = true;
+              break;
+            }
+          } else {
+            std::cout << "incorrect type allocated to list" << std::endl;
+          }
+        }
+      }
+    }
+  }
+  // deconstuct and remove objecsts that have run out of health.
+  while (!to_remove.empty()) {
+    GameObject* removed = to_remove.top();
+    to_remove.pop();
+    for (int i = kPlayers; i < kBullets; i++) {
+      objects->at(i).erase(
+          std::remove(objects->at(i).begin(), objects->at(i).end(), removed),
+          objects->at(i).end());
+      if (i == kEnemies) {
+        Enemy* enemy = dynamic_cast<Enemy*>(removed);
+        if (enemy) {
+          delete enemy;
+        } else {
+          std::cout << "incorrect type allocated to list " << std::endl;
+        }
+      }
+    }
+  }
+  return destruct;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "door.h"
+
+Door::Door(int x, int y) : GameObject(x, y, "door") { open_ = false; }
+
+bool Door::Open() {
+  open_ = !open_;
+  return open_;
+}
+
+bool Door::Collide(GameObject* obj) {
+  bool rv = false;
+  // if not rendered, no point in wasting memory, and if closed
+  if (rendered_ && !open_) {
+    std::pair<bool, bool> move = {false, false};
+    Vector diff = {(obj->GetCenter()->x + obj->GetRect().x) -
+                       (rect_.x + rotation_center_.x),
+                   (obj->GetCenter()->y + obj->GetRect().y) -
+                       (rect_.y + rotation_center_.y)};
+    float circle_distance_x = abs(diff.x);
+    float circle_distance_y = abs(diff.y);
+    int r = obj->GetCenter()->x;
+
+    // checking if the obj is overlapping
+    if (circle_distance_x < (rect_.w / 2 + r)) {
+      if (circle_distance_y < (rect_.h / 2 + r)) {
+        if (circle_distance_x <= (rect_.w / 2)) {
+          // on y axis
+          rv = true;
+          move.second = true;
+        }
+        if (circle_distance_y <= (rect_.h / 2)) {
+          // on x axis
+          rv = true;
+          move.first = true;
+        }
+        float cornerdistance_sq = pow((circle_distance_x - rect_.w / 2), 2) +
+                                  pow((circle_distance_y - rect_.h / 2), 2);
+        // checking overlapping on corner
+        if (cornerdistance_sq <= pow(r, 2)) {
+          rv = true;
+          // only cancel out velocity moving towards object
+          move.first = (obj->GetVelocity().x / abs(obj->GetVelocity().x) !=
+                        diff.x / abs(diff.x));
+          move.second = (obj->GetVelocity().y / abs(obj->GetVelocity().y) !=
+                         diff.y / abs(diff.y));
+        }
+      }
+    }
+    // canceling out motion according to collision
+    obj->Move(obj->GetVelocity().x * -1 * move.first,
+              obj->GetVelocity().y * -1 * move.second);
+  }
+  return rv;
+}
+
+bool Door::GetState() { return open_; }
+// Copyright 2024 Hugh Thompson
+
+#include "enemy.h"
+
+#include <algorithm>
+#include <iostream>
+#include <string>
+
+#include "main.h"
+#include "wall.h"
+
+Enemy::Enemy(int x, int y, int type, Room* room)
+    : GameObject(x, y, "enemy_" + std::to_string(type)) {
+  // var initilaistion
+  SetPos(x, y);
+  room_ = room;
+  rotation_center_.y = (rect_.h - 28);
+  gun_ = new Gun(0, this);
+  // setting up AI
+  for (size_t i = 0; i < kNumRays; i++) {
+    float angle = (i * 2 * M_PI) / kNumRays;
+    ray_directions_[i] = {cos(angle), sin(angle)};
+  }
+}
+
+bool Enemy::Damage(int amount) {
+  bool rv = false;
+  health_ -= amount;
+  // speed boost if on low health
+  if (health_ < max_health_ / 4) {
+    speed_ *= 1.3;
+  }
+  // cehcking if the enemy is dead
+  if (health_ <= 0) {
+    rv = true;
+    dead_ = true;
+    health_bar_->SetValue(0);
+  } else {
+    health_bar_->SetValue(health_);
+  }
+  return rv;
+}
+
+void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
+  //
+  std::vector<Vector> diff;
+  // looping through players and adding to lists
+  for (GameObject* player : game_objects->at(kPlayers)) {
+    if (static_cast<Player*>(player)) {
+      diff.push_back({(player->GetRect().x + player->GetCenter()->x) -
+                          (rect_.x + rotation_center_.x),
+                      (player->GetRect().y + player->GetCenter()->y) -
+                          (rect_.y + rotation_center_.y)});
+    } else {
+      std::cout << "incorrect type allocated to list" << std::endl;
+    }
+  }
+  // cehcking if in range of player
+  if (!dead_ && (diff[0].Norm() < 500 || diff[1].Norm() < 500)) {
+    if (delta == 0) {
+      delta = 1;
+    }
+    // buffer lists of objects
+    std::vector<GameObject*> danger_objects;
+    std::vector<Vector> interest_objects;
+    // iterating through all game objects and adding them to the buffer lists
+    for (int i = 0; i < game_objects->size() - 1; i++) {
+      for (GameObject* obj : game_objects->at(i)) {
+        // if wall in search range, add to danger
+        if (i == kWalls) {
+          if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
+                         (rect_.x + rotation_center_.x),
+                     (obj->GetRect().y + obj->GetCenter()->y) -
+                         (rect_.y + rotation_center_.y)}
+                  .Norm() < search_range_) {
+            danger_objects.push_back(obj);
+          }
+        }
+        // if other enemy in search range, add to danger
+        if (i == kEnemies) {
+          if (obj != this) {
+            if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
+                           (rect_.x + rotation_center_.x),
+                       (obj->GetRect().y + obj->GetCenter()->y) -
+                           (rect_.y + rotation_center_.y)}
+                    .Norm() < search_range_) {
+              danger_objects.push_back(obj);
+            }
+          }
+        }
+        // if player in range, add to interest, if low health, add inverse to
+        // interest, if in attack range attack
+        if (i == kPlayers) {
+          Vector diff = {(obj->GetRect().x + obj->GetCenter()->x) -
+                             (rect_.x + rotation_center_.x),
+                         (obj->GetRect().y + obj->GetCenter()->y) -
+                             (rect_.y + rotation_center_.y)};
+          if (diff.Norm() <= search_range_ * 3) {
+            if (health_ > max_health_ / 4) {
+              interest_objects.push_back(Vector{obj->GetRect().x - rect_.x,
+                                                obj->GetRect().y - rect_.y});
+              if (diff.Norm() <= attack_range_) {
+                Bullet* bullet = Attack(diff);
+                if (speed_ > 1) {
+                  speed_ *= 0.95;
+                }
+                if (bullet) {
+                  game_objects->at(kBullets).push_back(bullet);
+                }
+              } else {
+                speed_ = 80;
+              }
+            } else {
+              speed_ = 100;
+              interest_objects.push_back(
+                  Vector{(obj->GetRect().x - rect_.x) * -1,
+                         (obj->GetRect().y - rect_.y) * -1});
+            }
+          }
+        }
+      }
+    }
+    // set interest
+    std::vector<float> interest(kNumRays);
+    if (!interest_objects.empty()) {
+      interest = SetInterest(interest_objects[0]);
+    } else {
+      interest = SetInterest({0, 0});
+    }
+    // set dangeer
+    std::vector<float> danger = SetDanger(danger_objects);
+    // combine interest and danger
+    for (int i = 0; i < kNumRays; i++) {
+      if (danger[i] != 0.0f) {
+        interest[i] = danger[i];
+      }
+    }
+    // calculate net direction
+    Vector chosen_dir = {0, 0};
+    for (int i = 0; i < kNumRays; i++) {
+      chosen_dir.x += interest[i] * ray_directions_[i].x;
+      chosen_dir.y += interest[i] * ray_directions_[i].y;
+    }
+    // steering calculations
+    if (chosen_dir.x != 0 && chosen_dir.y != 0) {
+      Vector steer = {
+          ((chosen_dir.Normalised().x) - velocity_.x) * steer_force_,
+          ((chosen_dir.Normalised().y) - velocity_.y) * steer_force_};
+      Vector chosen_direction = {velocity_.x + steer.x, velocity_.y + steer.y};
+      Move(((chosen_direction.Normalised().x * speed_ * delta) / 1000),
+           ((chosen_direction.Normalised().y * speed_ * delta) / 1000));
+      velocity_ = {(chosen_direction.Normalised().x * speed_ * delta) / 1000,
+                   (chosen_direction.Normalised().y * speed_ * delta) / 1000};
+      float new_rotation = SetRotationFromVector(chosen_direction);
+      if (abs(new_rotation - rotation_) > M_PI) {
+        float amount =
+            ((2 * M_PI) - abs(new_rotation - rotation_)) * steer_force_ / 5;
+        if (rotation_ > new_rotation) {
+          rotation_ += amount;
+        } else {
+          rotation_ -= amount;
+        }
+      } else {
+        rotation_ += ((new_rotation - rotation_) * steer_force_ / 5);
+      }
+      if (rotation_ >= 2 * M_PI) {
+        rotation_ -= 2 * M_PI;
+      }
+      if (rotation_ <= 0) {
+        rotation_ += 2 * M_PI;
+      }
+    } else {
+      velocity_ = {0, 0};
+    }
+  }
+}
+
+UIBar* Enemy::GetBar(Screen* screen) {
+  // add bar to screen's bars if not already on there
+  if (std::count(on_screen_.begin(), on_screen_.end(), screen) == 0) {
+    on_screen_.push_back(screen);
+  }
+  return health_bar_;
+}
+
+UIBar* Enemy::CreateBar(Screen* screen) {
+  // bar initilaisation
+  health_bar_ = new UIBar(
+      max_health_, {135, 211, 124},
+      SDL_Rect{static_cast<int>(rect_.x), static_cast<int>(rect_.y - 10),
+               static_cast<int>(rect_.w), 10});
+  health_bar_->SetValue(max_health_);
+  // if not on screen, add to on screen
+  if (std::count(on_screen_.begin(), on_screen_.end(), screen) == 0) {
+    on_screen_.push_back(screen);
+  }
+  return health_bar_;
+}
+
+Enemy::~Enemy() {
+  // remove enmies in a memory safe way
+  if (room_->GetEnemies()->size() != 0) {
+    std::vector<Enemy*>* room_emenies = room_->GetEnemies();
+    room_emenies->erase(
+        std::remove(room_emenies->begin(), room_emenies->end(), this),
+        room_emenies->end());
+  }
+  std::cout << "enemy destroyed!" << std::endl;
+  // removing health bar in a meomory safe way
+  for (Screen* screen : on_screen_) {
+    std::vector<UIBar*>* bars = screen->GetBars();
+    bars->erase(std::remove(bars->begin(), bars->end(), health_bar_),
+                bars->end());
+  }
+  delete health_bar_;
+}
+
+std::vector<float> Enemy::SetInterest(Vector direction) {
+  // reurns the chosen dirction represneted in the form of all the rays in the
+  // ray dirctions scaled so that the sum of theese rays is equal to the
+  // inputted dirctions.
+  std::vector<float> interest_aray(kNumRays);
+  for (int i = 0; i < kNumRays; i++) {
+    float interest =
+        ray_directions_[i].Normalised().Dot(direction.Normalised());
+    interest_aray[i] = std::max(0.0f, interest);
+  }
+  return interest_aray;
+}
+
+std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
+  std::vector<float> danger_aray(kNumRays);
+  for (int i = 0; i < kNumRays; i++) {
+    // calculating cast ray
+    std::pair<SDL_Point, SDL_Point> ray = {
+        SDL_Point{static_cast<int>(ray_directions_[i].Scaled(search_range_).x) +
+                      static_cast<int>(rect_.x + rotation_center_.x),
+                  static_cast<int>(ray_directions_[i].Scaled(search_range_).y) +
+                      static_cast<int>(rect_.y + rotation_center_.y)},
+        SDL_Point{static_cast<int>(rect_.x + rotation_center_.y),
+                  static_cast<int>(rect_.y + rotation_center_.y)}};
+    // iterates through all given game objects and checks for dangerous objects
+    // in ray path
+    for (GameObject* obj : objects) {
+      // r is shorthand for the rect, not called rect as this uses too much
+      // horizontal space
+      SDL_Rect r = {obj->GetRect().x, obj->GetRect().y, obj->GetRect().w,
+                    obj->GetRect().h};
+      // division of that rectangle into its component line segments
+      std::vector<std::pair<SDL_Point, SDL_Point>> lines = {
+          {SDL_Point{r.x, r.y}, SDL_Point{r.x + r.w, r.y}},
+          {SDL_Point{r.x + r.w, r.y}, SDL_Point{r.x + r.w, r.y + r.h}},
+          {SDL_Point{r.x + r.w, r.y + r.h}, SDL_Point{r.x, r.y + r.h}},
+          {SDL_Point{r.x, r.y + r.h}, SDL_Point{r.x, r.y}}};
+      // checks each line segmemt of intercetions with the cast ray
+      for (std::pair<SDL_Point, SDL_Point> line : lines) {
+        float danger = 0;
+        if (Intersect(line.first, line.second, ray.first, ray.second)) {
+          // if there is an intersection set the danger equal to the inverse
+          // distance between the enemy and that object, times a constant
+          float diffrence;
+          if (line.first.x == line.second.x) {
+            diffrence = abs(line.first.x - (rect_.x + rotation_center_.x));
+          } else {
+            diffrence = abs(line.first.y - (rect_.y + rotation_center_.y));
+          }
+          Wall* wall_type = static_cast<Wall*>(obj);
+          Enemy* enemy_type = static_cast<Enemy*>(obj);
+          if (wall_type) {
+            danger = ((search_range_ - r.w) - diffrence) * 0.025;
+          } else if (enemy_type) {
+            danger = -0.001f;
+          }
+        }
+        danger_aray[i] = danger;
+        if (danger != 0.0f && danger != -0.001f) {
+          break;
+        }
+      }
+      if (danger_aray[i] != 0.0f) {
+        break;
+      }
+    }
+  }
+  return danger_aray;
+}
+
+bool Enemy::Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2) {
+  // algorithm from:
+  // https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/,
+  // checks orientation of the two tragnes formed by the lines, if diffrent
+  // the the lines intersect
+  int o1 = Orientation(p1, q1, p2);
+  int o2 = Orientation(p1, q1, q2);
+  int o3 = Orientation(p2, q2, p1);
+  int o4 = Orientation(p2, q2, q1);
+  if (o1 != o2 && o3 != o4) {
+    return true;
+  }
+  return false;
+}
+
+int Enemy::Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3) {
+  int val = (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y);
+  if (val == 0) return 0;    // collinear
+  return (val > 0) ? 1 : 2;  // clock or counterclock wise
+}
+Bullet* Enemy::Attack(Vector location) {
+  Bullet* bullet = gun_->Shoot();
+  return bullet;
+}
+
+float Enemy::SetRotationFromVector(Vector rotation) {
+  float new_rotation = atan(velocity_.y / velocity_.x);
+  if (rotation.y > 0) {
+    if (rotation.x < 0) {
+      new_rotation += M_PI;
+    } else {
+      new_rotation += M_PI * 2;
+    }
+  } else {
+    if (rotation.x < 0) {
+      new_rotation += M_PI;
+    }
+  }
+  if (new_rotation < 0) {
+    new_rotation += M_PI * 2;
+  }
+  new_rotation += M_PI / 2;
+  if (new_rotation >= 2 * M_PI) {
+    new_rotation -= 2 * M_PI;
+  }
+  return new_rotation;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "game_object.h"
+
+#include <filesystem>
+
+void GameObject::Cast() {}
+
+GameObject::GameObject(int x, int y, std::string name) {
+  // setting posistion
+  rect_.x = x;
+  rect_.y = y;
+
+  // image loader, finds folder based off _name, loads the assets into a 2d aray
+  // of frames in animations and frame numbers.
+  std::string path = "assets/" + name + "/";
+  int index_pointer = 0;
+  for (const auto& entry : std::filesystem::directory_iterator(path)) {
+    std::string animation_path = (entry.path()).string() + "/";
+    std::vector<SDL_Surface*> empty;
+    surfaces_.emplace_back(empty);
+    for (const auto& animation_entry :
+         std::filesystem::directory_iterator(animation_path)) {
+      SDL_Surface* surface_buffer =
+          IMG_Load(((animation_entry.path()).string()).c_str());
+      surfaces_[index_pointer].emplace_back(surface_buffer);
+    }
+    index_pointer += 1;
+  }
+
+  // setting dimensions
+  rect_.w = surfaces_[0][0]->w;
+  rect_.h = surfaces_[0][0]->h;
+
+  // rotation center default
+  rotation_center_.x = (rect_.w / 2);
+  rotation_center_.y = (rect_.h / 2);
+}
+
+void GameObject::SetPos(int x, int y) {
+  // update postion
+  rect_.x = x;
+  rect_.y = y;
+  // set velocity
+  velocity_ = {0, 0};
+}
+
+void GameObject::Move(float x, float y) {
+  // update postion
+  rect_.x += x;
+  rect_.y += y;
+}
+
+SDL_Surface* GameObject::GetSurface() {
+  // animation calcuation, if there is an animation update it based off the del
+  // t since last this function called, and chages animation to next in que if
+  // applicple when animaion repeats.
+  if (surfaces_[state_].size() != 1) {
+    int ticks = SDL_GetTicks64();
+    int delta_time = ticks - last_step_;
+    if (delta_time != 0) {
+      int mspf = std::pow((static_cast<float>(fps_) / 1000), -1);
+      int step = delta_time / mspf;
+      if (step >= 1) {
+        frame_ += step;
+        if (step > surfaces_[state_].size() - 1) {
+          frame_ = 0;
+          if (state_que_.size() != 0) {
+            state_ = state_que_.back();
+            state_que_.pop_back();
+          }
+        }
+      }
+    }
+  }
+  return surfaces_[state_][frame_];
+}
+
+void GameObject::Setstate(int state) { state_ = state; }
+
+void GameObject::QueState(int state) {
+  state_que_.insert(state_que_.begin(), state);
+}
+
+SDL_FRect GameObject::GetRect() { return rect_; }
+
+float GameObject::GetRotation() { return rotation_; }
+
+SDL_Point* GameObject::GetCenter() { return &rotation_center_; }
+
+Vector GameObject::GetVelocity() { return velocity_; }
+// Copyright 2024 Hugh Thompson
+
+#include "gun.h"
+
+#include <SDL.h>
+
+Gun::Gun(int type, GameObject* holder) { held_by_ = holder; }
+
+Bullet* Gun::Shoot() {
+  Bullet* rv = nullptr;
+  // setting the fire rate of the weapon
+  if (SDL_GetTicks64() - last_shot_ > cooldown_) {
+    last_shot_ = SDL_GetTicks64();
+    rv = new Bullet(held_by_, damage_);
+  }
+  return rv;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "main.h"
+
+#include <SDL.h>
+
+#include <iostream>
+#include <stack>
+#include <vector>
+
+#include "door.h"
+#include "enemy.h"
+#include "game_object.h"
+#include "gun.h"
+#include "player.h"
+#include "room.h"
+#include "screen.h"
+#include "ship.h"
+#include "ui_bar.h"
+#include "wall.h"
+
+int main(int argc, char* args[]) {
+  srand(time(0));
+  bool run = true;
+  // intlising SDL with window and renderer, errors are thrown if initilaides
+  // incorrectly
+  if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+    printf("error initializing SDL: %s\n", SDL_GetError());
+  }
+  // creating windows
+  Screen screen1(100, 250);
+  Screen screen2(600, 250);
+  SDL_Event e;
+  UIBar* swtich_bar = nullptr;
+
+  // game object intitilastion
+  Player player1;
+  Player player2;
+  player1.SetPos(256, 256);
+  player2.SetPos(256, 256);
+
+  // adding objects to lists
+  std::vector<std::vector<GameObject*>> game_objects = {{}, {}, {}, {}, {}};
+  game_objects[kPlayers].push_back(&player1);
+  game_objects[kPlayers].push_back(&player2);
+
+  // testing code
+  Ship ship1(&game_objects);
+  // eniemies
+  // assign players to screens
+  screen2.Attach(&player2);
+  screen1.Attach(&player1);
+  // game vars
+  Screen* controlling = &screen1;
+  int swich_cooldown = 0;
+
+  const Uint8* key_state = SDL_GetKeyboardState(NULL);
+
+  // delta time vars
+  int delta_time = 0;
+  int last = 0;
+  const int frame_cap = 30;
+  // main game loop
+  while (run) {
+    // inputs
+    if (SDL_PollEvent(&e)) {
+      if (e.type == SDL_QUIT) {
+        run = false;
+      }
+      if (e.type == SDL_KEYDOWN) {
+        if (e.key.keysym.sym == SDLK_SPACE) {
+          Bullet* bullet = controlling->GetAttached()->GetGun()->Shoot();
+          if (bullet) {
+            game_objects[kBullets].push_back(bullet);
+          }
+        }
+      }
+    }
+    SDL_PumpEvents();
+    if (key_state[SDL_SCANCODE_W] == 1) {
+      controlling->GetAttached()->Step(delta_time);
+    }
+    if (key_state[SDL_SCANCODE_A] == 1) {
+      controlling->GetAttached()->Rotate(0, delta_time);
+    }
+    if (key_state[SDL_SCANCODE_D] == 1) {
+      controlling->GetAttached()->Rotate(1, delta_time);
+    }
+    if (key_state[SDL_SCANCODE_SPACE] == 1) {
+      Bullet* bullet = controlling->GetAttached()->GetGun()->Shoot();
+      if (bullet) {
+        game_objects[kBullets].push_back(bullet);
+      }
+    }
+    if (key_state[SDL_SCANCODE_V] == 1) {
+      if (swtich_bar) {
+        swtich_bar->ChangeValue(2 * (delta_time / 10));
+        std::cout << swtich_bar->GetValue() << std::endl;
+        if (swtich_bar->Full()) {
+          controlling->RemoveBar(swtich_bar);
+          swtich_bar = nullptr;
+          swich_cooldown = 1000;
+          if (controlling == &screen1) {
+            controlling = &screen2;
+          } else {
+            controlling = &screen1;
+          }
+        }
+      } else if (swich_cooldown <= 0) {
+        swtich_bar = controlling->AddBar(
+            100, {45, 136, 255}, {150, 225, 200, 50}, 3 * (delta_time / 10));
+      }
+    }
+
+    // game logic
+
+    // unlocking of doors
+    if (game_objects[kEnemies].size() == 0) {
+      Door* door = dynamic_cast<Door*>(game_objects[kDoors].back());
+      if (!door->GetState()) {
+        door->Open();
+      }
+    }
+
+    // level advancing
+    for (GameObject* obj : game_objects[kPlayers]) {
+      Player* player = dynamic_cast<Player*>(obj);
+      if (player) {
+        SDL_FRect rect = player->GetRect();
+        if (rect.x < 0 || rect.y < 0) {
+          if (!ship1.MoveRoom(false)) {
+            player1.SetPos(ship1.GetDimensions().first - 256,
+                           ship1.GetDimensions().second - 256);
+            player2.SetPos(ship1.GetDimensions().first - 256,
+                           ship1.GetDimensions().second - 256);
+          } else {
+            run = false;
+          }
+          break;
+        }
+        if (rect.x > ship1.GetDimensions().first + 64 ||
+            rect.y > ship1.GetDimensions().second + 64) {
+          if (!ship1.MoveRoom(true)) {
+            player1.SetPos(256, 256);
+            player2.SetPos(256, 256);
+          } else {
+            run = false;
+          }
+          break;
+        }
+      } else {
+        std::cout << "incorrect type allocated to list" << std::endl;
+      }
+    }
+
+    // enemy AI
+    for (GameObject* obj : game_objects[kEnemies]) {
+      Enemy* enemy = dynamic_cast<Enemy*>(obj);
+      if (enemy) {
+        enemy->AI(&game_objects, delta_time);
+      }
+    }
+    // wall collision
+    for (GameObject* obj : game_objects[kWalls]) {
+      Wall* wall = dynamic_cast<Wall*>(obj);
+      if (wall) {
+        wall->Collision(controlling->GetAttached());
+        wall->rendered_ = false;
+      } else {
+        std::cout << "incorrect type allocated to list" << std::endl;
+      }
+    }
+    // door collision
+    for (GameObject* obj : game_objects[kDoors]) {
+      Door* door = dynamic_cast<Door*>(obj);
+      if (door) {
+        bool colliding = door->Collide(controlling->GetAttached());
+        door->rendered_ = false;
+      } else {
+        std::cout << "incorrect type allocated to list" << std::endl;
+      }
+    }
+    // switching players
+    if (swich_cooldown > 0) {
+      swich_cooldown -= delta_time;
+    }
+    if (swtich_bar) {
+      swtich_bar->ChangeValue(-1 * (delta_time / 10));
+      if (swtich_bar->GetValue() <= 0) {
+        controlling->RemoveBar(swtich_bar);
+        swtich_bar = nullptr;
+        swich_cooldown = 1000;
+      }
+    }
+    // bullets
+    std::stack<Bullet*> to_remove;
+    for (GameObject* obj : game_objects[kBullets]) {
+      Bullet* bullet = dynamic_cast<Bullet*>(obj);
+      if (bullet) {
+        if (bullet->Update(&game_objects)) {
+          to_remove.push(bullet);
+        }
+      } else {
+        std::cout << "incorrect type allocated to list" << std::endl;
+      }
+    }
+    while (!to_remove.empty()) {
+      std::vector<GameObject*>* bullets = &game_objects[kBullets];
+      bullets->erase(
+          std::remove(bullets->begin(), bullets->end(), to_remove.top()),
+          bullets->end());
+      delete to_remove.top();
+      to_remove.pop();
+    }
+
+    // rendering
+    screen1.Render(game_objects);
+    screen2.Render(game_objects);
+
+    // delta time calculation
+    delta_time = SDL_GetTicks64() - last;
+    last = SDL_GetTicks64();
+
+    // frame capping
+    if (delta_time < pow(frame_cap * 1000, -1)) {
+      SDL_Delay(pow(frame_cap * 1000, -1) - delta_time);
+    }
+  }
+  SDL_Quit();
+  return 0;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "player.h"
+
+#include <cmath>
+
+Player::Player() : GameObject(0, 0, "player") {
+  // roataion center to center of player charter
+  rotation_center_.y = (rect_.h - 28) + rect_.y;
+  gun_ = new Gun(0, this);
+  damage_bar_ = new UIBar(
+      500, {110, 59, 173},
+      {static_cast<int>(rect_.x), static_cast<int>(rect_.y), 250, 40});
+}
+
+void Player::Step(int delta_time) {
+  // caluclating the componets of the vector to move given the rotation and
+  // speed (scaled by delta time)
+  float x = sin(rotation_) * speed_ * delta_time / 1000;
+  float y = cos(rotation_) * speed_ * delta_time / 1000 * -1;
+  velocity_ = {x, y};
+  this->Move(x, y);
+}
+
+void Player::Rotate(bool dir, int delta_time) {
+  if (dir == 1) {
+    rotation_ += rotation_speed_ * delta_time;
+  }
+  if (dir == 0) {
+    rotation_ -= rotation_speed_ * delta_time;
+  }
+}
+
+Gun* Player::GetGun() { return gun_; }
+
+bool Player::Damage(int amount) {
+  bool rv = false;
+  damage_ += amount;
+  // conditions based on if the player has reached the maximim damage
+  if (damage_ >= 500) {
+    rv = true;
+    damage_bar_->SetValue(0);
+  } else {
+    damage_bar_->SetValue(damage_);
+  }
+  return rv;
+}
+
+UIBar* Player::GetBar() { return damage_bar_; }
+// Copyright 2024 Hugh Thompson
+
+#include "room.h"
+
+#include <time.h>
+
+#include <cstdlib>
+#include <iostream>
+#include <stack>
+
+#include "door.h"
+#include "vector.h"
+
+Room::Room() {
+  // convereting genretaed map into walls9
+  std::vector<std::vector<Room::States>> map = Generate();
+  for (int y = 0; y < map.size() - 1; y++) {
+    for (int x = 0; x < map[0].size() - 1; x++) {
+      if (y == 0 && x == 1) {
+        Door* door = new Door(x * 128, y * 128);
+        walls_.push_back(door);
+        door->Open();
+      } else if (map[y][x] == kEmpty || map[y][x] == kNextToArea) {
+        walls_.push_back(new Wall(x * 128, y * 128));
+      } else {
+        free_.push_back({(x * 128) + 64, (y * 128) + 64});
+      }
+    }
+    walls_.push_back(new Wall((map[0].size() - 1) * 128, y * 128));
+    std::cout << std::endl;
+  }
+  for (int x = 0; x < map[0].size(); x++) {
+    if (x == map[0].size() - 2) {
+      walls_.push_back(new Door(x * 128, (map.size() - 1) * 128));
+    } else {
+      walls_.push_back(new Wall(x * 128, (map.size() - 1) * 128));
+    }
+  }
+  int size = (((rand() % (61)) + 70) / 100.0f) * (free_.size() / 12);
+  for (int i = 0; i < size; i++) {
+    int random = rand() % free_.size();
+    Enemy* enemy =
+        new Enemy(free_[random].first, free_[random].second, 1, this);
+    free_.erase(free_.begin() + random);
+    enemy->Move(-1 * enemy->GetCenter()->x, -1 * enemy->GetCenter()->y);
+    enemies_.push_back(enemy);
+  }
+}
+
+std::vector<GameObject*> Room::GetWalls() { return walls_; }
+
+std::vector<Enemy*>* Room::GetEnemies() { return &enemies_; }
+
+std::vector<std::pair<int, int>> Room::GetFree() { return free_; }
+
+Room::~Room() {
+  // as enemy deconstructor deletes itself from enemy list, the enemies cannot
+  // be deleted while iterating over that list as it chnages size while
+  // iterating.
+  std::stack<Enemy*> delete_stack;
+  for (Enemy* enemy : enemies_) {
+    delete_stack.push(enemy);
+  }
+  while (!delete_stack.empty()) {
+    delete delete_stack.top();
+    delete_stack.pop();
+  }
+  for (GameObject* wall : walls_) {
+    delete wall;
+  }
+}
+
+bool Room::Visit() {
+  bool rv = visited_;
+  visited_ = true;
+  return rv;
+}
+
+std::vector<std::vector<Room::States>> Room::Generate() {
+  std::vector<std::vector<Room::States>> output;
+  // generate blank feild
+  int width = (rand() % (22 - 12 + 1)) + 12;
+  int height = (rand() % (22 - 12 + 1)) + 12;
+  std::vector<Room::States> push;
+  for (int i = 0; i < width; i++) {
+    push.push_back(kEmpty);
+  }
+  for (int i = 0; i < height; i++) {
+    output.push_back(push);
+  }
+  // 3x3 end room generation
+  for (int l = height - 5; l < height; l++) {
+    for (int f = width - 5; f < width; f++) {
+      if (l == height - 5 || l == height || f == width - 5 || f == width) {
+        output[l][f] = kNextToArea;
+
+      } else {
+        output[l][f] = kArea;
+      }
+    }
+  }
+  // 3x3 starting room generation
+  for (int l = 0; l < 5; l++) {
+    for (int f = 0; f < 5; f++) {
+      if (l == 0 || l == 5 || f == 0 || f == 5) {
+        output[l][f] = kNextToArea;
+
+      } else {
+        output[l][f] = kArea;
+      }
+    }
+  }
+  // room generation
+  int area = width * height;
+  for (int i = 0; i < area / 10; i++) {
+    // random room size
+    int room_width = (rand() % ((width / 2) - (width / 5) + 1)) + (width / 5);
+    int room_height =
+        (rand() % ((height / 2) - (height / 5) + 1)) + (width / 5);
+    for (int j = 0; j < 50; j++) {
+      // random position
+      bool placable = true;
+      int x = rand() % (width - room_width) + 1;
+      int y = rand() % (height - room_height) + 1;
+      // checking if the room is placeble
+      for (int l = 0; l < room_height; l++) {
+        for (int f = 0; f < room_width; f++) {
+          if (output[l + y][x + f] != kEmpty) {
+            placable = false;
+          }
+        }
+      }
+      if (placable) {
+        for (int l = -1; l < room_height + 1; l++) {
+          for (int f = -1; f < room_width + 1; f++) {
+            if (l < 0 || l >= room_height || f < 0 || f >= room_width) {
+              if ((l + y) > 0 && (l + y) < height - 1 && (f + x) > 0 &&
+                  (f + x) < width - 1) {
+                output[l + y][x + f] = kNextToArea;
+              }
+            } else {
+              output[l + y][x + f] = kArea;
+            }
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  // corridor generation
+  std::vector<SDL_Point> starting_points = {};
+  // getting a list of possible starting points
+  for (int i = 1; i < output.size() - 2; i++) {
+    for (int j = 1; j < output[i].size() - 2; j++) {
+      if (output[i][j] == kEmpty) {
+        int startable = false;
+        for (SDL_Point pos : GetSurroundingCells(j, i)) {
+          if (output[pos.y][pos.x] == kEmpty ||
+              output[pos.y][pos.x] == kNextToArea) {
+            startable++;
+          }
+        }
+        if (startable == 4) {
+          starting_points.push_back({j, i});
+        }
+      }
+    }
+  }
+  while (starting_points.size() != 0) {
+    // getting a starting point
+    SDL_Point starting_point = starting_points[rand() % starting_points.size()];
+
+    // staring maze generation algorithim
+    std::stack<SDL_Point> pos;
+    pos.push(starting_point);
+
+    while (!pos.empty()) {
+      std::stack<Vector> directions;
+      output[pos.top().y][pos.top().x] = kCorridor;
+      // left
+      if (pos.top().x > 1) {
+        if (output[pos.top().y][pos.top().x - 1] == kEmpty &&
+            output[pos.top().y][pos.top().x - 2] != kCorridor &&
+            output[pos.top().y + 1][pos.top().x - 1] != kCorridor &&
+            output[pos.top().y - 1][pos.top().x - 1] != kCorridor) {
+          directions.push({-1, 0});
+        }
+      }
+      // right
+      if (pos.top().x < width - 2) {
+        if (output[pos.top().y][pos.top().x + 1] == kEmpty &&
+            output[pos.top().y][pos.top().x + 2] != kCorridor &&
+            output[pos.top().y + 1][pos.top().x + 1] != kCorridor &&
+            output[pos.top().y - 1][pos.top().x + 1] != kCorridor) {
+          directions.push({1, 0});
+        }
+      }
+      // up
+      if (pos.top().y > 1) {
+        if (output[pos.top().y - 1][pos.top().x] == kEmpty &&
+            output[pos.top().y - 2][pos.top().x] != kCorridor &&
+            output[pos.top().y - 1][pos.top().x + 1] != kCorridor &&
+            output[pos.top().y - 1][pos.top().x - 1] != kCorridor) {
+          directions.push({0, -1});
+        }
+      }
+      // down
+      if (pos.top().y < height - 2) {
+        if (output[pos.top().y + 1][pos.top().x] == kEmpty &&
+            output[pos.top().y + 2][pos.top().x] != kCorridor &&
+            output[pos.top().y + 1][pos.top().x + 1] != kCorridor &&
+            output[pos.top().y + 1][pos.top().x - 1] != kCorridor) {
+          directions.push({0, 1});
+        }
+      }
+      if (directions.empty()) {
+        pos.pop();
+      } else {
+        if (directions.size() - 1 != 0) {
+          int length = rand() % directions.size() - 1;
+          for (int i = 0; i < length; i++) {
+            directions.pop();
+          }
+        }
+        SDL_Point next = {(pos.top().x + directions.top().x),
+                          (pos.top().y + directions.top().y)};
+        pos.push(next);
+      }
+    }
+    starting_points = {};
+    for (int i = 1; i < output.size() - 2; i++) {
+      for (int j = 1; j < output[i].size() - 2; j++) {
+        if (output[i][j] == kEmpty) {
+          int startable = false;
+          for (SDL_Point pos : GetSurroundingCells(j, i)) {
+            if (output[pos.y][pos.x] == kEmpty ||
+                output[pos.y][pos.x] == kNextToArea) {
+              startable++;
+            }
+          }
+          if (startable == 4) {
+            starting_points.push_back({j, i});
+          }
+        }
+      }
+    }
+  }
+  // doorways
+  std::stack<SDL_Point> group;
+  unsigned int group_counter = 0;
+
+  // horizontal
+  for (int y = 1; y < output.size() - 2; y++) {
+    for (int x = 1; x < output[0].size() - 2; x++) {
+      int area = 0;
+      int corridor = 0;
+      // checking if the cell is a potential doorway
+      std::vector<SDL_Point> cells = GetSurroundingCells(x, y);
+      for (int i = 0; i < 4; i += 2) {
+        SDL_Point point = cells[i];
+        if (output[point.y][point.x] == kArea) {
+          area++;
+        }
+        if (output[point.y][point.x] == kCorridor) {
+          corridor++;
+        }
+      }
+      if ((area >= 2 || (area + corridor >= 2 && corridor == 1)) &&
+          (output[y][x] == kEmpty || output[y][x] == kNextToArea)) {
+        // to figure out where the door should be placed
+        if (!group.empty()) {
+          if (group.top().x == x - 1) {
+            group_counter++;
+            group.push({x, y});
+          } else {
+            if (group_counter > 0) {
+              int length = rand() % group_counter + 1;
+              if (length != 0) {
+                for (int i = 0; i < length; i++) {
+                  group.pop();
+                }
+              }
+              output[group.top().y][group.top().x] = kDoor;
+              length = group.size();
+              for (int i = 0; i < length; i++) {
+                group.pop();
+              }
+              group_counter = 0;
+              group.push({x, y});
+            } else {
+              output[group.top().y][group.top().x] = kDoor;
+              group.pop();
+              group.push({x, y});
+            }
+          }
+        } else {
+          group.push({x, y});
+        }
+      }
+    }
+  }
+  output[group.top().y][group.top().x] = kDoor;
+  group = {};
+  group_counter = 0;
+  // vertical
+  for (int x = 1; x < output[0].size() - 2; x++) {
+    for (int y = 1; y < output.size() - 2; y++) {
+      int area = 0;
+      int corridor = 0;
+      // checking if the cell is a potential doorway
+      std::vector<SDL_Point> cells = GetSurroundingCells(x, y);
+      for (int i = 1; i < 4; i += 2) {
+        SDL_Point point = cells[i];
+        if (output[point.y][point.x] == kArea) {
+          area++;
+        }
+        if (output[point.y][point.x] == kCorridor) {
+          corridor++;
+        }
+      }
+      if ((area >= 2 || (area + corridor >= 2 && corridor == 1)) &&
+          (output[y][x] == kEmpty || output[y][x] == kNextToArea)) {
+        // to figure out where the door should be placed
+        if (!group.empty()) {
+          if (group.top().y == y - 1) {
+            group_counter++;
+            group.push({x, y});
+          } else {
+            if (group_counter > 0) {
+              int length = rand() % group_counter + 1;
+              if (length != 0) {
+                for (int i = 0; i < length; i++) {
+                  group.pop();
+                }
+              }
+              output[group.top().y][group.top().x] = kDoor;
+              length = group.size();
+              for (int i = 0; i < length; i++) {
+                group.pop();
+              }
+              group_counter = 0;
+              group.push({x, y});
+            } else {
+              output[group.top().y][group.top().x] = kDoor;
+              group.pop();
+              group.push({x, y});
+            }
+          }
+        } else {
+          group.push({x, y});
+        }
+      }
+    }
+  }
+  output[group.top().y][group.top().x] = kDoor;
+
+  // cleanup and dead end deletion
+  int number_of_dead_ends = 1;
+  while (number_of_dead_ends != 0) {
+    number_of_dead_ends = 0;
+    for (int y = 1; y < output.size() - 1; y++) {
+      for (int x = 1; x < output[0].size() - 1; x++) {
+        if (output[y][x] != kEmpty && output[y][x] != kNextToArea) {
+          int sum = 0;
+          for (SDL_Point cell : GetSurroundingCells(x, y)) {
+            if (output[cell.y][cell.x] != kEmpty &&
+                output[cell.y][cell.x] != kNextToArea) {
+              sum++;
+            }
+          }
+          if (sum <= 1) {
+            output[y][x] = kEmpty;
+            number_of_dead_ends++;
+          }
+        }
+      }
+    }
+  }
+  return output;
+}
+
+std::vector<SDL_Point> Room::GetSurroundingCells(int x, int y) {
+  std::vector<SDL_Point> rv = {{x, y - 1}, {x + 1, y}, {x, y + 1}, {x - 1, y}};
+  return rv;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "screen.h"
+
+#include <cmath>
+#include <stack>
+
+#include "enemy.h"
+
+Screen::Screen(int x, int y) {
+  // window creation using SDL
+  win_ = SDL_CreateWindow("Window", x, y, 500, 500, 0);
+  if (win_ == NULL) {
+    std::cout << "Error window creation";
+  }
+  renderer_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
+  if (renderer_ == NULL) {
+    std::cout << "Error renderer creation";
+  }
+  window_id_ = SDL_GetWindowID(win_);
+}
+
+Screen::~Screen() {
+  // clean up to avoid memory leaks
+  SDL_DestroyRenderer(renderer_);
+  SDL_DestroyWindow(win_);
+  for (UIBar* bar : bars_) {
+    delete bar;
+  }
+}
+
+void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
+  // renderer setup
+  SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
+  SDL_RenderClear(renderer_);
+  // update of cam postion if bound to object
+  if (following_) {
+    x_ = following_->GetRect().x;
+    y_ = following_->GetRect().y;
+  }
+  // iterate through all game objects, rendering all if conditions met
+  for (std::vector<GameObject*> type_vector : game_objects) {
+    for (GameObject* obj : type_vector) {
+      // calcuate position on screen
+      SDL_FRect actual_rect = obj->GetRect();
+      SDL_Rect render_rect = {(actual_rect.x - x_ + offset_.first),
+                              (actual_rect.y - y_ + offset_.second),
+                              actual_rect.w, actual_rect.h};
+      // if the object is on screen, then render it
+      if (render_rect.x > -1 * actual_rect.w && render_rect.x < 600 &&
+          render_rect.y > -1 * actual_rect.h && render_rect.y < 600) {
+        // render object on screen
+        obj->rendered_ = true;
+        SDL_Texture* texture =
+            SDL_CreateTextureFromSurface(renderer_, obj->GetSurface());
+        float angle = obj->GetRotation() * (180 / M_PI);
+        SDL_RenderCopyEx(renderer_, texture, NULL, &render_rect, angle,
+                         obj->GetCenter(), SDL_FLIP_NONE);
+        SDL_DestroyTexture(texture);
+        // add eney health bar to list if the bar has not been added to the list before.
+        Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
+        if (enemy_type) {
+          if (!enemy_type->GetBar(this)) {
+            bars_.push_back(enemy_type->CreateBar(this));
+          } else if (std::count(bars_.begin(), bars_.end(),
+                                enemy_type->GetBar(this)) == 0) {
+            bars_.push_back(enemy_type->GetBar(this));
+          }
+          SDL_FRect rect = enemy_type->GetRect();
+          enemy_type->GetBar(this)->SetPos(rect.x - x_ + offset_.first,
+                                           (rect.y + 20) - y_ + offset_.second);
+        }
+      }
+    }
+  }
+  // UI_Bar rendering of bars attached to this screen
+  if (bars_.size() > 0) {
+    std::stack<UIBar*> to_remove;
+    for (auto bar : bars_) {
+      if (!bar) {
+        to_remove.push(bar);
+      } else {
+        SDL_SetRenderDrawColor(renderer_, background_color_.r,
+                               background_color_.g, background_color_.b, 1);
+        SDL_RenderFillRect(renderer_, bar->GetRect());
+        SDL_SetRenderDrawColor(renderer_, bar->GetBar().second.r,
+                               bar->GetBar().second.g, bar->GetBar().second.b,
+                               1);
+        SDL_RenderFillRect(renderer_, bar->GetBar().first);
+      }
+    }
+    SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 1);
+    while (!to_remove.empty()) {
+      bars_.erase(std::remove(bars_.begin(), bars_.end(), to_remove.top()),
+                  bars_.end());
+      to_remove.pop();
+    }
+  }
+  // Update screen
+  SDL_RenderPresent(renderer_);
+}
+
+void Screen::Attach(Player* target) {
+  // set target
+  following_ = target;
+  // set offset so target is centered on screen
+  offset_.first = 250 - following_->GetCenter()->x;
+  offset_.second = 250 - following_->GetCenter()->y;
+  // add the damage bar of the robot to the list of bars 
+  bars_.push_back(following_->GetBar());
+  bars_.back()->SetPos(10, 450);
+}
+UIBar* Screen::AddBar(int max_value, SDL_Color color, SDL_Rect rect,
+                      int value) {
+  std::cout << "addbar" << std::endl;
+  bars_.push_back(new UIBar(max_value, color, rect));
+  bars_.back()->SetValue(value);
+  return bars_.back();
+}
+
+void Screen::RemoveBar(UIBar* bar_to_remove) {
+  std::cout << "killbar" << std::endl;
+  bars_.erase(std::remove(bars_.begin(), bars_.end(), bar_to_remove),
+              bars_.end());
+  delete bar_to_remove;
+}
+
+Player* Screen::GetAttached() { return following_; }
+
+std::vector<UIBar*>* Screen::GetBars() { return &bars_; }
+// Copyright 2024 Hugh Thompson
+
+#include "ship.h"
+
+#include <random>
+
+#include "main.h"
+#include "door.h"
+
+Ship::Ship(std::vector<std::vector<GameObject*>>* game_objects) {
+  game_objects_ = game_objects;
+  // room generation, from 5 to 10 rooms generated
+  for (int i = 0; i < (rand() % 6) + 5; i++) {
+    rooms_.push_back(new Room());
+  }
+  // loads inital room into gameobjects
+  LoadRoom(0);
+}
+
+Ship::~Ship() {
+  for (Room* room : rooms_) {
+    delete room;
+  }
+}
+
+std::pair<int, int> Ship::GetDimensions() {
+  return {rooms_[room_number_]->GetWalls().back()->GetRect().x,
+          rooms_[room_number_]->GetWalls().back()->GetRect().y
+  };
+}
+
+bool Ship::MoveRoom(bool dir) {
+  bool rv = false;
+  int to_be_loaded = room_number_;
+  // increment room if input is positive, decermesemt teh room if negitave.
+  if (dir) {
+    if (room_number_ <= rooms_.size() - 1) {
+      to_be_loaded++;
+    } else {
+      rv = true;
+    }
+  } else {
+    if (room_number_ >= 1) {
+      to_be_loaded--;
+    } else {
+      rv = true;
+    }
+  }
+  // load new room
+  if (to_be_loaded != room_number_) {
+    LoadRoom(to_be_loaded);
+  }
+  return rv;
+}
+
+void Ship::LoadRoom(int room_number) {
+  // deleteing all old wall and door objects
+  game_objects_->at(kWalls).clear();
+  game_objects_->at(kDoors).clear();
+  // removing old enemy objects from game object list
+  game_objects_->at(kEnemies).clear();
+  // upadting room index
+  room_number_ = room_number;
+  Room* room = rooms_[room_number_];
+  // loading in new walls
+  std::vector<GameObject*> walls = room->GetWalls();
+  for (GameObject* obj : walls) {
+    int type = NULL;
+    if (dynamic_cast<Wall*>(obj)) {
+      type = kWalls;
+    }
+    if (dynamic_cast<Door*>(obj)) {
+      type = kDoors;
+    }
+    game_objects_->at(type).push_back(obj);
+  }
+  // loading in enemies
+  for (Enemy* enemy : *rooms_[room_number_]->GetEnemies()) {
+    if (enemy) {
+      game_objects_->at(kEnemies).push_back(enemy);
+    }
+  }
+}
+// Copyright 2024 Hugh Thompson
+
+#include "ui_bar.h"
+
+UIBar::UIBar(int max_value, SDL_Color color, SDL_Rect rect) {
+  rect_ = rect;
+  color_ = color;
+  max_value_ = max_value;
+}
+
+UIBar::~UIBar() {
+  std::cout << "destroyed bar" << std::endl;
+}
+
+void UIBar::SetValue(int value) { value_ = value; }
+
+void UIBar::ChangeValue(float delta_value) {
+  if (value_ < max_value_) {
+    value_ += delta_value;
+  }
+}
+
+std::pair<SDL_Rect*, SDL_Color> UIBar::GetBar() {
+  SDL_Rect bar = {
+      rect_.x + border, rect_.y + border,
+      (rect_.w - (border * static_cast<float>(2))) / max_value_ * value_,
+      rect_.h - (border * 2)};
+  return {&bar, color_};
+}
+
+SDL_Rect* UIBar::GetRect() { return &rect_; }
+
+bool UIBar::Full() { return value_ >= max_value_; }
+
+float UIBar::GetValue() { return value_; }
+
+void UIBar::Move(int x, int y) {
+  rect_.x += x;
+  rect_.y += y;
+}
+
+void UIBar::SetPos(int x, int y) {
+  rect_.x = x;
+  rect_.y = y;
+}
+// Copyright (C) 2024 Hugh Thompson
+
+#include "wall.h"
+
+#include <algorithm>
+#include <cmath>
+
+Wall::Wall(int x, int y) : GameObject(x, y, "wall") {}
+
+bool Wall::Collision(GameObject* obj) {
+  bool rv = false;
+  // if not rendered, no point in wasting memory
+  if (rendered_) {
+    std::pair<bool, bool> move = {false, false};
+    Vector diff = {(obj->GetCenter()->x + obj->GetRect().x) -
+                       (rect_.x + rotation_center_.x),
+                   (obj->GetCenter()->y + obj->GetRect().y) -
+                       (rect_.y + rotation_center_.y)};
+    float circle_distance_x = abs(diff.x);
+    float circle_distance_y = abs(diff.y);
+    int r = obj->GetCenter()->x;
+
+    // checking if the obj is overlapping
+    if (circle_distance_x < (rect_.w / 2 + r)) {
+      if (circle_distance_y < (rect_.h / 2 + r)) {
+        if (circle_distance_x <= (rect_.w / 2)) {
+          // on y axis
+          rv = true;
+          move.second = true;
+        }
+        if (circle_distance_y <= (rect_.h / 2)) {
+          // on x axis
+          rv = true;
+          move.first = true;
+        }
+        float cornerdistance_sq = pow((circle_distance_x - rect_.w / 2), 2) +
+                                  pow((circle_distance_y - rect_.h / 2), 2);
+        // checking overlapping on corner
+        if (cornerdistance_sq <= pow(r, 2)) {
+          rv = true;
+          // only cancel out velocity moving towards object
+          move.first = (obj->GetVelocity().x / abs(obj->GetVelocity().x) !=
+                        diff.x / abs(diff.x));
+          move.second = (obj->GetVelocity().y / abs(obj->GetVelocity().y) !=
+                         diff.y / abs(diff.y));
+        }
+      }
+    }
+    // canceling out motion according to collision
+    obj->Move(obj->GetVelocity().x * -1 * move.first,
+              obj->GetVelocity().y * -1 * move.second);
+  }
+  return rv;
+}
