@@ -51,6 +51,18 @@
     <ClCompile Include="src\door.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\menu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\menu_item.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\menu_button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\menu_text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inculde\vector.h">
@@ -90,6 +102,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inculde\door.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inculde\menu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="menu_button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inculde\menu_text.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inculde\menu_item.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -25,6 +25,10 @@
     <ClCompile Include="src\game_object.cpp" />
     <ClCompile Include="src\gun.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\menu.cpp" />
+    <ClCompile Include="src\menu_button.cpp" />
+    <ClCompile Include="src\menu_item.cpp" />
+    <ClCompile Include="src\menu_text.cpp" />
     <ClCompile Include="src\player.cpp" />
     <ClCompile Include="src\room.cpp" />
     <ClCompile Include="src\screen.cpp" />
@@ -38,7 +42,10 @@
     <ClInclude Include="inculde\enemy.h" />
     <ClInclude Include="inculde\game_object.h" />
     <ClInclude Include="inculde\gun.h" />
+    <ClInclude Include="inculde\menu.h" />
     <ClInclude Include="inculde\main.h" />
+    <ClInclude Include="inculde\menu_item.h" />
+    <ClInclude Include="inculde\menu_text.h" />
     <ClInclude Include="inculde\player.h" />
     <ClInclude Include="inculde\room.h" />
     <ClInclude Include="inculde\screen.h" />
@@ -46,6 +53,7 @@
     <ClInclude Include="inculde\ui_bar.h" />
     <ClInclude Include="inculde\vector.h" />
     <ClInclude Include="inculde\wall.h" />
+    <ClInclude Include="menu_button.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -101,19 +109,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>.\bin\$(Platform)\$(Configuration)\</OutDir>
-    <LibraryPath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\lib\x64;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\lib\x64;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_ttf\lib\x64;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
     <ExternalIncludePath>
     </ExternalIncludePath>
     <SourcePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\src;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\src;$(SourcePath);$(SourcePath)</SourcePath>
-    <IncludePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\inculde;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\inculde;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_ttf\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>.\bin\$(Platform)\$(Configuration)\</OutDir>
     <ExternalIncludePath>
     </ExternalIncludePath>
-    <LibraryPath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\lib\x64;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_ttf\lib\x64;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\lib\x64;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\lib\x64;$(LibraryPath)</LibraryPath>
     <SourcePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\src;$(VC_SourcePath);;$(SourcePath)</SourcePath>
-    <IncludePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\inculde;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_image\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2\include;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\inculde;C:\Users\hughb\Documents\Dev\splitscreen\splitscreen\libs\SDL2_ttf\include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -173,7 +181,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
