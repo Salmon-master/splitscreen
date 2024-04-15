@@ -3,6 +3,7 @@
 #include "main.h"
 
 #include <SDL.h>
+#include <SDL_TTF.h>
 
 #include <iostream>
 #include <stack>
@@ -12,12 +13,21 @@
 #include "enemy.h"
 #include "game_object.h"
 #include "gun.h"
+#include "menu.h"
+#include "menu_button.h"
+#include "menu_text.h"
 #include "player.h"
 #include "room.h"
 #include "screen.h"
 #include "ship.h"
 #include "ui_bar.h"
 #include "wall.h"
+
+Menu* menu = new Menu;
+bool menu_run = true;
+MenuText* credits = new MenuText(0, 0, "Credits : ¢1000");
+void HideCredits() { credits->Hide(); };
+MenuButton* credit_button = new MenuButton({100, 100, 100, 30}, &HideCredits, nullptr);
 
 int main(int argc, char* args[]) {
   srand(time(0));
@@ -27,10 +37,27 @@ int main(int argc, char* args[]) {
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     printf("error initializing SDL: %s\n", SDL_GetError());
   }
+  SDL_Event e;
+  // menu
+  menu->menu_items_ = {credits, credit_button};
+  while (menu_run) {
+    if (SDL_PollEvent(&e)) {
+      if (e.type == SDL_QUIT) {
+        menu_run = false;
+      }
+      if (e.type == SDL_KEYDOWN) {
+        if (e.key.keysym.sym == SDLK_ESCAPE) {
+          menu_run = false;
+        }
+      }
+    }
+    menu->Render();
+  }
+  menu->ChangeVisability();
+
   // creating windows
   Screen screen1(100, 250);
   Screen screen2(600, 250);
-  SDL_Event e;
   UIBar* swtich_bar = nullptr;
 
   // game object intitilastion
@@ -46,6 +73,7 @@ int main(int argc, char* args[]) {
 
   // testing code
   Ship ship1(&game_objects);
+
   // eniemies
   // assign players to screens
   screen2.Attach(&player2);
@@ -73,6 +101,9 @@ int main(int argc, char* args[]) {
           if (bullet) {
             game_objects[kBullets].push_back(bullet);
           }
+        }
+        if (e.key.keysym.sym == SDLK_ESCAPE) {
+          run = false;
         }
       }
     }
@@ -227,5 +258,6 @@ int main(int argc, char* args[]) {
     }
   }
   SDL_Quit();
+  delete menu;
   return 0;
 }

@@ -40,6 +40,7 @@
     <ClInclude Include="inculde\bullet.h" />
     <ClInclude Include="inculde\door.h" />
     <ClInclude Include="inculde\enemy.h" />
+    <ClInclude Include="inculde\functions.h" />
     <ClInclude Include="inculde\game_object.h" />
     <ClInclude Include="inculde\gun.h" />
     <ClInclude Include="inculde\menu.h" />
@@ -162,7 +163,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
