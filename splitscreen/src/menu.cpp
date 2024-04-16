@@ -4,7 +4,6 @@
 
 #include "menu_button.h"
 
-
 Menu::Menu() {
   // window creation using SDL
   win_ = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED,
@@ -19,6 +18,7 @@ Menu::Menu() {
   if (TTF_Init() < 0) {
     std::cout << "Error initializing SDL_ttf: " << TTF_GetError();
   }
+  SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
 }
 
 Menu::~Menu() {
@@ -33,19 +33,32 @@ void Menu::Render() {
   SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
   SDL_RenderClear(renderer_);
   for (MenuItem* item : menu_items_) {
-    item->Update();
-    if (item->Visable()) {
-      if (item->GetColor().r) {
-        SDL_SetRenderDrawColor(renderer_, item->GetColor().r, item->GetColor().g,
-                               item->GetColor().b, 1);
-        SDL_RenderFillRect(renderer_, item->GetRect());
-        SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
-      }
-      if (item->GetSurface()) {
-        SDL_Texture* texture =
-            SDL_CreateTextureFromSurface(renderer_, item->GetSurface());
-        SDL_RenderCopy(renderer_, texture, NULL, item->GetRect());
-        SDL_DestroyTexture(texture);
+    if (item) {
+      item->Update();
+      if (item->Visable()) {
+        if (item->GetColor().r) {
+          SDL_SetRenderDrawColor(renderer_, item->GetColor().r,
+                                 item->GetColor().g, item->GetColor().b,
+                                 item->GetColor().a);
+          SDL_RenderFillRect(renderer_, item->GetRect());
+          SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
+        }
+        if (item->GetSurface()) {
+          SDL_Texture* texture =
+              SDL_CreateTextureFromSurface(renderer_, item->GetSurface());
+          SDL_RenderCopy(renderer_, texture, NULL, item->GetRect());
+          SDL_DestroyTexture(texture);
+        }
+        MenuButton* button = dynamic_cast<MenuButton*>(item);
+        if (button) {
+          MenuItem* display = button->GetDisplay();
+          if (display) {
+            SDL_Texture* texture =
+                SDL_CreateTextureFromSurface(renderer_, display->GetSurface());
+            SDL_RenderCopy(renderer_, texture, NULL, display->GetRect());
+            SDL_DestroyTexture(texture);
+          }
+        }
       }
     }
   }

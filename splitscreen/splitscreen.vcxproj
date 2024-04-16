@@ -27,6 +27,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\menu.cpp" />
     <ClCompile Include="src\menu_button.cpp" />
+    <ClCompile Include="src\menu_image.cpp" />
     <ClCompile Include="src\menu_item.cpp" />
     <ClCompile Include="src\menu_text.cpp" />
     <ClCompile Include="src\player.cpp" />
@@ -40,11 +41,12 @@
     <ClInclude Include="inculde\bullet.h" />
     <ClInclude Include="inculde\door.h" />
     <ClInclude Include="inculde\enemy.h" />
-    <ClInclude Include="inculde\functions.h" />
+    <ClInclude Include="inculde\menu_items.h" />
     <ClInclude Include="inculde\game_object.h" />
     <ClInclude Include="inculde\gun.h" />
     <ClInclude Include="inculde\menu.h" />
     <ClInclude Include="inculde\main.h" />
+    <ClInclude Include="inculde\menu_image.h" />
     <ClInclude Include="inculde\menu_item.h" />
     <ClInclude Include="inculde\menu_text.h" />
     <ClInclude Include="inculde\player.h" />
@@ -55,6 +57,9 @@
     <ClInclude Include="inculde\vector.h" />
     <ClInclude Include="inculde\wall.h" />
     <ClInclude Include="menu_button.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\menu\player.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

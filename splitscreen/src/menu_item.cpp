@@ -24,3 +24,8 @@ MenuItem::MenuItem(int x, int y) {
   rect_.x = x;
   rect_.y = y;
 }
+
+MenuItem::MenuItem(SDL_Rect rect, SDL_Color color) {
+  rect_ = rect;
+  color_ = color;
+}

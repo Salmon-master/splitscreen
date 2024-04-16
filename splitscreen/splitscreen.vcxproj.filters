@@ -63,6 +63,9 @@
     <ClCompile Include="src\menu_text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\menu_image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inculde\vector.h">
@@ -116,8 +119,16 @@
     <ClInclude Include="inculde\menu_item.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inculde\functions.h">
+    <ClInclude Include="inculde\menu_items.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inculde\menu_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\menu\player.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

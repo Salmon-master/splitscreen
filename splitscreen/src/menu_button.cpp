@@ -1,33 +1,48 @@
 #include "menu_button.h"
 
-MenuButton::MenuButton(SDL_Rect rect, void (*Func)(), MenuItem* display)
+#include "iostream"
+
+MenuButton::MenuButton(SDL_Rect rect, void (*Click)(), void (*Hover)(bool dir),
+                       MenuItem* display)
     : MenuItem(rect.x, rect.y) {
-  if (!display) {
-    rect_ = rect;
-  }
-  OnClick = Func;
+  rect_ = rect;
+  OnClick = Click;
+  OnHover = Hover;
   display_ = display;
-  color_ = {60, 60, 60};
+  if (display_) {
+    display_->GetRect()->x = rect_.x;
+    display_->GetRect()->y = rect_.y;
+  }
+  color_ = {60, 60, 60, 255};
 }
+
+MenuButton::~MenuButton() { delete display_; }
 
 void MenuButton::Update() {
   int x, y;
   SDL_GetMouseState(&x, &y);
-  if (x > rect_.x && x < rect_.x + rect_.w && y > rect_.y &&
-      y < rect_.y + rect_.h) {
-    SDL_Event e;
-    if (SDL_PollEvent(&e)) {
-      if (e.type == SDL_MOUSEBUTTONDOWN) {
-        Clicked();
-      } else {
-        Hover();
+  if (visable_) {
+    if (x > rect_.x && x < rect_.x + rect_.w && y > rect_.y &&
+        y < rect_.y + rect_.h) {
+      SDL_Event e;
+      color_ = {220, 20, 20, 255};
+      if (OnHover) {
+        OnHover(true);
       }
+      if (SDL_PollEvent(&e)) {
+        if (e.type == SDL_MOUSEBUTTONDOWN) {
+          if (OnClick) {
+            OnClick();
+          }
+        }
+      }
+    } else {
+      if (OnHover) {
+        OnHover(false);
+      }
+      color_ = {60, 60, 60, 255};
     }
-  } else {
-    color_ = {60, 60, 60};
   }
 }
 
-void MenuButton::Clicked() { OnClick(); }
-
-void MenuButton::Hover() { color_ = {20, 20, 20}; }
+MenuItem* MenuButton::GetDisplay() { return display_; }

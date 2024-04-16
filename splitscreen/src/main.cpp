@@ -15,6 +15,8 @@
 #include "gun.h"
 #include "menu.h"
 #include "menu_button.h"
+#include "menu_image.h"
+#include "menu_items.h"
 #include "menu_text.h"
 #include "player.h"
 #include "room.h"
@@ -23,11 +25,7 @@
 #include "ui_bar.h"
 #include "wall.h"
 
-Menu* menu = new Menu;
 bool menu_run = true;
-MenuText* credits = new MenuText(0, 0, "Credits : ¢1000");
-void HideCredits() { credits->Hide(); };
-MenuButton* credit_button = new MenuButton({100, 100, 100, 30}, &HideCredits, nullptr);
 
 int main(int argc, char* args[]) {
   srand(time(0));
@@ -39,7 +37,11 @@ int main(int argc, char* args[]) {
   }
   SDL_Event e;
   // menu
-  menu->menu_items_ = {credits, credit_button};
+  menu->menu_items_ = {
+      player1_image, player2_image, player1_gun1,   player1_gun2, player1_gun3,
+      player1_gun4,  player1_gun5,  player2_gun1,   player2_gun2, player2_gun3,
+      player2_gun4,  player2_gun5,  player1_overlay};
+  player1_overlay->Hide();
   while (menu_run) {
     if (SDL_PollEvent(&e)) {
       if (e.type == SDL_QUIT) {
@@ -51,7 +53,15 @@ int main(int argc, char* args[]) {
         }
       }
     }
+    SDL_Rect rect = *player1_overlay->GetRect();
+    int x, y;
+    SDL_GetMouseState(&x, &y);
+    if (!(x > rect.x && x < rect.x + rect.w && y > rect.y &&
+        y < rect.y + rect.h)) {
+      OverlayHide();
+    }
     menu->Render();
+    SDL_Delay(10);
   }
   menu->ChangeVisability();
 

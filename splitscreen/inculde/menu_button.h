@@ -5,12 +5,13 @@
 
 class MenuButton : public MenuItem {
  public:
-  MenuButton(SDL_Rect rect, void (*Func)(), MenuItem* display);
+  MenuButton(SDL_Rect rect, void (*Click)(), void (*Hover)(bool dir), MenuItem* display);
+  ~MenuButton();
   void Update();
-  void Clicked();
-  void Hover();
+  MenuItem* GetDisplay();
  private:
-  void (*OnClick)();
+  void (*OnClick)() = NULL;
+  void (*OnHover)(bool dir) = NULL;
   MenuItem* display_ = nullptr;
 };
 

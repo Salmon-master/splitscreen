@@ -8,6 +8,7 @@
 class MenuItem {
  public:
   MenuItem(int x, int y);
+  MenuItem(SDL_Rect rect, SDL_Color color);
   SDL_Rect* GetRect();
   SDL_Surface* GetSurface();
   void Show();
