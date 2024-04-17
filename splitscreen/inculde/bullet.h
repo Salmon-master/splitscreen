@@ -13,7 +13,7 @@ class Player;
 // a class used to represent an in game bullet
 class Bullet : public GameObject {
  public:
-  Bullet(GameObject* shooter, int damage);
+  Bullet(GameObject* shooter, int damage, int speed);
   // used in main game loop to step the bullet foward by veclocity and check for
   // collisions between the current list of gameobjects(input)
   bool Update(std::vector<std::vector<GameObject*>>* objects);

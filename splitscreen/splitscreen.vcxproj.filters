@@ -110,9 +110,6 @@
     <ClInclude Include="inculde\menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="menu_button.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inculde\menu_text.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -123,6 +120,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inculde\menu_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inculde\menu_button.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -38,9 +38,17 @@ int main(int argc, char* args[]) {
   SDL_Event e;
   // menu
   menu->menu_items_ = {
-      player1_image, player2_image, player1_gun1,   player1_gun2, player1_gun3,
-      player1_gun4,  player1_gun5,  player2_gun1,   player2_gun2, player2_gun3,
-      player2_gun4,  player2_gun5,  player1_overlay};
+      player1_image,     player2_image,          player1_gun1,
+      player1_gun2,      player1_gun3,           player1_gun4,
+      player1_gun5,      player2_gun1,           player2_gun2,
+      player2_gun3,      player2_gun4,           player2_gun5,
+      player1_overlay,   player1_upgrade_weapon, player1_gun1_text,
+      player1_gun2_text, player1_gun3_text,      player1_gun4_text,
+      player1_gun5_text, player2_overlay,        player2_upgrade_weapon,
+      player2_gun1_text, player2_gun2_text,      player2_gun3_text,
+      player2_gun4_text, player2_gun5_text,      p1_speed,
+      p1_armour,         p1_upgrade_speed,       p1_upgrade_armour,
+      p1_repair};
   player1_overlay->Hide();
   while (menu_run) {
     if (SDL_PollEvent(&e)) {
@@ -57,8 +65,13 @@ int main(int argc, char* args[]) {
     int x, y;
     SDL_GetMouseState(&x, &y);
     if (!(x > rect.x && x < rect.x + rect.w && y > rect.y &&
-        y < rect.y + rect.h)) {
-      OverlayHide();
+          y < rect.y + rect.h)) {
+      Overlay1Hide();
+    }
+    SDL_Rect rect2 = *player2_overlay->GetRect();
+    if (!(x > rect2.x && x < rect2.x + rect2.w && y > rect2.y &&
+          y < rect2.y + rect2.h)) {
+      Overlay2Hide();
     }
     menu->Render();
     SDL_Delay(10);

@@ -10,14 +10,19 @@
 // a class used to represnet text in the menu screens 
 class MenuText : public MenuItem {
  public:
-  MenuText(int x, int y, std::string text, SDL_Color text_color);
+  MenuText(std::string text, SDL_Color text_color, int size);
+  MenuText(int x, int y, std::string text, SDL_Color text_color, int size);
   void Update();
+  void SetWrap(int wrap);
+  void SetText(std::string text);
 
  private:
-  TTF_Font* font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", 28);
+  TTF_Font* font_ = nullptr;
   std::string text_;
   std::string last_text_;
-  SDL_Color text_color_ = {0, 0, 0};
+  SDL_Color text_color_ = {0, 0, 0, 255};
+  int wrap_ = NULL;
+  int size_ = 28;
 };
 
 #endif  // !MENU_TEXT_H_

@@ -8,7 +8,7 @@
 #include "main.h"
 #include "wall.h"
 
-Bullet::Bullet(GameObject* shooter, int damage)
+Bullet::Bullet(GameObject* shooter, int damage, int speed)
     : GameObject(
           shooter->GetCenter()->x + shooter->GetRect().x +
               (sin(shooter->GetRotation()) * shooter->GetCenter()->y),
@@ -23,6 +23,7 @@ Bullet::Bullet(GameObject* shooter, int damage)
   // setting bullet properties
   damage_ = damage;
   shooter_ = shooter;
+  speed_ = speed;
 }
 
 bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {

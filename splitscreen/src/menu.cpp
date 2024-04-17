@@ -53,6 +53,7 @@ void Menu::Render() {
         if (button) {
           MenuItem* display = button->GetDisplay();
           if (display) {
+            display->Update();
             SDL_Texture* texture =
                 SDL_CreateTextureFromSurface(renderer_, display->GetSurface());
             SDL_RenderCopy(renderer_, texture, NULL, display->GetRect());

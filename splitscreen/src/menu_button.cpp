@@ -2,6 +2,8 @@
 
 #include "iostream"
 
+#include "menu_text.h"
+
 MenuButton::MenuButton(SDL_Rect rect, void (*Click)(), void (*Hover)(bool dir),
                        MenuItem* display)
     : MenuItem(rect.x, rect.y) {
@@ -10,8 +12,12 @@ MenuButton::MenuButton(SDL_Rect rect, void (*Click)(), void (*Hover)(bool dir),
   OnHover = Hover;
   display_ = display;
   if (display_) {
-    display_->GetRect()->x = rect_.x;
-    display_->GetRect()->y = rect_.y;
+    display_->GetRect()->x = rect_.x + ((rect.w - display_->GetRect()->w) / 2);
+    display_->GetRect()->y = rect_.y + ((rect.h - display_->GetRect()->h) / 2);
+    MenuText* text = dynamic_cast<MenuText*>(display_);
+    if (text) {
+      text->SetWrap(rect_.w);
+    }
   }
   color_ = {60, 60, 60, 255};
 }
