@@ -17,6 +17,7 @@ class Menu {
   void Render();
   void ChangeVisability();
   std::vector<MenuItem*> menu_items_ = {};
+  Menu(int x, int y);
 
  private:
   // SDL window data

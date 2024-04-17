@@ -7,7 +7,7 @@
 Menu::Menu() {
   // window creation using SDL
   win_ = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED,
-                          SDL_WINDOWPOS_CENTERED, 750, 500, 0);
+                          SDL_WINDOWPOS_CENTERED, 750, 465, 0);
   if (win_ == NULL) {
     std::cout << "Error window creation";
   }
@@ -43,25 +43,26 @@ void Menu::Render() {
           SDL_RenderFillRect(renderer_, item->GetRect());
           SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
         }
+        SDL_Texture* texture = nullptr;
         if (item->GetSurface()) {
-          SDL_Texture* texture =
-              SDL_CreateTextureFromSurface(renderer_, item->GetSurface());
+          texture = SDL_CreateTextureFromSurface(renderer_, item->GetSurface());
           SDL_RenderCopy(renderer_, texture, NULL, item->GetRect());
-          SDL_DestroyTexture(texture);
         }
         MenuButton* button = dynamic_cast<MenuButton*>(item);
         if (button) {
           MenuItem* display = button->GetDisplay();
           if (display) {
             display->Update();
-            SDL_Texture* texture =
+            texture =
                 SDL_CreateTextureFromSurface(renderer_, display->GetSurface());
             SDL_RenderCopy(renderer_, texture, NULL, display->GetRect());
             SDL_DestroyTexture(texture);
           }
         }
+        SDL_DestroyTexture(texture);
       }
     }
+    std::cout << "a" << std::endl;
   }
   SDL_RenderPresent(renderer_);
 }
@@ -73,4 +74,21 @@ void Menu::ChangeVisability() {
     SDL_ShowWindow(win_);
   }
   visability_ != visability_;
+}
+
+Menu::Menu(int x, int y) {
+  // window creation using SDL
+  win_ = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED,
+                          SDL_WINDOWPOS_CENTERED, x, y, 0);
+  if (win_ == NULL) {
+    std::cout << "Error window creation";
+  }
+  renderer_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
+  if (renderer_ == NULL) {
+    std::cout << "Error renderer creation";
+  }
+  if (TTF_Init() < 0) {
+    std::cout << "Error initializing SDL_ttf: " << TTF_GetError();
+  }
+  SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
 }

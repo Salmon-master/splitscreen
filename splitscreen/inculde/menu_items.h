@@ -8,6 +8,53 @@
 
 Menu* menu = new Menu;
 
+MenuButton* play =
+    new MenuButton({25, 210, 200, 70}, NULL, NULL,
+                   new MenuText("Play", {255, 255, 255, 255}, 60));
+MenuButton* quit =
+    new MenuButton({25, 340, 200, 50}, NULL, NULL,
+                   new MenuText("Quit", {255, 255, 255, 255}, 40));
+void Tutorial() {
+  Menu* popup = new Menu(600, 400);
+  bool popup_run = true;
+  SDL_Event e;
+  MenuText* text = new MenuText(
+      25, 25,
+      "Naviagte your way though enemy spaceships using your two robots, if an "
+      "eniter ship is cleared, you will receive a reward! The catch is however "
+      "that you may only control one of your robots at a time.\n\n To switch "
+      "between which robot you are controlling press v.\n to control your "
+      "currently selected robot, use a and d to rotate the robot and w to move "
+      "fowards and space to shoot\n\n to clear a ship, you will need to "
+      "progress through a number of rooms, to do this you must defeat all "
+      "enemies in that room, and then navigate through to the bottom right "
+      "hand corner of the room to progress to the next stage",
+      {0, 0, 0, 255}, 16);
+  text->SetWrap(550);
+  popup->menu_items_ = {text};
+  while (popup_run) {
+    if (SDL_PollEvent(&e)) {
+      if (e.type == SDL_QUIT) {
+        popup_run = false;
+      }
+      if (e.type == SDL_KEYDOWN) {
+        if (e.key.keysym.sym == SDLK_ESCAPE) {
+          popup_run = false;
+        }
+      }
+    }
+    popup->Render();
+  }
+  delete popup;
+}
+MenuButton* how =
+    new MenuButton({25, 285, 200, 50}, NULL, NULL,
+                   new MenuText("How To", {255, 255, 255, 255}, 40));
+
+MenuText* title = new MenuText(25, 75, "Conscience", {255, 0, 0, 255}, 26);
+
+MenuText* credits = new MenuText(25, 174, "Cr: ¢1000000", {0, 0, 0, 255}, 26);
+
 // overlay for p1 gun menu
 int player1_selector = NULL;
 MenuItem* player1_overlay =
@@ -27,7 +74,7 @@ MenuImage* player1_image = new MenuImage(314, 100, "player");
 
 // p1 gun 1
 MenuText* player1_gun1_text =
-    new MenuText(314, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost: 100",
+    new MenuText(314, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost:¢100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover11(bool dir) {
   player1_gun1_text->SetWrap(112);
@@ -43,7 +90,7 @@ MenuButton* player1_gun1 =
 
 // p1 gun 2
 MenuText* player1_gun2_text =
-    new MenuText(314, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost: 100",
+    new MenuText(314, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover12(bool dir) {
   player1_gun2_text->SetWrap(112);
@@ -59,7 +106,7 @@ MenuButton* player1_gun2 =
 
 // p1 gun 3
 MenuText* player1_gun3_text =
-    new MenuText(314, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost: 100",
+    new MenuText(314, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover13(bool dir) {
   player1_gun3_text->SetWrap(112);
@@ -75,7 +122,7 @@ MenuButton* player1_gun3 =
 
 // p1 gun 4
 MenuText* player1_gun4_text =
-    new MenuText(314, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost: 100",
+    new MenuText(314, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover14(bool dir) {
   player1_gun4_text->SetWrap(112);
@@ -91,7 +138,7 @@ MenuButton* player1_gun4 =
 
 // p1 gun 5
 MenuText* player1_gun5_text =
-    new MenuText(314, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost: 100",
+    new MenuText(314, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover15(bool dir) {
   player1_gun5_text->SetWrap(112);
@@ -118,13 +165,14 @@ void Overlay1Hide() {
 }
 
 // p1 upgrades
-MenuText* p1_speed = new MenuText(274, 75, "S: 500", {0,0,0,255}, 20);
+MenuText* p1_speed = new MenuText(274, 75, "S: 500", {0, 0, 0, 255}, 20);
 MenuText* p1_armour = new MenuText(360, 75, "A: 500", {0, 0, 0, 255}, 20);
 
 void ShowPriceP1Speed(bool dir);
-MenuButton* p1_upgrade_speed = new MenuButton(
-    {274, 299, 80, 35}, NULL, ShowPriceP1Speed, new MenuText("Speed+", {255, 255, 255, 255}, 15));
-void ShowPriceP1Speed(bool dir){
+MenuButton* p1_upgrade_speed =
+    new MenuButton({274, 299, 80, 35}, NULL, ShowPriceP1Speed,
+                   new MenuText("Speed+", {255, 255, 255, 255}, 15));
+void ShowPriceP1Speed(bool dir) {
   MenuText* text = dynamic_cast<MenuText*>(p1_upgrade_speed->GetDisplay());
   if (dir) {
     text->SetText("¢1000");
@@ -159,16 +207,11 @@ void ShowPriceP1Repair(bool dir) {
   }
 }
 
+MenuItem* p1_damagebar = new MenuItem({274, 379, 100, 11}, {110, 59, 173, 255});
+MenuItem* p1_damagebar_bkg =
+    new MenuItem({274, 379, 165, 11}, {26, 34, 38, 255});
 
-
-
-
-
-
-
-
-
-// p2
+// player two
 int player2_selector = NULL;
 MenuItem* player2_overlay =
     new MenuItem({554, 100, 132, 188}, SDL_Color{30, 30, 30, 120});
@@ -187,7 +230,7 @@ MenuImage* player2_image = new MenuImage(564, 100, "player");
 
 // p2 gun 1
 MenuText* player2_gun1_text =
-    new MenuText(564, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost: 100",
+    new MenuText(564, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost:¢100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover21(bool dir) {
   player2_gun1_text->SetWrap(112);
@@ -203,7 +246,7 @@ MenuButton* player2_gun1 =
 
 // 21 gun 2
 MenuText* player2_gun2_text =
-    new MenuText(564, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost: 100",
+    new MenuText(564, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover22(bool dir) {
   player2_gun2_text->SetWrap(112);
@@ -219,7 +262,7 @@ MenuButton* player2_gun2 =
 
 // p2 gun 3
 MenuText* player2_gun3_text =
-    new MenuText(564, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost: 100",
+    new MenuText(564, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover23(bool dir) {
   player2_gun3_text->SetWrap(112);
@@ -235,7 +278,7 @@ MenuButton* player2_gun3 =
 
 // p2 gun 4
 MenuText* player2_gun4_text =
-    new MenuText(564, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost: 100",
+    new MenuText(564, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover24(bool dir) {
   player2_gun4_text->SetWrap(112);
@@ -251,7 +294,7 @@ MenuButton* player2_gun4 =
 
 // p1 gun 5
 MenuText* player2_gun5_text =
-    new MenuText(564, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost: 100",
+    new MenuText(564, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover25(bool dir) {
   player2_gun5_text->SetWrap(112);
@@ -277,3 +320,48 @@ void Overlay2Hide() {
   player2_selector = NULL;
 }
 
+MenuText* p2_speed = new MenuText(524, 75, "S: 500", {0, 0, 0, 255}, 20);
+MenuText* p2_armour = new MenuText(610, 75, "A: 500", {0, 0, 0, 255}, 20);
+
+void ShowPriceP2Speed(bool dir);
+MenuButton* p2_upgrade_speed =
+    new MenuButton({524, 299, 80, 35}, NULL, ShowPriceP2Speed,
+                   new MenuText("Speed+", {255, 255, 255, 255}, 15));
+void ShowPriceP2Speed(bool dir) {
+  MenuText* text = dynamic_cast<MenuText*>(p2_upgrade_speed->GetDisplay());
+  if (dir) {
+    text->SetText("¢1000");
+  } else {
+    text->SetText("Speed+");
+  }
+}
+
+void ShowPriceP2Armour(bool dir);
+MenuButton* p2_upgrade_armour =
+    new MenuButton({607, 299, 80, 35}, NULL, ShowPriceP2Armour,
+                   new MenuText("Armor+", {255, 255, 255, 255}, 15));
+void ShowPriceP2Armour(bool dir) {
+  MenuText* text = dynamic_cast<MenuText*>(p2_upgrade_armour->GetDisplay());
+  if (dir) {
+    text->SetText("¢1000");
+  } else {
+    text->SetText("Armor+");
+  }
+}
+
+void ShowPriceP2Repair(bool dir);
+MenuButton* p2_repair =
+    new MenuButton({524, 339, 165, 35}, NULL, ShowPriceP2Repair,
+                   new MenuText("Repair", {255, 255, 255, 255}, 15));
+void ShowPriceP2Repair(bool dir) {
+  MenuText* text = dynamic_cast<MenuText*>(p2_repair->GetDisplay());
+  if (dir) {
+    text->SetText("¢1000");
+  } else {
+    text->SetText("Repair");
+  }
+}
+
+MenuItem* p2_damagebar = new MenuItem({524, 379, 100, 11}, {110, 59, 173, 255});
+MenuItem* p2_damagebar_bkg =
+    new MenuItem({524, 379, 165, 11}, {26, 34, 38, 255});

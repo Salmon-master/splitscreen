@@ -17,7 +17,7 @@ class MenuText : public MenuItem {
   void SetText(std::string text);
 
  private:
-  TTF_Font* font_ = nullptr;
+  TTF_Font* font_;
   std::string text_;
   std::string last_text_;
   SDL_Color text_color_ = {0, 0, 0, 255};

@@ -37,19 +37,50 @@ int main(int argc, char* args[]) {
   }
   SDL_Event e;
   // menu
-  menu->menu_items_ = {
-      player1_image,     player2_image,          player1_gun1,
-      player1_gun2,      player1_gun3,           player1_gun4,
-      player1_gun5,      player2_gun1,           player2_gun2,
-      player2_gun3,      player2_gun4,           player2_gun5,
-      player1_overlay,   player1_upgrade_weapon, player1_gun1_text,
-      player1_gun2_text, player1_gun3_text,      player1_gun4_text,
-      player1_gun5_text, player2_overlay,        player2_upgrade_weapon,
-      player2_gun1_text, player2_gun2_text,      player2_gun3_text,
-      player2_gun4_text, player2_gun5_text,      p1_speed,
-      p1_armour,         p1_upgrade_speed,       p1_upgrade_armour,
-      p1_repair};
-  player1_overlay->Hide();
+  menu->menu_items_ = {player1_image,
+                       player2_image,
+                       player1_gun1,
+                       player1_gun2,
+                       player1_gun3,
+                       player1_gun4,
+                       player1_gun5,
+                       player2_gun1,
+                       player2_gun2,
+                       player2_gun3,
+                       player2_gun4,
+                       player2_gun5,
+                       player1_overlay,
+                       player1_upgrade_weapon,
+                       player1_gun1_text,
+                       player1_gun2_text,
+                       player1_gun3_text,
+                       player1_gun4_text,
+                       player1_gun5_text,
+                       player2_overlay,
+                       player2_upgrade_weapon,
+                       player2_gun1_text,
+                       player2_gun2_text,
+                       player2_gun3_text,
+                       player2_gun4_text,
+                       player2_gun5_text,
+                       p1_speed,
+                       p1_armour,
+                       p1_upgrade_speed,
+                       p1_upgrade_armour,
+                       p1_repair,
+                       p1_damagebar_bkg,
+                       p1_damagebar,
+                       p2_speed,
+                       p2_armour,
+                       p2_upgrade_speed,
+                       p2_upgrade_armour,
+                       p2_repair,
+                       p2_damagebar_bkg,
+                       p2_damagebar,
+                       play,
+                       title,
+                       quit, how, credits};
+  title->SetWrap(200);
   while (menu_run) {
     if (SDL_PollEvent(&e)) {
       if (e.type == SDL_QUIT) {
@@ -74,7 +105,6 @@ int main(int argc, char* args[]) {
       Overlay2Hide();
     }
     menu->Render();
-    SDL_Delay(10);
   }
   menu->ChangeVisability();
 
