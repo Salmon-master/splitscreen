@@ -48,7 +48,7 @@ void Tutorial() {
   delete popup;
 }
 MenuButton* how =
-    new MenuButton({25, 285, 200, 50}, NULL, NULL,
+    new MenuButton({25, 285, 200, 50}, Tutorial, NULL,
                    new MenuText("How To", {255, 255, 255, 255}, 40));
 
 MenuText* title = new MenuText(25, 75, "Conscience", {255, 0, 0, 255}, 26);

@@ -6,7 +6,7 @@ MenuText::MenuText(std::string text, SDL_Color text_color, int size)
     : MenuItem(0, 0) {
   size_ = size;
   text_ = text;
-  TTF_Font* font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", size);
+  font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", size);
   if (!font_) {
     std::cout << TTF_GetError() << std::endl;
   }
@@ -21,7 +21,7 @@ MenuText::MenuText(int x, int y, std::string text, SDL_Color text_color,
     : MenuItem(x, y) {
   text_ = text;
   size_ = size;
-  TTF_Font* font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", size_);
+  font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", size_);
   if (!font_) {
     std::cout << TTF_GetError() << std::endl;
   }
@@ -32,7 +32,6 @@ MenuText::MenuText(int x, int y, std::string text, SDL_Color text_color,
 }
 
 void MenuText::Update() {
-  TTF_Font* font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", size_);
   if (text_ != last_text_) {
     last_text_ = text_;
     if (wrap_) {

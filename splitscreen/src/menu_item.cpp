@@ -8,7 +8,7 @@ void MenuItem::Show() { visable_ = true; }
 
 void MenuItem::Hide() { visable_ = false; }
 
-void MenuItem::Update() {}
+void MenuItem::Update() { return (void)10; }
 
 SDL_Color MenuItem::GetColor() { return color_; }
 

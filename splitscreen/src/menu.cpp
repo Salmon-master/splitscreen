@@ -56,13 +56,11 @@ void Menu::Render() {
             texture =
                 SDL_CreateTextureFromSurface(renderer_, display->GetSurface());
             SDL_RenderCopy(renderer_, texture, NULL, display->GetRect());
-            SDL_DestroyTexture(texture);
           }
         }
         SDL_DestroyTexture(texture);
       }
     }
-    std::cout << "a" << std::endl;
   }
   SDL_RenderPresent(renderer_);
 }

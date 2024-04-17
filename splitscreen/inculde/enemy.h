@@ -25,8 +25,6 @@ class Enemy : public GameObject {
   // alorightm at https://kidscancode.org/godot_recipes/3.x/ai/context_map/
   void AI(std::vector<std::vector<GameObject*>>* game_objects, int delta);
   UIBar* GetBar(Screen* screen);
-  // used to initailsie the enemies health bar
-  UIBar* CreateBar(Screen* screen);
   ~Enemy();
 
  private:

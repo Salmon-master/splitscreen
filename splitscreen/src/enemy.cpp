@@ -21,6 +21,11 @@ Enemy::Enemy(int x, int y, int type, Room* room)
     float angle = (i * 2 * M_PI) / kNumRays;
     ray_directions_[i] = {cos(angle), sin(angle)};
   }
+  health_bar_ = new UIBar(
+      max_health_, {135, 211, 124},
+      SDL_Rect{static_cast<int>(rect_.x), static_cast<int>(rect_.y - 10),
+               static_cast<int>(rect_.w), 10});
+  health_bar_->SetValue(max_health_);
 }
 
 bool Enemy::Damage(int amount) {
@@ -177,20 +182,6 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
 
 UIBar* Enemy::GetBar(Screen* screen) {
   // add bar to screen's bars if not already on there
-  if (std::count(on_screen_.begin(), on_screen_.end(), screen) == 0) {
-    on_screen_.push_back(screen);
-  }
-  return health_bar_;
-}
-
-UIBar* Enemy::CreateBar(Screen* screen) {
-  // bar initilaisation
-  health_bar_ = new UIBar(
-      max_health_, {135, 211, 124},
-      SDL_Rect{static_cast<int>(rect_.x), static_cast<int>(rect_.y - 10),
-               static_cast<int>(rect_.w), 10});
-  health_bar_->SetValue(max_health_);
-  // if not on screen, add to on screen
   if (std::count(on_screen_.begin(), on_screen_.end(), screen) == 0) {
     on_screen_.push_back(screen);
   }

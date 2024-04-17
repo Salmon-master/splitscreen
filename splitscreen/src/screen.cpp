@@ -60,9 +60,7 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
         // add eney health bar to list if the bar has not been added to the list before.
         Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
         if (enemy_type) {
-          if (!enemy_type->GetBar(this)) {
-            bars_.push_back(enemy_type->CreateBar(this));
-          } else if (std::count(bars_.begin(), bars_.end(),
+          if (std::count(bars_.begin(), bars_.end(),
                                 enemy_type->GetBar(this)) == 0) {
             bars_.push_back(enemy_type->GetBar(this));
           }
