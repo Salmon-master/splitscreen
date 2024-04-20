@@ -13,6 +13,8 @@ Player::Player() : GameObject(0, 0, "player") {
       {static_cast<int>(rect_.x), static_cast<int>(rect_.y), 250, 40});
 }
 
+Player::~Player() { delete gun_; }
+
 void Player::Step(int delta_time) {
   // caluclating the componets of the vector to move given the rotation and
   // speed (scaled by delta time)
@@ -35,7 +37,8 @@ Gun* Player::GetGun() { return gun_; }
 
 bool Player::Damage(int amount) {
   bool rv = false;
-  damage_ += amount;
+  int real_damage = amount - ((amount * armour_) / 100);
+  damage_ += real_damage;
   // conditions based on if the player has reached the maximim damage
   if (damage_ >= 500) {
     rv = true;

@@ -66,6 +66,9 @@
     <ClCompile Include="src\menu_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\save_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inculde\vector.h">
@@ -123,6 +126,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inculde\menu_button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inculde\save_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

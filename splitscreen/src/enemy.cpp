@@ -204,6 +204,7 @@ Enemy::~Enemy() {
                 bars->end());
   }
   delete health_bar_;
+  delete gun_;
 }
 
 std::vector<float> Enemy::SetInterest(Vector direction) {

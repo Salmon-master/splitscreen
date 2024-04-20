@@ -25,6 +25,7 @@ class Menu {
   // SDL renderer data
   SDL_Renderer* renderer_ = nullptr;
   bool visability_ = true;
+  bool border_ = false;
 };
 
 #endif  // !MENU_H_

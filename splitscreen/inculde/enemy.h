@@ -55,7 +55,7 @@ class Enemy : public GameObject {
   // retuns the orenatation of three points, could be either colcokwise(1),
   // anitclockwise(2) or colinear(0)
   int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);
-  // a pointer to the enemies health bar, initiaised in addbar
+  // a pointer to the enemies health bar, initiaised in constructor
   UIBar* health_bar_ = nullptr;
   // wether or not the enenmy is alive
   bool dead_ = false;

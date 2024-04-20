@@ -37,6 +37,14 @@ GameObject::GameObject(int x, int y, std::string name) {
   rotation_center_.y = (rect_.h / 2);
 }
 
+GameObject::~GameObject() {
+  for (std::vector<SDL_Surface*> surfaces : surfaces_) {
+    for (SDL_Surface* surface : surfaces) {
+      SDL_FreeSurface(surface);
+    }
+  }
+}
+
 void GameObject::SetPos(int x, int y) {
   // update postion
   rect_.x = x;

@@ -40,6 +40,7 @@ class GameObject {
 
  public:
   GameObject(int x, int y, std::string name);
+  ~GameObject();
   // location modiying and setting
   void SetPos(int x, int y);
   void Move(float x, float y);

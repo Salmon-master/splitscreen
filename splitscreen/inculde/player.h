@@ -21,9 +21,12 @@ class Player : public GameObject {
   int damage_ = 0;
   // assigned in consturctor
   UIBar* damage_bar_ = nullptr;
+  // armour value, reduces damage taken, from 0 to 100 as a percentage of damage reduced
+  int armour_ = 0;
 
  public:
   Player();
+  ~Player();
   // convert the speed(magnitude) and rotation(angle) into x and y components to
   // feed to parent move function, and then move the player.(smoothed with delta
   // time)
