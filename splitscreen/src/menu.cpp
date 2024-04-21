@@ -33,6 +33,7 @@ void Menu::Render() {
   SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
   SDL_RenderClear(renderer_);
   if (border_) {
+    SDL_RaiseWindow(win_);
     int w, h;
     SDL_GetWindowSize(win_, &w, &h);
     SDL_Rect rect = {0, 0, w, h};

@@ -12,13 +12,14 @@
 #include "screen.h"
 #include "ui_bar.h"
 #include "vector.h"
+#include "save_manager.h"
 
 class Room;
 
 //  a class represneting the enemies in the game
 class Enemy : public GameObject {
  public:
-  Enemy(int x, int y, int type, Room* room);
+  Enemy(int x, int y, int type, Room* room, SaveManager* save);
   // subtract from health, retuns true if health is below 0, false if not
   bool Damage(int amount);
   // calclate the direction the enemy wants to go in, interpritation of

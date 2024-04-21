@@ -9,6 +9,7 @@
 #include "enemy.h"
 #include "SDL.h"
 #include "wall.h"
+#include "save_manager.h"
 
 class Enemy;
 // A class used to represent room with the game, it is composed of wall of
@@ -16,7 +17,7 @@ class Enemy;
 // layout, used as a part of a ship object.
 class Room {
  public:
-  Room();
+  Room(SaveManager* save);
   std::vector<GameObject*> GetWalls();
   std::vector<Enemy*>* GetEnemies();
   // retuns the locations that are empty for enemy spawing, used to spawn

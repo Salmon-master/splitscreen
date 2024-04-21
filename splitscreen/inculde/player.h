@@ -6,6 +6,7 @@
 #include "game_object.h"
 #include "gun.h"
 #include "ui_bar.h"
+#include "save_manager.h"
 
 // foward declations
 class Gun;
@@ -23,9 +24,10 @@ class Player : public GameObject {
   UIBar* damage_bar_ = nullptr;
   // armour value, reduces damage taken, from 0 to 100 as a percentage of damage reduced
   int armour_ = 0;
+  int id_;
 
  public:
-  Player();
+  Player(SaveManager* save, int gun);
   ~Player();
   // convert the speed(magnitude) and rotation(angle) into x and y components to
   // feed to parent move function, and then move the player.(smoothed with delta
@@ -36,11 +38,12 @@ class Player : public GameObject {
   // smoothed by delta time.
   void Rotate(bool direction, int delta_time);
   Gun* GetGun();
-  // called when teh player receives damage, retuns wether or not the player is
+  // called when the player receives damage, retuns wether or not the player is
   // alive.
   bool Damage(int amount);
   UIBar* GetBar();
-
+  bool active_ = true;
+  inline static int new_id_;
 };
 
 #endif  // !PLAYER_H_

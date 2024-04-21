@@ -19,7 +19,8 @@ class Ship {
   // used, sorted by type, so that it may be modified to add, remove and modify
   // game objects from the game, maked explicit as it is a single paramter
   // constuctor
-  explicit Ship(std::vector<std::vector<GameObject*>>* game_objects);
+  Ship(std::vector<std::vector<GameObject*>>* game_objects,
+                SaveManager* save);
   ~Ship();
   // Retuns the dimensions, in px of the current room
   std::pair<int, int> GetDimensions();

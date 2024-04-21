@@ -11,8 +11,8 @@
 #include "door.h"
 #include "vector.h"
 
-Room::Room() {
-  // convereting genretaed map into walls9
+Room::Room(SaveManager* save) {
+  // convereting genretaed map into walls
   std::vector<std::vector<Room::States>> map = Generate();
   for (int y = 0; y < map.size() - 1; y++) {
     for (int x = 0; x < map[0].size() - 1; x++) {
@@ -40,7 +40,7 @@ Room::Room() {
   for (int i = 0; i < size; i++) {
     int random = rand() % free_.size();
     Enemy* enemy =
-        new Enemy(free_[random].first, free_[random].second, 1, this);
+        new Enemy(free_[random].first, free_[random].second, 1, this, save);
     free_.erase(free_.begin() + random);
     enemy->Move(-1 * enemy->GetCenter()->x, -1 * enemy->GetCenter()->y);
     enemies_.push_back(enemy);

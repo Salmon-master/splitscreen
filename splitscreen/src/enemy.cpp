@@ -9,13 +9,13 @@
 #include "main.h"
 #include "wall.h"
 
-Enemy::Enemy(int x, int y, int type, Room* room)
+Enemy::Enemy(int x, int y, int type, Room* room, SaveManager* save)
     : GameObject(x, y, "enemy_" + std::to_string(type)) {
   // var initilaistion
   SetPos(x, y);
   room_ = room;
   rotation_center_.y = (rect_.h - 28);
-  gun_ = new Gun(0, this);
+  gun_ = new Gun(0, this, save);
   // setting up AI
   for (size_t i = 0; i < kNumRays; i++) {
     float angle = (i * 2 * M_PI) / kNumRays;

@@ -46,9 +46,11 @@ void MenuButton::Update() {
       if (OnHover) {
         OnHover(false);
       }
-      color_ = {60, 60, 60, 255};
+      color_ = color_def_;
     }
   }
 }
 
 MenuItem* MenuButton::GetDisplay() { return display_; }
+
+void MenuButton::SetColorDef(SDL_Color color) { color_def_ = color; }

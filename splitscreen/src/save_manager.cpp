@@ -70,17 +70,20 @@ bool SaveManager::UpgradePlayer(bool upgrade, int player) {
   return bought;
 }
 
-bool SaveManager::Repair(int player) {
+int SaveManager::Repair(int player) {
   int index = 1;
   if (player == 2) {
     index = 4;
   }
   int cost = GetRepairCost(player);
-  int bought = false;
+  int bought = 0;
   if (cost <= data_[0]) {
-    data_[index] += 5;
-    data_[0] -= cost;
-    bought = true;
+    bought = 2;
+    if (data_[index] >= 5) {
+      data_[index] -= 5;
+      data_[0] -= cost;
+      bought = 1;
+    }
   }
   return bought;
 }

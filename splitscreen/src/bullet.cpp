@@ -15,15 +15,15 @@ Bullet::Bullet(GameObject* shooter, int damage, int speed)
           shooter->GetCenter()->y + shooter->GetRect().y +
               (cos(shooter->GetRotation()) * shooter->GetCenter()->y * -1),
           "bullet") {
+  // setting bullet properties
+  damage_ = damage;
+  shooter_ = shooter;
+  speed_ = speed;
   // setting kinematic properites
   float x = sin(shooter->GetRotation()) * speed_;
   float y = cos(shooter->GetRotation()) * speed_ * -1;
   rotation_ = shooter->GetRotation();
   velocity_ = {x, y};
-  // setting bullet properties
-  damage_ = damage;
-  shooter_ = shooter;
-  speed_ = speed;
 }
 
 bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
@@ -77,7 +77,6 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
                                (obj->GetCenter()->y + obj->GetRect().y)};
             if (diff.Norm() <= obj->GetCenter()->x) {
               if (player->Damage(damage_)) {
-                to_remove.push(obj);
               }
               destruct = true;
               break;

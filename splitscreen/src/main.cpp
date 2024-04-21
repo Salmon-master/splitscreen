@@ -19,18 +19,16 @@
 #include "menu_text.h"
 #include "player.h"
 #include "room.h"
+#include "save_manager.h"
 #include "screen.h"
 #include "ship.h"
 #include "ui_bar.h"
 #include "wall.h"
-#include "save_manager.h"
 
 bool run = true;
 bool menu_run = true;
 bool game_run = true;
 SaveManager save;
-
-
 
 #include "menu_items.h"
 
@@ -90,6 +88,15 @@ int main(int argc, char* args[]) {
   SDL_Event e;
   while (run) {
     // menu
+    menu->Render();
+    if (death_menu) {
+      MenuText* dead = new MenuText(120, 25, "You Died", {255, 0, 0, 255}, 30);
+      death_menu->menu_items_ = {dead};
+      death_menu->Render();
+      SDL_Delay(3000);
+      delete death_menu;
+      death_menu = nullptr;
+    }
     menu_run = true;
     while (menu_run) {
       if (SDL_PollEvent(&e)) {
@@ -118,15 +125,16 @@ int main(int argc, char* args[]) {
     }
     menu->ChangeVisability();
 
-    if (game_run){
+    if (game_run) {
       // creating windows
       Screen screen1(100, 250);
       Screen screen2(600, 250);
       UIBar* swtich_bar = nullptr;
 
       // game object intitilastion
-      Player player1;
-      Player player2;
+      Player::new_id_ = 1;
+      Player player1(&save, player_1_gun);
+      Player player2(&save, player_2_gun);
       player1.SetPos(256, 256);
       player2.SetPos(256, 256);
 
@@ -136,7 +144,7 @@ int main(int argc, char* args[]) {
       game_objects[kPlayers].push_back(&player2);
 
       // ship
-      Ship ship1(&game_objects);
+      Ship ship1(&game_objects, &save);
 
       // eniemies
       // assign players to screens
@@ -160,12 +168,6 @@ int main(int argc, char* args[]) {
             game_run = false;
           }
           if (e.type == SDL_KEYDOWN) {
-            if (e.key.keysym.sym == SDLK_SPACE) {
-              Bullet* bullet = controlling->GetAttached()->GetGun()->Shoot();
-              if (bullet) {
-                game_objects[kBullets].push_back(bullet);
-              }
-            }
             if (e.key.keysym.sym == SDLK_ESCAPE) {
               game_run = false;
             }
@@ -182,9 +184,11 @@ int main(int argc, char* args[]) {
           controlling->GetAttached()->Rotate(1, delta_time);
         }
         if (key_state[SDL_SCANCODE_SPACE] == 1) {
-          Bullet* bullet = controlling->GetAttached()->GetGun()->Shoot();
-          if (bullet) {
-            game_objects[kBullets].push_back(bullet);
+          if (controlling->GetAttached()->active_) {
+            Bullet* bullet = controlling->GetAttached()->GetGun()->Shoot();
+            if (bullet) {
+              game_objects[kBullets].push_back(bullet);
+            }
           }
         }
         if (key_state[SDL_SCANCODE_V] == 1) {
@@ -217,7 +221,11 @@ int main(int argc, char* args[]) {
             door->Open();
           }
         }
-
+        // death
+        if (!player1.active_ && !player2.active_) {
+          game_run = false;
+          death_menu = new Menu(400, 80);
+        }
         // level advancing
         for (GameObject* obj : game_objects[kPlayers]) {
           Player* player = dynamic_cast<Player*>(obj);

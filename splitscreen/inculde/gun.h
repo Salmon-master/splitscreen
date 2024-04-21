@@ -5,6 +5,7 @@
 
 #include "bullet.h"
 #include "player.h"
+#include "save_manager.h"
 
 class Player;
 class Bullet;
@@ -14,7 +15,7 @@ class Bullet;
 // element of the game.
 class Gun {
  public:
-  Gun(int type, GameObject* holder);
+  Gun(int type, GameObject* holder, SaveManager* save);
   // shoots a bullet in the current direction of the entity holding, returns a
   // pointer to this bullet fired.
   Bullet* Shoot();
