@@ -8,6 +8,7 @@
 
 Menu* menu = new Menu;
 Menu* death_menu = nullptr;
+Menu* reward_menu = nullptr;
 
 void Play() {
   menu_run = false;
@@ -69,8 +70,13 @@ MenuText* title = new MenuText(25, 75, "Conscience", {255, 0, 0, 255}, 26);
 MenuText* credits = new MenuText(
     25, 174, "Cr: ¢" + std::to_string(save.GetCredits()), {0, 0, 0, 255}, 26);
 
+
+
+
+
+
 // player 1
-int player_1_gun = NULL;
+int player_1_gun = 0;
 void reset1();
 // overlay for p1 gun menu
 void Overlay1Hide();
@@ -433,7 +439,7 @@ void Hover22(bool dir) {
     player2_selector = 1;
     player2_gun2_text->Show();
     std::vector<int> stats = save.GetGunStats(1);
-    player2_gun2_text->SetText("Gun 1\n\nDAM:" + std::to_string(stats[0]) +
+    player2_gun2_text->SetText("Gun 2\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
                                "\n\nCost:¢" + std::to_string(stats[3]));
@@ -460,7 +466,7 @@ void Hover23(bool dir) {
     player2_selector = 2;
     player2_gun3_text->Show();
     std::vector<int> stats = save.GetGunStats(2);
-    player2_gun3_text->SetText("Gun 2\n\nDAM:" + std::to_string(stats[0]) +
+    player2_gun3_text->SetText("Gun 3\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
                                "\n\nCost:¢" + std::to_string(stats[3]));
@@ -478,7 +484,7 @@ void Click23() {
 
 // p2 gun 4
 MenuText* player2_gun4_text =
-    new MenuText(564, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
+    new MenuText(564, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover24(bool dir) {
   player2_gun4_text->SetWrap(112);

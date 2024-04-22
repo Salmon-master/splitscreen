@@ -6,8 +6,9 @@
 class SaveManager {
  public:
   SaveManager();
+  ~SaveManager();
   unsigned int GetCredits();
-  void Reward(unsigned int credits);
+  unsigned int Reward();
   // DAM, ROF, SPE, cost
   std::vector<int> GetGunStats(int type);
   bool UpgradeWeapon(int type);

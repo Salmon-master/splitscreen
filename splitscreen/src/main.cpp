@@ -85,10 +85,14 @@ int main(int argc, char* args[]) {
                        how,
                        credits};
   title->SetWrap(200);
+  player1_gun1->SetColorDef({200, 0, 0, 255});
+  player2_gun1->SetColorDef({200, 0, 0, 255});
   SDL_Event e;
   while (run) {
     // menu
     menu->Render();
+    p1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
+    p2_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(2) * 1.65f);
     if (death_menu) {
       MenuText* dead = new MenuText(120, 25, "You Died", {255, 0, 0, 255}, 30);
       death_menu->menu_items_ = {dead};
@@ -96,6 +100,13 @@ int main(int argc, char* args[]) {
       SDL_Delay(3000);
       delete death_menu;
       death_menu = nullptr;
+    }
+    if (reward_menu) {
+      reward_menu->Render();
+      SDL_Delay(3000);
+      delete reward_menu;
+      reward_menu = nullptr;
+      credits->SetText("Cr: ¢" + std::to_string(save.GetCredits()));
     }
     menu_run = true;
     while (menu_run) {
@@ -163,16 +174,6 @@ int main(int argc, char* args[]) {
       // main game loop
       while (game_run) {
         // inputs
-        if (SDL_PollEvent(&e)) {
-          if (e.type == SDL_QUIT) {
-            game_run = false;
-          }
-          if (e.type == SDL_KEYDOWN) {
-            if (e.key.keysym.sym == SDLK_ESCAPE) {
-              game_run = false;
-            }
-          }
-        }
         SDL_PumpEvents();
         if (key_state[SDL_SCANCODE_W] == 1) {
           controlling->GetAttached()->Step(delta_time);
@@ -239,6 +240,8 @@ int main(int argc, char* args[]) {
                                ship1.GetDimensions().second - 256);
               } else {
                 game_run = false;
+                save.SetMenuDamage(1, player1.GetDamage());
+                save.SetMenuDamage(2, player2.GetDamage());
               }
               break;
             }
@@ -248,7 +251,14 @@ int main(int argc, char* args[]) {
                 player1.SetPos(256, 256);
                 player2.SetPos(256, 256);
               } else {
-                run = false;
+                game_run = false;
+                int amount = save.Reward();
+                MenuText* dead =
+                    new MenuText(25, 25, "Reward: ¢" + std::to_string(amount), {255, 0, 0, 255}, 30);
+                reward_menu = new Menu(dead->GetRect()->w + 50, 80);
+                reward_menu->menu_items_ = {dead};
+                save.SetMenuDamage(1, player1.GetDamage());
+                save.SetMenuDamage(1, player2.GetDamage());
               }
               break;
             }

@@ -11,9 +11,10 @@ Ship::Ship(std::vector<std::vector<GameObject*>>* game_objects,
            SaveManager* save) {
   game_objects_ = game_objects;
   // room generation, from 5 to 10 rooms generated
-  for (int i = 0; i < (rand() % 6) + 5; i++) {
+  /*for (int i = 0; i < (rand() % 6) + 5; i++) {
     rooms_.push_back(new Room(save));
-  }
+  }*/
+  rooms_.push_back(new Room(save));
   // loads inital room into gameobjects
   LoadRoom(0);
 }
@@ -35,7 +36,7 @@ bool Ship::MoveRoom(bool dir) {
   int to_be_loaded = room_number_;
   // increment room if input is positive, decermesemt teh room if negitave.
   if (dir) {
-    if (room_number_ <= rooms_.size() - 1) {
+    if (room_number_ < rooms_.size() - 1) {
       to_be_loaded++;
     } else {
       rv = true;

@@ -1,5 +1,7 @@
 #include "save_manager.h"
 
+#include <cstdio>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -13,9 +15,23 @@ SaveManager::SaveManager() {
   data.close();
 }
 
+SaveManager::~SaveManager() {
+  std::remove("assets/save.txt");
+  std::ofstream data("assets/save.txt");
+  for (int i : data_) {
+    data << std::to_string(i) << "\n";
+  }
+  data.close();
+}
+
 unsigned int SaveManager::GetCredits() { return data_[0]; }
 
-void SaveManager::Reward(unsigned int credits) {}
+unsigned int SaveManager::Reward() {
+  int avrgae_level = (data_[2] + data_[3] + data_[5] + data_[6]) / 4;
+  int reward = avrgae_level * 100;
+  data_[0] += reward;
+  return reward;
+}
 
 std::vector<int> SaveManager::GetGunStats(int type) {
   float level = data_[7 + type];
@@ -88,16 +104,20 @@ int SaveManager::Repair(int player) {
   return bought;
 }
 
-void SaveManager::SetMenuDamage(int player, int damage) {}
+void SaveManager::SetMenuDamage(int player, int damage) {
+  int index = 1;
+  if (player == 2) {
+    index = 4;
+  }
+  data_[index] = damage;
+}
 
 int SaveManager::GetRepairCost(int player) {
   int index = 1;
   if (player == 2) {
     index = 4;
   }
-  int avg_level =
-      (data_[index + 1] + data_[index + 2]) /
-      2;
+  int avg_level = (data_[index + 1] + data_[index + 2]) / 2;
   int cost = 10 * pow(1.1, avg_level);
   if (data_[index] == 0) {
     cost *= 10;

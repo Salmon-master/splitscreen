@@ -66,3 +66,5 @@ bool Player::Damage(int amount) {
 }
 
 UIBar* Player::GetBar() { return damage_bar_; }
+
+int Player::GetDamage() { return damage_; }

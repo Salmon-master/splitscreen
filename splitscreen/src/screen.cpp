@@ -9,7 +9,7 @@
 
 Screen::Screen(int x, int y) {
   // window creation using SDL
-  win_ = SDL_CreateWindow("Window", x, y, 500, 500, 0);
+  win_ = SDL_CreateWindow("Window", x, y, 500, 500, SDL_WINDOW_BORDERLESS);
   if (win_ == NULL) {
     std::cout << "Error window creation";
   }

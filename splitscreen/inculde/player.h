@@ -44,6 +44,7 @@ class Player : public GameObject {
   UIBar* GetBar();
   bool active_ = true;
   inline static int new_id_;
+  int GetDamage();
 };
 
 #endif  // !PLAYER_H_
