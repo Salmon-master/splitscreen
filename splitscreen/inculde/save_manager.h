@@ -21,6 +21,7 @@ class SaveManager {
   void SetMenuDamage(int player, int damage);
   int GetRepairCost(int player);
   int GetDamage(int player);
+  int GetLevel();
 
  private:
   // DAM, ROF, SPE

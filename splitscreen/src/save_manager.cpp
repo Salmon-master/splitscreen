@@ -132,3 +132,7 @@ int SaveManager::GetDamage(int player) {
   }
   return data_[index];
 }
+
+int SaveManager::GetLevel() {
+  return (data_[2] + data_[3] + data_[5] + data_[6]) / 4;
+}

@@ -71,6 +71,8 @@ class Enemy : public GameObject {
   Room* room_ = nullptr;
   // which screen/s the enemy is currently rendered on.
   std::vector<Screen*> on_screen_;
+  const int kEnemyStats[5][3] = {
+      {30, 64, 20}, {60, 128, 10}, {85, 96, 5}, {50, 256, 10}, {60, 128, 10}};
 };
 
 #endif  // !ENEMY_H_

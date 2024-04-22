@@ -15,12 +15,16 @@ Enemy::Enemy(int x, int y, int type, Room* room, SaveManager* save)
   SetPos(x, y);
   room_ = room;
   rotation_center_.y = (rect_.h - 28);
-  gun_ = new Gun(0, this, save);
+  gun_ = new Gun(type - 1, this, save);
   // setting up AI
   for (size_t i = 0; i < kNumRays; i++) {
     float angle = (i * 2 * M_PI) / kNumRays;
     ray_directions_[i] = {cos(angle), sin(angle)};
   }
+  // setting up enemy type
+  speed_ = kEnemyStats[type][0];
+  attack_range_ = kEnemyStats[type][1];
+  max_health_ = kEnemyStats[type][2] + ((kEnemyStats[type][2] * save->GetLevel()) / 10);
   health_bar_ = new UIBar(
       max_health_, {135, 211, 124},
       SDL_Rect{static_cast<int>(rect_.x), static_cast<int>(rect_.y - 10),
