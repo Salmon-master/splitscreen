@@ -9,7 +9,7 @@
 
 #include "game_object.h"
 #include "player.h"
-#include "SDL.h"
+#include "SDL2/include/SDL.h"
 #include "ui_bar.h"
 
 // object to control a window on screen, used by the main.cc to create a window,

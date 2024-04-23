@@ -1,7 +1,7 @@
 #ifndef MENU_ITEM_H_
 #define MENU_ITEM_H_
 
-#include <SDL.h>
+#include "SDL2/include/SDL.h"
 
 // an purley virtual class used as an interface by the menu object to render the
 // menu items(buttons text ect)

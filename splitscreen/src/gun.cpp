@@ -2,7 +2,7 @@
 
 #include "gun.h"
 
-#include <SDL.h>
+#include "SDL2/include/SDL.h"
 
 Gun::Gun(int type, GameObject* holder, SaveManager* save) {
   held_by_ = holder;

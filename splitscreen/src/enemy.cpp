@@ -6,16 +6,18 @@
 #include <iostream>
 #include <string>
 
+#include "door.h"
 #include "main.h"
 #include "wall.h"
 
 Enemy::Enemy(int x, int y, int type, Room* room, SaveManager* save)
-    : GameObject(x, y, "enemy_" + std::to_string(type)) {
+    : GameObject(x, y, "enemy_" + std::to_string(type + 1)) {
   // var initilaistion
   SetPos(x, y);
   room_ = room;
   rotation_center_.y = (rect_.h - 28);
-  gun_ = new Gun(type - 1, this, save);
+  gun_ = new Gun(type, this, save);
+  type_ = type;
   // setting up AI
   for (size_t i = 0; i < kNumRays; i++) {
     float angle = (i * 2 * M_PI) / kNumRays;
@@ -24,7 +26,8 @@ Enemy::Enemy(int x, int y, int type, Room* room, SaveManager* save)
   // setting up enemy type
   speed_ = kEnemyStats[type][0];
   attack_range_ = kEnemyStats[type][1];
-  max_health_ = kEnemyStats[type][2] + ((kEnemyStats[type][2] * save->GetLevel()) / 10);
+  max_health_ =
+      kEnemyStats[type][2] + ((kEnemyStats[type][2] * save->GetLevel()) / 10);
   health_bar_ = new UIBar(
       max_health_, {135, 211, 124},
       SDL_Rect{static_cast<int>(rect_.x), static_cast<int>(rect_.y - 10),
@@ -108,7 +111,7 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
             if (health_ > max_health_ / 4) {
               interest_objects.push_back(Vector{obj->GetRect().x - rect_.x,
                                                 obj->GetRect().y - rect_.y});
-              if (diff.Norm() <= attack_range_) {
+              if (diff.Norm() < attack_range_) {
                 Bullet* bullet = Attack(diff);
                 if (speed_ > 1) {
                   speed_ *= 0.95;
@@ -117,10 +120,10 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
                   game_objects->at(kBullets).push_back(bullet);
                 }
               } else {
-                speed_ = 80;
+                speed_ = kEnemyStats[type_][0];
               }
             } else {
-              speed_ = 100;
+              speed_ = kEnemyStats[type_][0] * 1.2;
               interest_objects.push_back(
                   Vector{(obj->GetRect().x - rect_.x) * -1,
                          (obj->GetRect().y - rect_.y) * -1});
@@ -184,11 +187,8 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
   }
 }
 
-UIBar* Enemy::GetBar(Screen* screen) {
+UIBar* Enemy::GetBar() {
   // add bar to screen's bars if not already on there
-  if (std::count(on_screen_.begin(), on_screen_.end(), screen) == 0) {
-    on_screen_.push_back(screen);
-  }
   return health_bar_;
 }
 
@@ -201,12 +201,6 @@ Enemy::~Enemy() {
         room_emenies->end());
   }
   std::cout << "enemy destroyed!" << std::endl;
-  // removing health bar in a meomory safe way
-  for (Screen* screen : on_screen_) {
-    std::vector<UIBar*>* bars = screen->GetBars();
-    bars->erase(std::remove(bars->begin(), bars->end(), health_bar_),
-                bars->end());
-  }
   delete health_bar_;
   delete gun_;
 }
@@ -261,8 +255,9 @@ std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
             diffrence = abs(line.first.y - (rect_.y + rotation_center_.y));
           }
           Wall* wall_type = static_cast<Wall*>(obj);
+          Door* door_type = static_cast<Door*>(obj);
           Enemy* enemy_type = static_cast<Enemy*>(obj);
-          if (wall_type) {
+          if (wall_type || door_type) {
             danger = ((search_range_ - r.w) - diffrence) * 0.025;
           } else if (enemy_type) {
             danger = -0.001f;

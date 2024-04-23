@@ -6,7 +6,7 @@
 #include <iostream>
 #include <utility>
 
-#include "SDL.h"
+#include "SDL2/include/SDL.h"
 
 // a class used to display infomation to the player in the form of a bar, theese
 // bars are assigned to an induvidular screen object which will display them.

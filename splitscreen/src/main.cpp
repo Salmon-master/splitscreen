@@ -2,12 +2,12 @@
 
 #include "main.h"
 
-#include <SDL.h>
-#include <SDL_TTF.h>
-
 #include <iostream>
 #include <stack>
 #include <vector>
+
+#include "SDL2/include/SDL.h"
+#include "SDL2_ttf/include/SDL_TTF.h"
 
 #include "door.h"
 #include "enemy.h"
@@ -87,8 +87,10 @@ int main(int argc, char* args[]) {
   title->SetWrap(200);
   player1_gun1->SetColorDef({200, 0, 0, 255});
   player2_gun1->SetColorDef({200, 0, 0, 255});
+  menu->ChangeVisability();
   SDL_Event e;
   while (run) {
+    menu->ChangeVisability();
     // menu
     menu->Render();
     p1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
@@ -113,10 +115,14 @@ int main(int argc, char* args[]) {
       if (SDL_PollEvent(&e)) {
         if (e.type == SDL_QUIT) {
           menu_run = false;
+          game_run = false;
+          run = false;
         }
         if (e.type == SDL_KEYDOWN) {
           if (e.key.keysym.sym == SDLK_ESCAPE) {
             menu_run = false;
+            game_run = false;
+            run = false;
           }
         }
       }
@@ -138,8 +144,8 @@ int main(int argc, char* args[]) {
 
     if (game_run) {
       // creating windows
-      Screen screen1(100, 250);
-      Screen screen2(600, 250);
+      Screen screen1(100, SDL_WINDOWPOS_CENTERED);
+      Screen screen2(600, SDL_WINDOWPOS_CENTERED);
       UIBar* swtich_bar = nullptr;
 
       // game object intitilastion
@@ -254,7 +260,8 @@ int main(int argc, char* args[]) {
                 game_run = false;
                 int amount = save.Reward();
                 MenuText* dead =
-                    new MenuText(25, 25, "Reward: ¢" + std::to_string(amount), {255, 0, 0, 255}, 30);
+                    new MenuText(25, 25, "Reward: ¢" + std::to_string(amount),
+                                 {255, 0, 0, 255}, 30);
                 reward_menu = new Menu(dead->GetRect()->w + 50, 80);
                 reward_menu->menu_items_ = {dead};
                 save.SetMenuDamage(1, player1.GetDamage());
@@ -344,7 +351,6 @@ int main(int argc, char* args[]) {
         delete bullet;
       }
     }
-    menu->ChangeVisability();
   }
   SDL_Quit();
   delete menu;

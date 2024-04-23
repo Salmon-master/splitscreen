@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "SDL_ttf.h"
+#include "SDL2_ttf/include/SDL_ttf.h"
 
 #include "menu_item.h"
 

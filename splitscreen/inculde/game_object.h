@@ -7,8 +7,8 @@
 #include <vector>
 #include <string>
 
-#include "SDL.h"
-#include "SDL_image.h"
+#include "SDL2/include/SDL.h"
+#include "SDL2_image/include/SDL_image.h"
 #include "vector.h"
 
 // Base class for all and any objects which are rendered to a screen, used

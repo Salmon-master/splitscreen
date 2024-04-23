@@ -25,7 +25,7 @@ class Enemy : public GameObject {
   // calclate the direction the enemy wants to go in, interpritation of
   // alorightm at https://kidscancode.org/godot_recipes/3.x/ai/context_map/
   void AI(std::vector<std::vector<GameObject*>>* game_objects, int delta);
-  UIBar* GetBar(Screen* screen);
+  UIBar* GetBar();
   ~Enemy();
 
  private:
@@ -69,10 +69,10 @@ class Enemy : public GameObject {
   float SetRotationFromVector(Vector rotation);
   // a pointer to the room which the enemy is in, initised in consctor
   Room* room_ = nullptr;
-  // which screen/s the enemy is currently rendered on.
-  std::vector<Screen*> on_screen_;
+  // base enemy stats
   const int kEnemyStats[5][3] = {
       {30, 64, 20}, {60, 128, 10}, {85, 96, 5}, {50, 256, 10}, {60, 128, 10}};
+  int type_;
 };
 
 #endif  // !ENEMY_H_

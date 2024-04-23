@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "enemy.h"
-#include "SDL.h"
+#include "SDL2/include/SDL.h"
 #include "wall.h"
 #include "save_manager.h"
 

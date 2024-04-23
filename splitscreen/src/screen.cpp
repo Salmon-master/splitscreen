@@ -38,6 +38,8 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
     x_ = following_->GetRect().x;
     y_ = following_->GetRect().y;
   }
+  // rendering enemy bars
+  int enemy_bars = 0;
   // iterate through all game objects, rendering all if conditions met
   for (std::vector<GameObject*> type_vector : game_objects) {
     for (GameObject* obj : type_vector) {
@@ -57,15 +59,12 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
         SDL_RenderCopyEx(renderer_, texture, NULL, &render_rect, angle,
                          obj->GetCenter(), SDL_FLIP_NONE);
         SDL_DestroyTexture(texture);
-        // add eney health bar to list if the bar has not been added to the list before.
         Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
         if (enemy_type) {
-          if (std::count(bars_.begin(), bars_.end(),
-                                enemy_type->GetBar(this)) == 0) {
-            bars_.push_back(enemy_type->GetBar(this));
-          }
+          bars_.push_back(enemy_type->GetBar());
+          enemy_bars++;
           SDL_FRect rect = enemy_type->GetRect();
-          enemy_type->GetBar(this)->SetPos(rect.x - x_ + offset_.first,
+          enemy_type->GetBar()->SetPos(rect.x - x_ + offset_.first,
                                            (rect.y + 20) - y_ + offset_.second);
         }
       }
@@ -74,7 +73,7 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
   // UI_Bar rendering of bars attached to this screen
   if (bars_.size() > 0) {
     std::stack<UIBar*> to_remove;
-    for (auto bar : bars_) {
+    for (UIBar* bar : bars_) {
       if (!bar) {
         to_remove.push(bar);
       } else {
@@ -86,6 +85,10 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
                                1);
         SDL_RenderFillRect(renderer_, bar->GetBar().first);
       }
+    }
+    while (enemy_bars > 0){
+      bars_.pop_back();
+      enemy_bars--;
     }
     SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 1);
     while (!to_remove.empty()) {
@@ -104,7 +107,7 @@ void Screen::Attach(Player* target) {
   // set offset so target is centered on screen
   offset_.first = 250 - following_->GetCenter()->x;
   offset_.second = 250 - following_->GetCenter()->y;
-  // add the damage bar of the robot to the list of bars 
+  // add the damage bar of the robot to the list of bars
   bars_.push_back(following_->GetBar());
   bars_.back()->SetPos(10, 450);
 }
