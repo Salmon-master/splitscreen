@@ -17,7 +17,7 @@ class Enemy;
 // layout, used as a part of a ship object.
 class Room {
  public:
-  Room(SaveManager* save);
+  explicit Room(SaveManager* save);
   std::vector<GameObject*> GetWalls();
   std::vector<Enemy*>* GetEnemies();
   // retuns the locations that are empty for enemy spawing, used to spawn

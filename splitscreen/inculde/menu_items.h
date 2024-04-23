@@ -1,4 +1,8 @@
+// Copyright 2024 Hugh Thompson
+
 #pragma once
+
+#include <vector>
 
 #include "menu.h"
 #include "menu_button.h"
@@ -22,7 +26,7 @@ void Quit() {
   run = false;
   menu_run = false;
   game_run = false;
-};
+}
 MenuButton* quit =
     new MenuButton({25, 340, 200, 50}, Quit, NULL,
                    new MenuText("Quit", {255, 255, 255, 255}, 40));
@@ -67,13 +71,9 @@ MenuButton* how =
 
 MenuText* title = new MenuText(25, 75, "Conscience", {255, 0, 0, 255}, 26);
 
-MenuText* credits = new MenuText(
-    25, 174, "Cr: ¢" + std::to_string(save.GetCredits()), {0, 0, 0, 255}, 26);
-
-
-
-
-
+MenuText* credits =
+    new MenuText(25, 174, "Cr: \u00A2" + std::to_string(save.GetCredits()),
+                 {0, 0, 0, 255}, 26);
 
 // player 1
 int player_1_gun = 0;
@@ -86,7 +86,7 @@ MenuItem* player1_overlay =
 void UpgradeWeapon1() {
   if (save.UpgradeWeapon(player1_selector)) {
     Overlay1Hide();
-    credits->SetText("Cr: ¢" + std::to_string(save.GetCredits()));
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
   } else {
     Menu* popup = new Menu(410, 80);
     MenuText* text =
@@ -111,7 +111,7 @@ MenuImage* player1_image = new MenuImage(314, 100, "player");
 
 // p1 gun 1
 MenuText* player1_gun1_text =
-    new MenuText(314, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost:¢100",
+    new MenuText(314, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover11(bool dir) {
   player1_gun1_text->SetWrap(112);
@@ -123,7 +123,7 @@ void Hover11(bool dir) {
     player1_gun1_text->SetText("Gun 1\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:¢" + std::to_string(stats[3]));
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
 void Click11();
@@ -137,7 +137,7 @@ void Click11() {
 }
 // p1 gun 2
 MenuText* player1_gun2_text =
-    new MenuText(314, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
+    new MenuText(314, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover12(bool dir) {
   player1_gun2_text->SetWrap(112);
@@ -149,7 +149,7 @@ void Hover12(bool dir) {
     player1_gun2_text->SetText("Gun 2\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:¢" + std::to_string(stats[3]));
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
 void Click12();
@@ -164,7 +164,7 @@ void Click12() {
 
 // p1 gun 3
 MenuText* player1_gun3_text =
-    new MenuText(314, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
+    new MenuText(314, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover13(bool dir) {
   player1_gun3_text->SetWrap(112);
@@ -176,7 +176,7 @@ void Hover13(bool dir) {
     player1_gun3_text->SetText("Gun 3\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:¢" + std::to_string(stats[3]));
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
 void Click13();
@@ -190,7 +190,7 @@ void Click13() {
 }
 // p1 gun 4
 MenuText* player1_gun4_text =
-    new MenuText(314, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
+    new MenuText(314, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover14(bool dir) {
   player1_gun4_text->SetWrap(112);
@@ -202,7 +202,7 @@ void Hover14(bool dir) {
     player1_gun4_text->SetText("Gun 4\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:¢" + std::to_string(stats[3]));
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
 void Click14();
@@ -217,7 +217,7 @@ void Click14() {
 
 // p1 gun 5
 MenuText* player1_gun5_text =
-    new MenuText(314, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
+    new MenuText(314, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover15(bool dir) {
   player1_gun5_text->SetWrap(112);
@@ -229,7 +229,7 @@ void Hover15(bool dir) {
     player1_gun5_text->SetText("Gun 5\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:¢" + std::to_string(stats[3]));
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
 void Click15();
@@ -272,7 +272,7 @@ MenuText* p1_armour =
 void ShowPriceP1Speed(bool dir);
 void UpgradeP1Speed() {
   if (save.UpgradePlayer(false, 1)) {
-    credits->SetText("Cr: ¢" + std::to_string(save.GetCredits()));
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
     p1_speed->SetText("S: " + std::to_string(save.GetPlayerStats(1)[0] / 10));
   } else {
     Menu* popup = new Menu(410, 80);
@@ -290,7 +290,7 @@ MenuButton* p1_upgrade_speed =
 void ShowPriceP1Speed(bool dir) {
   MenuText* text = dynamic_cast<MenuText*>(p1_upgrade_speed->GetDisplay());
   if (dir) {
-    text->SetText("¢" + std::to_string(save.GetPlayerStats(1)[2]));
+    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(1)[2]));
   } else {
     text->SetText("Speed+");
   }
@@ -299,7 +299,7 @@ void ShowPriceP1Speed(bool dir) {
 void ShowPriceP1Armour(bool dir);
 void UpgradeP1Armour() {
   if (save.UpgradePlayer(true, 1)) {
-    credits->SetText("Cr: ¢" + std::to_string(save.GetCredits()));
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
     p1_armour->SetText("A: " + std::to_string(save.GetPlayerStats(1)[1]));
   } else {
     Menu* popup = new Menu(410, 80);
@@ -317,7 +317,7 @@ MenuButton* p1_upgrade_armour =
 void ShowPriceP1Armour(bool dir) {
   MenuText* text = dynamic_cast<MenuText*>(p1_upgrade_armour->GetDisplay());
   if (dir) {
-    text->SetText("¢" + std::to_string(save.GetPlayerStats(1)[3]));
+    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(1)[3]));
   } else {
     text->SetText("Armor+");
   }
@@ -344,7 +344,7 @@ void Repairp1() {
     SDL_Delay(3000);
     delete popup;
   } else {
-    credits->SetText("Cr: ¢" + std::to_string(save.GetCredits()));
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
     p1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
   }
 }
@@ -355,18 +355,11 @@ MenuButton* p1_repair =
 void ShowPriceP1Repair(bool dir) {
   MenuText* text = dynamic_cast<MenuText*>(p1_repair->GetDisplay());
   if (dir) {
-    text->SetText("¢" + std::to_string(save.GetRepairCost(1)));
+    text->SetText("\u00A2" + std::to_string(save.GetRepairCost(1)));
   } else {
     text->SetText("Repair");
   }
 }
-
-
-
-
-
-
-
 
 // player two
 int player_2_gun = NULL;
@@ -378,7 +371,7 @@ MenuItem* player2_overlay =
 void UpgradeWeapon2() {
   if (save.UpgradeWeapon(player2_selector)) {
     Overlay2Hide();
-    credits->SetText("Cr: ¢" + std::to_string(save.GetCredits()));
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
   } else {
     Menu* popup = new Menu(410, 80);
     MenuText* text =
@@ -403,7 +396,7 @@ MenuImage* player2_image = new MenuImage(564, 100, "player");
 
 // p2 gun 1
 MenuText* player2_gun1_text =
-    new MenuText(564, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost:¢100",
+    new MenuText(564, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover21(bool dir) {
   player2_gun1_text->SetWrap(112);
@@ -415,7 +408,7 @@ void Hover21(bool dir) {
     player2_gun1_text->SetText("Gun 1\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:¢" + std::to_string(stats[3]));
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
 void Click21();
@@ -430,7 +423,7 @@ void Click21() {
 
 // 21 gun 2
 MenuText* player2_gun2_text =
-    new MenuText(564, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
+    new MenuText(564, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover22(bool dir) {
   player2_gun2_text->SetWrap(112);
@@ -442,7 +435,7 @@ void Hover22(bool dir) {
     player2_gun2_text->SetText("Gun 2\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:¢" + std::to_string(stats[3]));
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
 void Click22();
@@ -457,7 +450,7 @@ void Click22() {
 
 // p2 gun 3
 MenuText* player2_gun3_text =
-    new MenuText(564, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
+    new MenuText(564, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover23(bool dir) {
   player2_gun3_text->SetWrap(112);
@@ -469,7 +462,7 @@ void Hover23(bool dir) {
     player2_gun3_text->SetText("Gun 3\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:¢" + std::to_string(stats[3]));
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
 void Click23();
@@ -484,7 +477,7 @@ void Click23() {
 
 // p2 gun 4
 MenuText* player2_gun4_text =
-    new MenuText(564, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
+    new MenuText(564, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover24(bool dir) {
   player2_gun4_text->SetWrap(112);
@@ -496,7 +489,7 @@ void Hover24(bool dir) {
     player2_gun4_text->SetText("Gun 4\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:¢" + std::to_string(stats[3]));
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
 void Click24();
@@ -511,7 +504,7 @@ void Click24() {
 
 // p1 gun 5
 MenuText* player2_gun5_text =
-    new MenuText(564, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost:¢100",
+    new MenuText(564, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
 void Hover25(bool dir) {
   player2_gun5_text->SetWrap(112);
@@ -523,7 +516,7 @@ void Hover25(bool dir) {
     player2_gun5_text->SetText("Gun 5\n\nDAM:" + std::to_string(stats[0]) +
                                "\nROF:" + std::to_string(stats[1] / 10) +
                                "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:¢" + std::to_string(stats[3]));
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
 void Click25();
@@ -555,8 +548,6 @@ void reset2() {
   player2_gun5->SetColorDef({60, 60, 60, 255});
 }
 
-
-
 MenuText* p2_speed = new MenuText(
     524, 75, "S: " + std::to_string(save.GetPlayerStats(2)[0] / 10),
     {0, 0, 0, 255}, 20);
@@ -567,7 +558,7 @@ MenuText* p2_armour =
 void ShowPriceP2Speed(bool dir);
 void UpgradeP2Speed() {
   if (save.UpgradePlayer(false, 2)) {
-    credits->SetText("Cr: ¢" + std::to_string(save.GetCredits()));
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
     p2_speed->SetText("S: " + std::to_string(save.GetPlayerStats(2)[0] / 10));
   } else {
     Menu* popup = new Menu(410, 80);
@@ -585,7 +576,7 @@ MenuButton* p2_upgrade_speed =
 void ShowPriceP2Speed(bool dir) {
   MenuText* text = dynamic_cast<MenuText*>(p2_upgrade_speed->GetDisplay());
   if (dir) {
-    text->SetText("¢" + std::to_string(save.GetPlayerStats(2)[2]));
+    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(2)[2]));
   } else {
     text->SetText("Speed+");
   }
@@ -594,7 +585,7 @@ void ShowPriceP2Speed(bool dir) {
 void ShowPriceP2Armour(bool dir);
 void UpgradeP2Armour() {
   if (save.UpgradePlayer(true, 2)) {
-    credits->SetText("Cr: ¢" + std::to_string(save.GetCredits()));
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
     p2_armour->SetText("A: " + std::to_string(save.GetPlayerStats(2)[1]));
   } else {
     Menu* popup = new Menu(410, 80);
@@ -612,7 +603,7 @@ MenuButton* p2_upgrade_armour =
 void ShowPriceP2Armour(bool dir) {
   MenuText* text = dynamic_cast<MenuText*>(p2_upgrade_armour->GetDisplay());
   if (dir) {
-    text->SetText("¢" + std::to_string(save.GetPlayerStats(2)[3]));
+    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(2)[3]));
   } else {
     text->SetText("Armor+");
   }
@@ -639,7 +630,7 @@ void Repairp2() {
     SDL_Delay(3000);
     delete popup;
   } else {
-    credits->SetText("Cr: ¢" + std::to_string(save.GetCredits()));
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
     p2_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(2) * 1.65f);
   }
 }
@@ -649,7 +640,7 @@ MenuButton* p2_repair =
 void ShowPriceP2Repair(bool dir) {
   MenuText* text = dynamic_cast<MenuText*>(p2_repair->GetDisplay());
   if (dir) {
-    text->SetText("¢" + std::to_string(save.GetRepairCost(2)));
+    text->SetText("\u00A2" + std::to_string(save.GetRepairCost(2)));
   } else {
     text->SetText("Repair");
   }

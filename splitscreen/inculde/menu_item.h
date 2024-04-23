@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #ifndef MENU_ITEM_H_
 #define MENU_ITEM_H_
 

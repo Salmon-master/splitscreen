@@ -5,8 +5,8 @@
 
 #include "game_object.h"
 #include "gun.h"
-#include "ui_bar.h"
 #include "save_manager.h"
+#include "ui_bar.h"
 
 // foward declations
 class Gun;
@@ -22,7 +22,8 @@ class Player : public GameObject {
   int damage_ = 0;
   // assigned in consturctor
   UIBar* damage_bar_ = nullptr;
-  // armour value, reduces damage taken, from 0 to 100 as a percentage of damage reduced
+  // armour value, reduces damage taken, from 0 to 100 as a percentage of damage
+  // reduced
   int armour_ = 0;
   int id_;
 

@@ -18,7 +18,7 @@ class Door : public GameObject {
   bool GetState();
 
  private:
-   // the current state of the door. True for open, false for closed.
+  // the current state of the door. True for open, false for closed.
   bool open_ = false;
 };
 

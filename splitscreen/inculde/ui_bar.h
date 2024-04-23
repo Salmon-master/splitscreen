@@ -39,7 +39,8 @@ class UIBar {
   // the maximum value the bar can be, defined in teh constuctor and used for
   // diplay purposes and to cehck if the bar is full
   float max_value_ = 0;
-  // The border size(in px) between the colored bit of teh bar and the background.
+  // The border size(in px) between the colored bit of teh bar and the
+  // background.
   static const int border = 2;
 };
 
