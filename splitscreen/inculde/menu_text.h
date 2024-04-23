@@ -9,7 +9,7 @@
 
 #include "menu_item.h"
 
-// a class used to represnet text in the menu screens
+// a class used to represent text in the menu screens
 class MenuText : public MenuItem {
  public:
   MenuText(std::string text, SDL_Color text_color, int size);

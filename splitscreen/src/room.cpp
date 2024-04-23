@@ -40,8 +40,8 @@ Room::Room(SaveManager* save) {
   for (int i = 0; i < size; i++) {
     int random = rand() % free_.size();
     int enemy_type = rand() % 5;
-    Enemy* enemy =
-        new Enemy(free_[random].first, free_[random].second, enemy_type, this, save);
+    Enemy* enemy = new Enemy(free_[random].first, free_[random].second,
+                             enemy_type, this, save);
     free_.erase(free_.begin() + random);
     enemy->Move(-1 * enemy->GetCenter()->x, -1 * enemy->GetCenter()->y);
     enemies_.push_back(enemy);

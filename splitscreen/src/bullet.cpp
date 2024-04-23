@@ -67,7 +67,7 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
             +kEnemies;
           }
         }
-        // players take damage, 
+        // players take damage
         if (i == kPlayers) {
           Player* player = dynamic_cast<Player*>(obj);
           if (player) {
@@ -76,8 +76,7 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
                            (rotation_center_.y + rect_.y) -
                                (obj->GetCenter()->y + obj->GetRect().y)};
             if (diff.Norm() <= obj->GetCenter()->x) {
-              if (player->Damage(damage_)) {
-              }
+              player->Damage(damage_);
               destruct = true;
               break;
             }

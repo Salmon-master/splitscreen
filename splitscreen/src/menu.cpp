@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #include "menu.h"
 
 #include <iostream>
@@ -85,8 +87,8 @@ void Menu::ChangeVisability() {
 
 Menu::Menu(int x, int y) {
   // window creation using SDL
-  win_ = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                       x, y, SDL_WINDOW_BORDERLESS);
+  win_ = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED,
+                          SDL_WINDOWPOS_CENTERED, x, y, SDL_WINDOW_BORDERLESS);
   if (win_ == NULL) {
     std::cout << "Error window creation";
   }

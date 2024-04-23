@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #include "menu_text.h"
 
 #include <iostream>
@@ -35,7 +37,8 @@ void MenuText::Update() {
   if (text_ != last_text_) {
     last_text_ = text_;
     if (wrap_) {
-      SetSurface(TTF_RenderText_Solid_Wrapped(font_, text_.c_str(), text_color_, wrap_));
+      SetSurface(TTF_RenderText_Solid_Wrapped(font_, text_.c_str(), text_color_,
+                                              wrap_));
     } else {
       SetSurface(TTF_RenderText_Solid(font_, text_.c_str(), text_color_));
     }

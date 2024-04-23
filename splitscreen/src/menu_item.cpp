@@ -1,3 +1,5 @@
+// Copyright 2024 Hugh Thompson
+
 #include "menu_item.h"
 
 SDL_Rect* MenuItem::GetRect() { return &rect_; }

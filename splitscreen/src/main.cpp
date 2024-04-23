@@ -108,7 +108,7 @@ int main(int argc, char* args[]) {
       SDL_Delay(3000);
       delete reward_menu;
       reward_menu = nullptr;
-      credits->SetText("Cr: ¢" + std::to_string(save.GetCredits()));
+      credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
     }
     menu_run = true;
     while (menu_run) {
@@ -259,9 +259,9 @@ int main(int argc, char* args[]) {
               } else {
                 game_run = false;
                 int amount = save.Reward();
-                MenuText* dead =
-                    new MenuText(25, 25, "Reward: ¢" + std::to_string(amount),
-                                 {255, 0, 0, 255}, 30);
+                MenuText* dead = new MenuText(
+                    25, 25, "Reward: \u00A2" + std::to_string(amount),
+                    {255, 0, 0, 255}, 30);
                 reward_menu = new Menu(dead->GetRect()->w + 50, 80);
                 reward_menu->menu_items_ = {dead};
                 save.SetMenuDamage(1, player1.GetDamage());

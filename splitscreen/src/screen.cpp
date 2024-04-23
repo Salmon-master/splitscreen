@@ -65,7 +65,7 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
           enemy_bars++;
           SDL_FRect rect = enemy_type->GetRect();
           enemy_type->GetBar()->SetPos(rect.x - x_ + offset_.first,
-                                           (rect.y + 20) - y_ + offset_.second);
+                                       (rect.y + 20) - y_ + offset_.second);
         }
       }
     }
@@ -86,7 +86,7 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
         SDL_RenderFillRect(renderer_, bar->GetBar().first);
       }
     }
-    while (enemy_bars > 0){
+    while (enemy_bars > 0) {
       bars_.pop_back();
       enemy_bars--;
     }
