@@ -13,6 +13,8 @@ class Player;
 // a class used to represent an in game bullet
 class Bullet : public GameObject {
  public:
+  // the constuctor of the bullet, used by the gun class to create an in game
+  // bullet.
   Bullet(GameObject* shooter, int damage, int speed);
   // used in main game loop to step the bullet foward by veclocity and check for
   // collisions between the current list of gameobjects(input)
@@ -25,7 +27,8 @@ class Bullet : public GameObject {
   int speed_ = 30;
   // damage of the bullet, set in constctor
   int damage_;
-  // a reference to the object that the gun that shot this bullet belongs to.
+  // a reference to the object that the gun that shot this bullet belongs to,
+  // given in constctor
   GameObject* shooter_;
 };
 

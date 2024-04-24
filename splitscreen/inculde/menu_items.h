@@ -10,27 +10,32 @@
 #include "menu_item.h"
 #include "menu_text.h"
 
+// menus and popups
 Menu* menu = new Menu;
 Menu* death_menu = nullptr;
 Menu* reward_menu = nullptr;
 
+// run the game
 void Play() {
   menu_run = false;
   game_run = true;
 }
 
+// play button
 MenuButton* play =
     new MenuButton({25, 210, 200, 70}, Play, NULL,
                    new MenuText("Play", {255, 255, 255, 255}, 60));
+// quit the game
 void Quit() {
   run = false;
   menu_run = false;
   game_run = false;
 }
+// quit button
 MenuButton* quit =
     new MenuButton({25, 340, 200, 50}, Quit, NULL,
                    new MenuText("Quit", {255, 255, 255, 255}, 40));
-
+// popup tutorial 
 void Tutorial() {
   Menu* popup = new Menu(600, 430);
   bool popup_run = true;
@@ -65,24 +70,30 @@ void Tutorial() {
   }
   delete popup;
 }
+// tutorial button
 MenuButton* how =
     new MenuButton({25, 285, 200, 50}, Tutorial, NULL,
                    new MenuText("How To", {255, 255, 255, 255}, 40));
-
+// tile of the game
 MenuText* title = new MenuText(25, 75, "Conscience", {255, 0, 0, 255}, 26);
 
+// amount of credits the player currently possesses
 MenuText* credits =
     new MenuText(25, 174, "Cr: \u00A2" + std::to_string(save.GetCredits()),
                  {0, 0, 0, 255}, 26);
 
-// player 1
+// player 1 GUI vars
+// which gun the player has selected
 int player_1_gun = 0;
 void reset1();
 // overlay for p1 gun menu
 void Overlay1Hide();
+// the currenyt hoverd over gun
 int player1_selector = NULL;
+// p1 overlay
 MenuItem* player1_overlay =
     new MenuItem({304, 100, 132, 188}, SDL_Color{30, 30, 30, 120});
+// upgrde the weapon of player 1
 void UpgradeWeapon1() {
   if (save.UpgradeWeapon(player1_selector)) {
     Overlay1Hide();
@@ -135,6 +146,8 @@ void Click11() {
   player1_gun1->SetColorDef({200, 0, 0, 255});
   player_1_gun = 0;
 }
+
+
 // p1 gun 2
 MenuText* player1_gun2_text =
     new MenuText(314, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
@@ -162,6 +175,8 @@ void Click12() {
   player_1_gun = 1;
 }
 
+
+
 // p1 gun 3
 MenuText* player1_gun3_text =
     new MenuText(314, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
@@ -188,6 +203,9 @@ void Click13() {
   player1_gun3->SetColorDef({200, 0, 0, 255});
   player_1_gun = 2;
 }
+
+
+
 // p1 gun 4
 MenuText* player1_gun4_text =
     new MenuText(314, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
@@ -215,6 +233,8 @@ void Click14() {
   player_1_gun = 3;
 }
 
+
+
 // p1 gun 5
 MenuText* player1_gun5_text =
     new MenuText(314, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
@@ -241,6 +261,7 @@ void Click15() {
   player1_gun5->SetColorDef({200, 0, 0, 255});
   player_1_gun = 4;
 }
+
 // hiding of p1 overlay components
 void reset1() {
   player1_gun1->SetColorDef({60, 60, 60, 255});
@@ -261,7 +282,7 @@ void Overlay1Hide() {
   player1_selector = NULL;
 }
 
-// p1 upgrades
+// p1 speed
 MenuText* p1_speed = new MenuText(
     274, 75, "S: " + std::to_string(save.GetPlayerStats(1)[0] / 10),
     {0, 0, 0, 255}, 20);
@@ -296,6 +317,9 @@ void ShowPriceP1Speed(bool dir) {
   }
 }
 
+
+
+// p1 armour
 void ShowPriceP1Armour(bool dir);
 void UpgradeP1Armour() {
   if (save.UpgradePlayer(true, 1)) {
@@ -323,6 +347,8 @@ void ShowPriceP1Armour(bool dir) {
   }
 }
 
+
+// p1 damage / repair
 MenuItem* p1_damagebar =
     new MenuItem({274, 379, static_cast<int>(save.GetDamage(1) * 1.65f), 11},
                  {110, 59, 173, 255});
@@ -394,6 +420,8 @@ void Overlay2Show(bool dir) {
 // player 2 menu image
 MenuImage* player2_image = new MenuImage(564, 100, "player");
 
+
+
 // p2 gun 1
 MenuText* player2_gun1_text =
     new MenuText(564, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost:\u00A2100",
@@ -420,6 +448,8 @@ void Click21() {
   player2_gun1->SetColorDef({200, 0, 0, 255});
   player_2_gun = 0;
 }
+
+
 
 // 21 gun 2
 MenuText* player2_gun2_text =
@@ -448,6 +478,8 @@ void Click22() {
   player_2_gun = 1;
 }
 
+
+
 // p2 gun 3
 MenuText* player2_gun3_text =
     new MenuText(564, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
@@ -475,6 +507,8 @@ void Click23() {
   player_2_gun = 2;
 }
 
+
+
 // p2 gun 4
 MenuText* player2_gun4_text =
     new MenuText(564, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
@@ -501,6 +535,8 @@ void Click24() {
   player2_gun4->SetColorDef({200, 0, 0, 255});
   player_2_gun = 3;
 }
+
+
 
 // p1 gun 5
 MenuText* player2_gun5_text =
@@ -548,6 +584,7 @@ void reset2() {
   player2_gun5->SetColorDef({60, 60, 60, 255});
 }
 
+// p2 speed
 MenuText* p2_speed = new MenuText(
     524, 75, "S: " + std::to_string(save.GetPlayerStats(2)[0] / 10),
     {0, 0, 0, 255}, 20);
@@ -582,6 +619,8 @@ void ShowPriceP2Speed(bool dir) {
   }
 }
 
+
+// p2 armour
 void ShowPriceP2Armour(bool dir);
 void UpgradeP2Armour() {
   if (save.UpgradePlayer(true, 2)) {
@@ -609,6 +648,8 @@ void ShowPriceP2Armour(bool dir) {
   }
 }
 
+
+// p2 repair / damage
 void ShowPriceP2Repair(bool dir);
 MenuItem* p2_damagebar =
     new MenuItem({524, 379, static_cast<int>(save.GetDamage(2) * 1.65f), 11},

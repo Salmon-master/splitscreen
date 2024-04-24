@@ -6,7 +6,9 @@
 #include <cmath>
 // a structure containing a 2d vector mathmatical/physics sense.
 struct Vector {
+  // x componet of the vector
   float x = 0;
+  // y component of the vector
   float y = 0;
   // retuns the length or normal of the vector
   float Norm() {
@@ -18,7 +20,7 @@ struct Vector {
     Vector normlisied = {this->x / this->Norm(), this->y / this->Norm()};
     return normlisied;
   }
-  // retuns teh dot product of this vector and another inputted vector
+  // retuns the dot product of this vector and another inputted vector
   float Dot(Vector other) { return (this->x * other.x) + (this->y * other.y); }
   // retuns this vector, but scaled by the input
   Vector Scaled(float scalar) {

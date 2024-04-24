@@ -7,9 +7,10 @@
 #include <utility>
 #include <vector>
 
+#include "SDL2/include/SDL.h"
+
 #include "game_object.h"
 #include "player.h"
-#include "SDL2/include/SDL.h"
 #include "ui_bar.h"
 
 // object to control a window on screen, used by the main.cc to create a window,
@@ -23,10 +24,11 @@ class Screen {
   SDL_Window* win_;
   // SDL window data
   SDL_Renderer* renderer_;
-  // an ID for when the need to distunguish between windows
+  // an ID for when the need to distunguish between windows, set in constructor
   int window_id_;
-  // camera pos
+  // camera pos x
   float x_ = 0;
+  // camera pos y
   float y_ = 0;
   // object following
   Player* following_ = nullptr;
@@ -40,6 +42,7 @@ class Screen {
  public:
   // inputs are the loction of the screen object's window on the actual screen
   Screen(int x, int y);
+  // uninitalise and destruct in a mem safe way
   ~Screen();
   // render all objects in veiw of camrea on screen, called in main method every
   // frame
@@ -47,14 +50,12 @@ class Screen {
   // bind camrea position to the inputted player's position, and disply the
   // health of that player on screen
   void Attach(Player* target);
-  // adds a bar to teh list of bars, and consequently to the screen
+  // adds a bar to the list of bars, and consequently to the screen
   UIBar* AddBar(int max_value, SDL_Color color, SDL_Rect rect, int value);
   // removes a given bar form the screen object.
   void RemoveBar(UIBar* bar_to_remove);
   Player* GetAttached();
   std::vector<UIBar*>* GetBars();
-
- private:
 };
 
 #endif  // !SCREEN_H_

@@ -12,11 +12,15 @@
 // bars are assigned to an induvidular screen object which will display them.
 class UIBar {
  public:
+  // constructor, takes a max value, the color of that bar and a rect
+  // represneting what place(in screen space) and dimensions teh bar should
+  // occupy
   UIBar(int max_value, SDL_Color color, SDL_Rect rect);
+  // uninitalise and destruct in a mem safe way
   ~UIBar();
   void SetValue(int value);
   void ChangeValue(float delta_value);
-  // returns the a rect and color of the coloured part of teh bar, called in the
+  // returns the a rect and color of the coloured part of the bar, called in the
   // render method in the screen object to display the bar
   std::pair<SDL_Rect*, SDL_Color> GetBar();
   SDL_Rect* GetRect();
@@ -29,17 +33,18 @@ class UIBar {
   void SetPos(int x, int y);
 
  private:
-  // rectangle of the bar, used for display purposes
+  // rectangle of the bar, used for display purposes (coorinates are in screen
+  // space)
   SDL_Rect rect_ = {0, 0, 0, 0};
   // color of the bar, used for display purposes
   SDL_Color color_ = {255, 0, 0};
   // current value of the bar. used for display and game object purposes, can be
   // externally acessed via the GetValue() method
   float value_ = 0;
-  // the maximum value the bar can be, defined in teh constuctor and used for
+  // the maximum value the bar can be, defined in the constuctor and used for
   // diplay purposes and to cehck if the bar is full
   float max_value_ = 0;
-  // The border size(in px) between the colored bit of teh bar and the
+  // The border size(in px) between the colored bit of the bar and the
   // background.
   static const int border = 2;
 };

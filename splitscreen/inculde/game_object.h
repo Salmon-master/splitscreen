@@ -4,11 +4,12 @@
 #define GAME_OBJECT_H_
 
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "SDL2/include/SDL.h"
 #include "SDL2_image/include/SDL_image.h"
+
 #include "vector.h"
 
 // Base class for all and any objects which are rendered to a screen, used
@@ -17,49 +18,56 @@
 // manipulation is also included.
 class GameObject {
  public:
-  // ture if rendered on a screen, if not false
+  // true if rendered on a screen, if not false
   bool rendered_ = false;
 
  protected:
-  // cartesian control variables
+  // rect of the object(in game space)
   SDL_FRect rect_ = {0, 0, 0, 0};
+  // rotation of that object, from 0 to 2PI
   float rotation_ = 0;
+  // the center about which that object is rotated
   SDL_Point rotation_center_ = {0, 0};
-  // still cartesian control, but is a reference of the pervious movment off the
-  // object
+  // a reference of the pervious movment off the object
   Vector velocity_ = {0, 0};
   // all frames of all animations indexed by animation and frame number
   std::vector<std::vector<SDL_Surface*>> surfaces_;
-  // animation control vars
+  // current animation the object doing
   int state_ = 0;
+  // current frame of current animation
   int frame_ = 0;
+  // the fps of the animation
   int fps_ = 0;
+  // the last time, in ms since sld2 libary initisation, that the render wanted
+  // the current frame of the object
   int last_step_ = 0;
+  // a vector of the next animations to play after the current animation has
+  // finished playing.
   std::vector<int> state_que_ = {};
+  // a redundant virtual function that allows of dynmic casting to distuingish
+  // between types of child objects
   virtual void Cast();
 
  public:
+  // a location and a name for filesystem purposes
   GameObject(int x, int y, std::string name);
   ~GameObject();
-  // location modiying and setting
+  // set the positin of the object in gamespace
   void SetPos(int x, int y);
+  // translate the object in gamespace by the inputted amounts
   void Move(float x, float y);
   // calculate animation and retrun frame that needs to be rendered, used by
-  // screen class to get surfaces to render
+  // screen class to get surfaces to render.
   SDL_Surface* GetSurface();
-  // both below functions used by the main game loop in the input sections to
-  // update what animation needs to be run, animations can either be run
-  // immedatly(SetState()) and interupt the current one, or run after the
-  // current animation is finished playing (QueState()).
+  // used to set the current animation, intreupting the current one playing.
   void Setstate(int state);
+  // aslo used to set the current amination, but ques the animation to run after
+  // the current animation is finished playing.
   void QueState(int state);
-  // private acessors
   SDL_FRect GetRect();
   float GetRotation();
   SDL_Point* GetCenter();
   Vector GetVelocity();
-
- private:
 };
 
 #endif  // !GAME_OBJECT_H_

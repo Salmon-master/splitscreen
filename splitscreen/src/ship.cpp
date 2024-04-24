@@ -33,7 +33,7 @@ std::pair<int, int> Ship::GetDimensions() {
 bool Ship::MoveRoom(bool dir) {
   bool rv = false;
   int to_be_loaded = room_number_;
-  // increment room if input is positive, decermesemt teh room if negitave.
+  // increment room if input is positive, decermesemt the room if negitave.
   if (dir) {
     if (room_number_ < rooms_.size() - 1) {
       to_be_loaded++;

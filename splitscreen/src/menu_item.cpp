@@ -31,3 +31,9 @@ MenuItem::MenuItem(SDL_Rect rect, SDL_Color color) {
   rect_ = rect;
   color_ = color;
 }
+
+MenuItem::~MenuItem() {
+  if (surface_) {
+    SDL_FreeSurface(surface_);
+  }
+}

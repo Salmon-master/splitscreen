@@ -21,6 +21,7 @@ class Ship {
   // constuctor
   Ship(std::vector<std::vector<GameObject*>>* game_objects,
                 SaveManager* save);
+  // uninitalise and destruct in a mem safe way
   ~Ship();
   // Retuns the dimensions, in px of the current room
   std::pair<int, int> GetDimensions();
