@@ -46,7 +46,8 @@ void MenuText::Update() {
   if (text_ != last_text_) {
     last_text_ = text_;
     if (wrap_) {
-      // convert text to surface and set that surface to this surface with wrapping
+      // convert text to surface and set that surface to this surface with
+      // wrapping
       SetSurface(TTF_RenderText_Solid_Wrapped(font_, text_.c_str(), text_color_,
                                               wrap_));
     } else {

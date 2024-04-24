@@ -128,7 +128,7 @@ int main(int argc, char* args[]) {
         }
         if (e.type == SDL_KEYDOWN) {
           if (e.key.keysym.sym == SDLK_ESCAPE) {
-            //quit
+            // quit
             menu_run = false;
             game_run = false;
             run = false;
