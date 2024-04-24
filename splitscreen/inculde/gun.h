@@ -23,11 +23,12 @@ class Gun {
   Bullet* Shoot();
 
  private:
-   // the speed of the bullet fired
+  // the speed of the bullet fired
   int speed_ = 30;
   // how long between shots the gun is allowed to fire.
   int cooldown_ = 300;
-  // timestamp for when the gun was last fired, in ms since the SDL initilisation
+  // timestamp for when the gun was last fired, in ms since the SDL
+  // initilisation
   int last_shot_ = 0;
   // an int relating to the type of gun (0 based)
   int type_ = 0;

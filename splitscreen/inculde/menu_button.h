@@ -35,7 +35,7 @@ class MenuButton : public MenuItem {
   // a pointer to an optional menuitem rendered as part of the button so that it
   // may display text or images initised in constructor
   MenuItem* display_ = nullptr;
-  // the default color of the button when not hoverd over 
+  // the default color of the button when not hoverd over
   SDL_Color color_def_ = {60, 60, 60, 255};
 };
 

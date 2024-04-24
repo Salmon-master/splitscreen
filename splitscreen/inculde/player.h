@@ -28,7 +28,7 @@ class Player : public GameObject {
   int armour_ = 0;
   // unique identification number used to load in stats, based off what order
   // the objects are constructed in. e.g first player has id of 1, next intilise
-  // has id of 2 ect... 
+  // has id of 2 ect...
   // initilised in constructor
   int id_;
 

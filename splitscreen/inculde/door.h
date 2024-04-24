@@ -8,7 +8,7 @@
 // a class used to represnt a door in the game
 class Door : public GameObject {
  public:
-   // inputs are the position of the door in game space.
+  // inputs are the position of the door in game space.
   Door(int x, int y);
   // switch the current state of the door, retuns the state of the door, true.
   // for open, false for closed

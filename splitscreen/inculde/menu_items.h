@@ -35,7 +35,7 @@ void Quit() {
 MenuButton* quit =
     new MenuButton({25, 340, 200, 50}, Quit, NULL,
                    new MenuText("Quit", {255, 255, 255, 255}, 40));
-// popup tutorial 
+// popup tutorial
 void Tutorial() {
   Menu* popup = new Menu(600, 430);
   bool popup_run = true;
