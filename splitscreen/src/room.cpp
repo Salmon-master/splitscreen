@@ -12,7 +12,7 @@
 #include "vector.h"
 
 Room::Room(SaveManager* save) {
-  // convereting genretaed map into walls
+  // convereting genretaed map into walls and doors
   std::vector<std::vector<Room::States>> map = Generate();
   for (int y = 0; y < map.size() - 1; y++) {
     for (int x = 0; x < map[0].size() - 1; x++) {
@@ -29,6 +29,7 @@ Room::Room(SaveManager* save) {
     walls_.push_back(new Wall((map[0].size() - 1) * 128, y * 128));
     std::cout << std::endl;
   }
+  // edge
   for (int x = 0; x < map[0].size(); x++) {
     if (x == map[0].size() - 2) {
       walls_.push_back(new Door(x * 128, (map.size() - 1) * 128));
@@ -36,6 +37,7 @@ Room::Room(SaveManager* save) {
       walls_.push_back(new Wall(x * 128, (map.size() - 1) * 128));
     }
   }
+  // enemy generation
   int size = (((rand() % (61)) + 70) / 100.0f) * (free_.size() / 12);
   for (int i = 0; i < size; i++) {
     int random = rand() % free_.size();
@@ -137,9 +139,11 @@ std::vector<std::vector<Room::States>> Room::Generate() {
             if (l < 0 || l >= room_height || f < 0 || f >= room_width) {
               if ((l + y) > 0 && (l + y) < height - 1 && (f + x) > 0 &&
                   (f + x) < width - 1) {
+                // placing in room
                 output[l + y][x + f] = kNextToArea;
               }
             } else {
+              // placing in room
               output[l + y][x + f] = kArea;
             }
           }
@@ -215,20 +219,24 @@ std::vector<std::vector<Room::States>> Room::Generate() {
           directions.push({0, 1});
         }
       }
+      // if the direction is empty, retreat to previous position
       if (directions.empty()) {
         pos.pop();
       } else {
+        // get random direction
         if (directions.size() - 1 != 0) {
           int length = rand() % directions.size() - 1;
           for (int i = 0; i < length; i++) {
             directions.pop();
           }
         }
+        // push new position
         SDL_Point next = {(pos.top().x + directions.top().x),
                           (pos.top().y + directions.top().y)};
         pos.push(next);
       }
     }
+    // re-get possible starting points
     starting_points = {};
     for (int i = 1; i < output.size() - 2; i++) {
       for (int j = 1; j < output[i].size() - 2; j++) {

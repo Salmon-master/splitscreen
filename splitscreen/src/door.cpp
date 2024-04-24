@@ -5,6 +5,7 @@
 Door::Door(int x, int y) : GameObject(x, y, "door") { open_ = false; }
 
 bool Door::Open() {
+  // reverse the open_ var 
   open_ = !open_;
   return open_;
 }

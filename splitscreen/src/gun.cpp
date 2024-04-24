@@ -6,6 +6,7 @@
 
 Gun::Gun(int type, GameObject* holder, SaveManager* save) {
   held_by_ = holder;
+  // setting stats from save
   std::vector<int> stats = save->GetGunStats(type);
   damage_ = stats[0];
   cooldown_ = stats[1];

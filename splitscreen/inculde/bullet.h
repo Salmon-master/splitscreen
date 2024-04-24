@@ -17,7 +17,8 @@ class Bullet : public GameObject {
   // bullet.
   Bullet(GameObject* shooter, int damage, int speed);
   // used in main game loop to step the bullet foward by veclocity and check for
-  // collisions between the current list of gameobjects(input)
+  // collisions between the current list of gameobjects(input), retuns if the
+  // bullet has hit an object and thefore needs to be destructed
   bool Update(std::vector<std::vector<GameObject*>>* objects);
 
  private:

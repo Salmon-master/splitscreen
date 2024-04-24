@@ -8,16 +8,14 @@
 
 #include "SDL2/include/SDL.h"
 
-// a class used to display infomation to the player in the form of a bar, theese
+// a class used to display infomation to the player in the from of a bar, theese
 // bars are assigned to an induvidular screen object which will display them.
 class UIBar {
  public:
   // constructor, takes a max value, the color of that bar and a rect
-  // represneting what place(in screen space) and dimensions teh bar should
+  // represneting what place(in screen space) and dimensions the bar should
   // occupy
   UIBar(int max_value, SDL_Color color, SDL_Rect rect);
-  // uninitalise and destruct in a mem safe way
-  ~UIBar();
   void SetValue(int value);
   void ChangeValue(float delta_value);
   // returns the a rect and color of the coloured part of the bar, called in the

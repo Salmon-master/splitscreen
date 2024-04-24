@@ -87,7 +87,7 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
       }
     }
   }
-  // deconstuct and remove objecsts that have run out of health.
+  // deconstuct and remove enemies that have run out of health.
   while (!to_remove.empty()) {
     GameObject* removed = to_remove.top();
     to_remove.pop();
@@ -105,5 +105,6 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
       }
     }
   }
+  // retruns true if the bullet has collided with somthing
   return destruct;
 }

@@ -52,7 +52,7 @@ class Screen {
   void Attach(Player* target);
   // adds a bar to the list of bars, and consequently to the screen
   UIBar* AddBar(int max_value, SDL_Color color, SDL_Rect rect, int value);
-  // removes a given bar form the screen object.
+  // removes a given bar from the screen object.
   void RemoveBar(UIBar* bar_to_remove);
   Player* GetAttached();
   std::vector<UIBar*>* GetBars();

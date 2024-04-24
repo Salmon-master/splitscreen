@@ -39,6 +39,7 @@ int main(int argc, char* args[]) {
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     printf("error initializing SDL: %s\n", SDL_GetError());
   }
+  // adding menuitems from menu_items.h
   menu->menu_items_ = {player1_image,
                        player2_image,
                        player1_gun1,
@@ -84,18 +85,23 @@ int main(int argc, char* args[]) {
                        quit,
                        how,
                        credits};
+  // setting speicilsed things about the items in menu_items.h
   title->SetWrap(200);
   player1_gun1->SetColorDef({200, 0, 0, 255});
   player2_gun1->SetColorDef({200, 0, 0, 255});
   menu->ChangeVisability();
   SDL_Event e;
+  // full game loop
   while (run) {
-    menu->ChangeVisability();
     // menu
+    // show menu
+    menu->ChangeVisability();
     menu->Render();
+    // updating bars
     p1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
     p2_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(2) * 1.65f);
     if (death_menu) {
+      // death popup
       MenuText* dead = new MenuText(120, 25, "You Died", {255, 0, 0, 255}, 30);
       death_menu->menu_items_ = {dead};
       death_menu->Render();
@@ -104,6 +110,7 @@ int main(int argc, char* args[]) {
       death_menu = nullptr;
     }
     if (reward_menu) {
+      // reward pop up
       reward_menu->Render();
       SDL_Delay(3000);
       delete reward_menu;
@@ -114,18 +121,21 @@ int main(int argc, char* args[]) {
     while (menu_run) {
       if (SDL_PollEvent(&e)) {
         if (e.type == SDL_QUIT) {
+          // quit
           menu_run = false;
           game_run = false;
           run = false;
         }
         if (e.type == SDL_KEYDOWN) {
           if (e.key.keysym.sym == SDLK_ESCAPE) {
+            //quit
             menu_run = false;
             game_run = false;
             run = false;
           }
         }
       }
+      // hovering over the overlays
       SDL_Rect rect = *player1_overlay->GetRect();
       int x, y;
       SDL_GetMouseState(&x, &y);
@@ -138,6 +148,7 @@ int main(int argc, char* args[]) {
             y < rect2.y + rect2.h)) {
         Overlay2Hide();
       }
+      // render
       menu->Render();
     }
     menu->ChangeVisability();
@@ -148,36 +159,37 @@ int main(int argc, char* args[]) {
       Screen screen2(600, SDL_WINDOWPOS_CENTERED);
       UIBar* swtich_bar = nullptr;
 
-      // game object intitilastion
+      // robot intitilastion
       Player::new_id_ = 1;
       Player player1(&save, player_1_gun);
       Player player2(&save, player_2_gun);
       player1.SetPos(256, 256);
       player2.SetPos(256, 256);
 
-      // adding objects to lists
+      // game objects list, indexed by type
       std::vector<std::vector<GameObject*>> game_objects = {{}, {}, {}, {}, {}};
+      // adding objects to lists
       game_objects[kPlayers].push_back(&player1);
       game_objects[kPlayers].push_back(&player2);
 
       // ship
       Ship ship1(&game_objects, &save);
 
-      // eniemies
-      // assign players to screens
+      // assign robots to screens
       screen2.Attach(&player2);
       screen1.Attach(&player1);
       // game vars
       Screen* controlling = &screen1;
       int swich_cooldown = 0;
 
+      // keyboard inputs
       const Uint8* key_state = SDL_GetKeyboardState(NULL);
 
       // delta time vars
       int delta_time = 0;
       int last = SDL_GetTicks64();
       const int frame_cap = 30;
-      // main game loop
+      // game loop
       while (game_run) {
         // inputs
         SDL_PumpEvents();
@@ -191,6 +203,7 @@ int main(int argc, char* args[]) {
           controlling->GetAttached()->Rotate(1, delta_time);
         }
         if (key_state[SDL_SCANCODE_SPACE] == 1) {
+          // shoot
           if (controlling->GetAttached()->active_) {
             Bullet* bullet = controlling->GetAttached()->GetGun()->Shoot();
             if (bullet) {
@@ -199,6 +212,7 @@ int main(int argc, char* args[]) {
           }
         }
         if (key_state[SDL_SCANCODE_V] == 1) {
+          // switching robots
           if (swtich_bar) {
             swtich_bar->ChangeValue(2 * (delta_time / 10));
             std::cout << swtich_bar->GetValue() << std::endl;
@@ -233,7 +247,7 @@ int main(int argc, char* args[]) {
           game_run = false;
           death_menu = new Menu(400, 80);
         }
-        // level advancing
+        // room advancing / ship completion / fleeing
         for (GameObject* obj : game_objects[kPlayers]) {
           Player* player = dynamic_cast<Player*>(obj);
           if (player) {
@@ -347,6 +361,7 @@ int main(int argc, char* args[]) {
           SDL_Delay(pow(frame_cap * 1000, -1) - delta_time);
         }
       }
+      // clean up
       for (GameObject* bullet : game_objects[kBullets]) {
         delete bullet;
       }

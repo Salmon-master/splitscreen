@@ -23,11 +23,12 @@ Enemy::Enemy(int x, int y, int type, Room* room, SaveManager* save)
     float angle = (i * 2 * M_PI) / kNumRays;
     ray_directions_[i] = {cos(angle), sin(angle)};
   }
-  // setting up enemy type
+  // setting up enemy type and loading in stats
   speed_ = kEnemyStats[type][0];
   attack_range_ = kEnemyStats[type][1];
   max_health_ =
       kEnemyStats[type][2] + ((kEnemyStats[type][2] * save->GetLevel()) / 10);
+  // health bar
   health_bar_ = new UIBar(
       max_health_, {135, 211, 124},
       SDL_Rect{static_cast<int>(rect_.x), static_cast<int>(rect_.y - 10),
@@ -54,7 +55,6 @@ bool Enemy::Damage(int amount) {
 }
 
 void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
-  //
   std::vector<Vector> diff;
   // looping through players and adding to lists
   for (GameObject* player : game_objects->at(kPlayers)) {
@@ -187,10 +187,7 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
   }
 }
 
-UIBar* Enemy::GetBar() {
-  // add bar to screen's bars if not already on there
-  return health_bar_;
-}
+UIBar* Enemy::GetBar() { return health_bar_; }
 
 Enemy::~Enemy() {
   // remove enmies in a memory safe way
@@ -206,7 +203,7 @@ Enemy::~Enemy() {
 }
 
 std::vector<float> Enemy::SetInterest(Vector direction) {
-  // reurns the chosen dirction represneted in the form of all the rays in the
+  // reurns the chosen dirction represneted in the from of all the rays in the
   // ray dirctions scaled so that the sum of theese rays is equal to the
   // inputted dirctions.
   std::vector<float> interest_aray(kNumRays);
@@ -246,8 +243,7 @@ std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
       for (std::pair<SDL_Point, SDL_Point> line : lines) {
         float danger = 0;
         if (Intersect(line.first, line.second, ray.first, ray.second)) {
-          // if there is an intersection set the danger equal to the inverse
-          // distance between the enemy and that object, times a constant
+          // intersection with an object
           float diffrence;
           if (line.first.x == line.second.x) {
             diffrence = abs(line.first.x - (rect_.x + rotation_center_.x));
@@ -257,12 +253,15 @@ std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
           Wall* wall_type = static_cast<Wall*>(obj);
           Door* door_type = static_cast<Door*>(obj);
           Enemy* enemy_type = static_cast<Enemy*>(obj);
+          // wall or door else enemy
           if (wall_type || door_type) {
             danger = ((search_range_ - r.w) - diffrence) * 0.025;
           } else if (enemy_type) {
             danger = -0.001f;
           }
         }
+        // if the ray has hit somthing, then no need to loop over the rest of
+        // the objects
         danger_aray[i] = danger;
         if (danger != 0.0f && danger != -0.001f) {
           break;
@@ -302,7 +301,9 @@ Bullet* Enemy::Attack(Vector location) {
 }
 
 float Enemy::SetRotationFromVector(Vector rotation) {
+  // basic angle, but only from 0 to PI/2
   float new_rotation = atan(velocity_.y / velocity_.x);
+  // adding based of vector to get angle from 0 to 2PI
   if (rotation.y > 0) {
     if (rotation.x < 0) {
       new_rotation += M_PI;

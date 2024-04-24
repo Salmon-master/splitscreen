@@ -10,8 +10,8 @@
 Ship::Ship(std::vector<std::vector<GameObject*>>* game_objects,
            SaveManager* save) {
   game_objects_ = game_objects;
-  // room generation, from 5 to 10 rooms generated
-  for (int i = 0; i < (rand() % 3) + 2; i++) {
+  // room generation, from 2 to 5 rooms generated
+  for (int i = 0; i < (rand() % 4) + 2; i++) {
     rooms_.push_back(new Room(save));
   }
   // loads inital room into gameobjects
@@ -19,6 +19,7 @@ Ship::Ship(std::vector<std::vector<GameObject*>>* game_objects,
 }
 
 Ship::~Ship() {
+  // destrcution of rooms
   for (Room* room : rooms_) {
     delete room;
   }

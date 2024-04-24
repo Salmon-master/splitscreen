@@ -55,14 +55,14 @@ class SaveManager {
 
  private:
   // The constants of the base guns, multipled by their respective levels to
-  // attain the gun's stats. in the form of a 3 element array where:
+  // attain the gun's stats. in the from of a 3 element array where:
   // [0] is the gun's base damage,
   // [1] is the gun's base rate of fire,
   // [2] is the gun's base bullet speed.
   const int kBaseGuns[5][3] = {
       {10, 500, 5}, {4, 200, 20}, {1, 100, 20}, {10, 600, 50}, {5, 300, 20}};
   // The constants of the base robots, multipled by their respective levels to
-  // attain the robots's stats. in the form of a 2 element array where:
+  // attain the robots's stats. in the from of a 2 element array where:
   // [0] is the robot's base speed,
   // [1] is the robot's base armour.
   const int kBasePlayer[2] = {200, 2};

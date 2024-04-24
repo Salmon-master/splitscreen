@@ -16,7 +16,9 @@ Player::Player(SaveManager* save, int gun) : GameObject(0, 0, "player") {
   damage_ = save->GetDamage(id_);
   // roataion center to center of player charter
   rotation_center_.y = (rect_.h - 28) + rect_.y;
+  // gun initialisation
   gun_ = new Gun(gun, this, save);
+  // damage bar initialisation
   damage_bar_ = new UIBar(
       100, {110, 59, 173},
       {static_cast<int>(rect_.x), static_cast<int>(rect_.y), 250, 40});
@@ -27,7 +29,7 @@ Player::~Player() { delete gun_; }
 
 void Player::Step(int delta_time) {
   // caluclating the componets of the vector to move given the rotation and
-  // speed (scaled by delta time)
+  // speed (scaled by delta time) if active
   if (active_) {
     float x = sin(rotation_) * speed_ * delta_time / 1000;
     float y = cos(rotation_) * speed_ * delta_time / 1000 * -1;
@@ -37,6 +39,7 @@ void Player::Step(int delta_time) {
 }
 
 void Player::Rotate(bool dir, int delta_time) {
+  // roatate based on direction if active
   if (active_) {
     if (dir == 1) {
       rotation_ += rotation_speed_ * delta_time;

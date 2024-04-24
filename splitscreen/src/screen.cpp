@@ -17,6 +17,7 @@ Screen::Screen(int x, int y) {
   if (renderer_ == NULL) {
     std::cout << "Error renderer creation";
   }
+  // setting window id
   window_id_ = SDL_GetWindowID(win_);
 }
 
@@ -59,6 +60,8 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
         SDL_RenderCopyEx(renderer_, texture, NULL, &render_rect, angle,
                          obj->GetCenter(), SDL_FLIP_NONE);
         SDL_DestroyTexture(texture);
+        // add any on screen enemy's health bar to list of bars, and set the
+        // position of that bar in screen space
         Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
         if (enemy_type) {
           bars_.push_back(enemy_type->GetBar());
@@ -86,10 +89,12 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
         SDL_RenderFillRect(renderer_, bar->GetBar().first);
       }
     }
+    // remove enemy health bars from list of bars
     while (enemy_bars > 0) {
       bars_.pop_back();
       enemy_bars--;
     }
+    // remove nullpointer bars from list of bars
     SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 1);
     while (!to_remove.empty()) {
       bars_.erase(std::remove(bars_.begin(), bars_.end(), to_remove.top()),
@@ -113,14 +118,12 @@ void Screen::Attach(Player* target) {
 }
 UIBar* Screen::AddBar(int max_value, SDL_Color color, SDL_Rect rect,
                       int value) {
-  std::cout << "addbar" << std::endl;
   bars_.push_back(new UIBar(max_value, color, rect));
   bars_.back()->SetValue(value);
   return bars_.back();
 }
 
 void Screen::RemoveBar(UIBar* bar_to_remove) {
-  std::cout << "killbar" << std::endl;
   bars_.erase(std::remove(bars_.begin(), bars_.end(), bar_to_remove),
               bars_.end());
   delete bar_to_remove;
