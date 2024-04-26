@@ -1,0 +1,3817 @@
+// Copyright 2024 Hugh Thompson
+
+#ifndef BULLET_H_
+#define BULLET_H_
+
+#include "game_object.h"
+#include "player.h"
+#include "vector"
+#include "vector.h"
+
+class Player;
+
+// a class used to represent an in game bullet
+class Bullet : public GameObject {
+ public:
+  // the constuctor of the bullet, used by the gun class to create an in game
+  // bullet.
+  Bullet(GameObject* shooter, int damage, int speed);
+  // used in main game loop to step the bullet foward by veclocity and check for
+  // collisions between the current list of gameobjects(input), retuns if the
+  // bullet has hit an object and thefore needs to be destructed
+  bool Update(std::vector<std::vector<GameObject*>>* objects);
+
+ private:
+  // the velocity of the bulet, set in constuctor.
+  Vector velocity_ = {0, 0};
+  // bullet speed
+  int speed_ = 30;
+  // damage of the bullet, set in constctor
+  int damage_;
+  // a reference to the object that the gun that shot this bullet belongs to,
+  // given in constctor
+  GameObject* shooter_;
+};
+
+#endif  // !BULLET_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef DOOR_H_
+#define DOOR_H_
+
+#include "game_object.h"
+
+// a class used to represnt a door in the game
+class Door : public GameObject {
+ public:
+  // inputs are the position of the door in game space.
+  Door(int x, int y);
+  // switch the current state of the door, retuns the state of the door, true.
+  // for open, false for closed
+  bool Open();
+  // check for collison between this door and the inputted game object.
+  bool Collide(GameObject* obj);
+  // retuns the state of the door. True for open, false for closed.
+  bool GetState();
+ private:
+  // the current state of the door. True for open, false for closed.
+  bool open_ = false;
+};
+
+#endif  // !DOOR_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef ENEMY_H_
+#define ENEMY_H_
+
+#include <vector>
+
+#include "bullet.h"
+#include "game_object.h"
+#include "gun.h"
+#include "room.h"
+#include "save_manager.h"
+#include "screen.h"
+#include "ui_bar.h"
+#include "vector.h"
+
+class Room;
+
+//  a class represneting the enemies in the game
+class Enemy : public GameObject {
+ public:
+  // initilastion of the enemy, initilised at a position(x, y) and a type(0
+  // based), with a pointer to the room it belongs in and a pointer to the
+  // current save to load in enemy stats
+  Enemy(int x, int y, int type, Room* room, SaveManager* save);
+  // subtract from health, retuns true if health is below 0, false if not
+  bool Damage(int amount);
+  // calculate the direction the enemy wants to go in, interpritation of
+  // alorightm at https://kidscancode.org/godot_recipes/3.x/ai/context_map/
+  void AI(std::vector<std::vector<GameObject*>>* game_objects, int delta);
+  UIBar* GetBar();
+  ~Enemy();
+
+ private:
+  // helper function to AI, caculates the interest array and returns it given a
+  // direction of interest
+  std::vector<float> SetInterest(Vector direction);
+  // helper function to AI, caculates the danger array and returns it given a
+  // list of game objects that are dangerous
+  std::vector<float> SetDanger(std::vector<GameObject*> objects);
+  // checks if two line segments intersect, used mainly for ray casting , line
+  // segments are given by two sets points(start and end) of each line
+  // line 1 = p1-q1
+  // line 2 = p2-q2
+  bool Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2);
+  // the health of the enemy.
+  int health_ = 0;
+  // the staring health of the enemy, set in constrctor.
+  int max_health_ = 10;
+  // movement speed of the enemy, set in constcor
+  float speed_ = 80;
+  // range of attack of the enemy, set in constructor
+  int attack_range_ = 128;
+  // The number of rays used to calculuate interest and danger, higher for
+  // better resoultion for the algroithim, lower for performance enhancment
+  static const int kNumRays = 8;
+  // The normalised vectors of the rays themselves, set in constructor.
+  Vector ray_directions_[kNumRays];
+  // the range in which the enemy may look for wall objects to avoid
+  int search_range_ = 128;
+  // a multiplier to how much the enemy may change its direction, used to avoid
+  // jitteryness and give then enmies a smmother look
+  float steer_force_ = 0.35;
+  // retuns the orenatation of three points, could be either colcokwise(1),
+  // anitclockwise(2) or colinear(0)
+  int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);
+  // a pointer to the enemies health bar, initiaised in constructor
+  UIBar* health_bar_ = nullptr;
+  // wether or not the enenmy is alive
+  bool dead_ = false;
+  // Deals with the enemies attack mechanics
+  Bullet* Attack(Vector location);
+  // reference to the wepon used by this enemy, initiased in constructor
+  Gun* gun_ = nullptr;
+  // returns a rotation is radians from the vertical (from 0 to 2PI Rad) given a
+  // vector.
+  float SetRotationFromVector(Vector rotation);
+  // a pointer to the room which the enemy is in, initised in consctor
+  Room* room_ = nullptr;
+  // base enemy stats, multiplied in constucor by avrage player level
+  const int kEnemyStats[5][3] = {
+      {30, 64, 20}, {60, 128, 10}, {85, 96, 5}, {50, 256, 10}, {60, 128, 10}};
+  // the type of the enmey (0 based)
+  int type_;
+};
+
+#endif  // !ENEMY_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef GAME_OBJECT_H_
+#define GAME_OBJECT_H_
+
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "SDL2/include/SDL.h"
+#include "SDL2_image/include/SDL_image.h"
+
+#include "vector.h"
+
+// Base class for all and any objects which are rendered to a screen, used
+// mainly as an interface with the screens so that one one type has to be
+// rendered, and most functionalty concerning loading of images and posistion
+// manipulation is also included.
+class GameObject {
+ public:
+  // true if rendered on a screen, if not false
+  bool rendered_ = false;
+
+ protected:
+  // rect of the object(in game space)
+  SDL_FRect rect_ = {0, 0, 0, 0};
+  // rotation of that object, from 0 to 2PI
+  float rotation_ = 0;
+  // the center about which that object is rotated
+  SDL_Point rotation_center_ = {0, 0};
+  // a reference of the pervious movment off the object
+  Vector velocity_ = {0, 0};
+  // all frames of all animations indexed by animation and frame number
+  std::vector<std::vector<SDL_Surface*>> surfaces_;
+  // current animation the object doing
+  int state_ = 0;
+  // current frame of current animation
+  int frame_ = 0;
+  // the fps of the animation
+  int fps_ = 0;
+  // the last time, in ms since sld2 libary initisation, that the render wanted
+  // the current frame of the object
+  int last_step_ = 0;
+  // a vector of the next animations to play after the current animation has
+  // finished playing.
+  std::vector<int> state_que_ = {};
+  // a redundant virtual function that allows of dynmic casting to distuingish
+  // between types of child objects
+  virtual void Cast();
+
+ public:
+  // a location and a name for filesystem purposes
+  GameObject(int x, int y, std::string name);
+  ~GameObject();
+  // set the positin of the object in gamespace
+  void SetPos(int x, int y);
+  // translate the object in gamespace by the inputted amounts
+  void Move(float x, float y);
+  // calculate animation and retrun frame that needs to be rendered, used by
+  // screen class to get surfaces to render.
+  SDL_Surface* GetSurface();
+  // used to set the current animation, intreupting the current one playing.
+  void Setstate(int state);
+  // aslo used to set the current amination, but ques the animation to run after
+  // the current animation is finished playing.
+  void QueState(int state);
+  SDL_FRect GetRect();
+  float GetRotation();
+  SDL_Point* GetCenter();
+  Vector GetVelocity();
+};
+
+#endif  // !GAME_OBJECT_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef GUN_H_
+#define GUN_H_
+
+#include "bullet.h"
+#include "player.h"
+#include "save_manager.h"
+
+class Player;
+class Bullet;
+
+// a class used to represnt the weapon held by either an enemy or player, used
+// by either of these classes to controll what anyting relating to the combat
+// element of the game.
+class Gun {
+ public:
+  // inputs are a reference to the type of gun and save to load that guns stats,
+  // and a pointer to the gameobject that holds this gun for aiming purposes
+  Gun(int type, GameObject* holder, SaveManager* save);
+  // shoots a bullet in the current direction of the entity holding, returns a
+  // pointer to this bullet fired.
+  Bullet* Shoot();
+
+ private:
+  // the speed of the bullet fired
+  int speed_ = 30;
+  // how long between shots the gun is allowed to fire.
+  int cooldown_ = 300;
+  // timestamp for when the gun was last fired, in ms since the SDL
+  // initilisation
+  int last_shot_ = 0;
+  // an int relating to the type of gun (0 based)
+  int type_ = 0;
+  // damage done by the bullets this weapon fires
+  int damage_ = 10;
+  // the gameobject that is firing the weapon, used to get a direction of where
+  // the bullet should shoot, set in constctor.
+  GameObject* held_by_ = nullptr;
+};
+
+#endif  // !GUN_H_
+// Copyright 2024 Hugh Thompson
+
+#pragma once
+
+#include "SDL2/include/SDL.h"
+
+// enumerated indexes of the game object types in gameobjects
+enum Types { kPlayers = 0, kWalls = 1, kEnemies = 2, kBullets = 3, kDoors = 4 };
+
+// a constasnt for the use of setting a null color
+const SDL_Color kNullColor = {NULL, NULL, NULL, NULL};
+// Copyright 2024 Hugh Thompson
+
+#ifndef MENU_H_
+#define MENU_H_
+
+#include <vector>
+
+#include "menu_item.h"
+#include "menu_text.h"
+#include "SDL2/include/SDL.h"
+
+class Menu {
+ public:
+  // initisation for a menu.
+  Menu();
+  ~Menu();
+  // render all objects on the list of menu items, called every frame by the
+  // menu loop
+  void Render();
+  // shows and hides the menu based on its current visability
+  void ChangeVisability();
+  // the list of menu items to render
+  std::vector<MenuItem*> menu_items_ = {};
+  // initisation for a popup, takes a location on the wider screen to initialse
+  // at.
+  Menu(int x, int y);
+
+ private:
+  // SDL window data
+  SDL_Window* win_ = nullptr;
+  // SDL renderer data
+  SDL_Renderer* renderer_ = nullptr;
+  // visabilty status, true for visable
+  bool visability_ = true;
+  // border, true for popus but not for menus
+  bool border_ = false;
+};
+
+#endif  // !MENU_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef MENU_BUTTON_H_
+#define MENU_BUTTON_H_
+
+#include "menu_item.h"
+
+// a class used to represnt a button in a menu, add to a menu's list of menu
+// objects and the button will appear on that menu
+class MenuButton : public MenuItem {
+ public:
+  // inputs are: a rect descibing the position and size of the button, what code
+  // to execute when the button is clicked, then what code to execucte when the
+  // button is hovered, and a pointer to a menuobject so that text or images my
+  // be reneder as part of the button.
+  MenuButton(SDL_Rect rect, void (*Click)(), void (*Hover)(bool dir),
+             MenuItem* display);
+  ~MenuButton();
+  //  called by the menu's renderer evey frame to update the buttons asthetics
+  //  and to check for hovering and clicking
+  void Update();
+  MenuItem* GetDisplay();
+  // sets the default color of the button when not hoverd over
+  void SetColorDef(SDL_Color color);
+
+ private:
+  // a function pointer to what code the button will execute when clicked.
+  // initised in constructor
+  void (*OnClick)() = NULL;
+  // a function pointer to what code should be executed when hoverd over, and an
+  // input to reverse this action. the function will be called with dir being
+  // true if the button is currently being over over and fasle if not. initised
+  // in constructor
+  void (*OnHover)(bool dir) = NULL;
+  // a pointer to an optional menuitem rendered as part of the button so that it
+  // may display text or images initised in constructor
+  MenuItem* display_ = nullptr;
+  // the default color of the button when not hoverd over
+  SDL_Color color_def_ = {60, 60, 60, 255};
+};
+
+#endif  // !MENU_BUTTON_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef MENU_IMAGE_H_
+#define MENU_IMAGE_H_
+
+#include <string>
+
+#include "SDL2/include/SDL.h"
+#include "SDL2_image/include/SDL_image.h"
+
+#include "menu_item.h"
+
+// a class used to represent a static image in a menu, add to a menu's list of
+// menu objects and the button will appear on that menu.
+class MenuImage : public MenuItem {
+ public:
+  // the location of that image and the name of the image file (whithout the
+  // suffix) of the image wanted to be loaded
+  MenuImage(int x, int y, std::string name);
+};
+
+#endif  // !MENU_IMAGE_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef MENU_ITEM_H_
+#define MENU_ITEM_H_
+
+#include "SDL2/include/SDL.h"
+
+// an class used mainly as an interface by the menu object to render the
+// menu items(buttons text ect), but a menu obect may also be renderd to act as
+// a block of color for example
+class MenuItem {
+ public:
+  // the constructor used by child classes using this class as an iterface, a
+  // postiton for the menu object is inputted.
+  MenuItem(int x, int y);
+  // the consctor used for a standalone menuitem, inputs are a position and
+  // dimenison in a rect and a color for diplay
+  MenuItem(SDL_Rect rect, SDL_Color color);
+  ~MenuItem();
+  SDL_Rect* GetRect();
+  SDL_Surface* GetSurface();
+  // sets the visablitiy of the object to show
+  void Show();
+  // sets the visablitiy of the object to hidden
+  void Hide();
+  // virtual update function, not implemeted by this object but child objcets
+  // have implemtations, and this is called evry frame by the menu.
+  virtual void Update();
+  SDL_Color GetColor();
+  // retuns the visaublity staus of the object, true for visable, false for
+  // hidden
+  bool Visable();
+
+ protected:
+  // sets the surface while updating rect
+  void SetSurface(SDL_Surface* surface);
+  // position and dimenion
+  SDL_Rect rect_ = {0, 0, 0, 0};
+  // the visablity status of the object, true for visable, false for hidden
+  bool visable_ = true;
+  // a pointer to the surface that this object is displaying.
+  SDL_Surface* surface_ = nullptr;
+  // color of this object
+  SDL_Color color_ = {NULL, NULL, NULL};
+};
+
+#endif  // !MENU_ITEM_H_
+// Copyright 2024 Hugh Thompson
+
+#pragma once
+
+#include <vector>
+
+#include "menu.h"
+#include "menu_button.h"
+#include "menu_image.h"
+#include "menu_item.h"
+#include "menu_text.h"
+
+// menus and popups
+Menu* menu = new Menu;
+Menu* death_menu = nullptr;
+Menu* reward_menu = nullptr;
+
+// run the game
+void Play() {
+  // if players are both active
+  if (save.GetDamage(1) < 100 && save.GetDamage(2) < 100) {
+    menu_run = false;
+    game_run = true;
+  } else{
+    Menu* popup = new Menu(517, 70);
+    MenuText* text =
+        new MenuText(25, 25, "Both Robots must be active to play", {0, 0, 0, 255}, 20);
+    popup->menu_items_ = {text};
+    popup->Render();
+    SDL_Delay(3000);
+    delete popup;
+  }
+}
+
+// play button
+MenuButton* play =
+    new MenuButton({25, 210, 200, 70}, Play, NULL,
+                   new MenuText("Play", {255, 255, 255, 255}, 60));
+// quit the game
+void Quit() {
+  run = false;
+  menu_run = false;
+  game_run = false;
+}
+// quit button
+MenuButton* quit =
+    new MenuButton({25, 340, 200, 50}, Quit, NULL,
+                   new MenuText("Quit", {255, 255, 255, 255}, 40));
+// popup tutorial
+void Tutorial() {
+  Menu* popup = new Menu(600, 430);
+  bool popup_run = true;
+  SDL_Event e;
+  MenuText* text = new MenuText(
+      25, 25,
+      "Naviagte your way though enemy spaceships using your two robots, if an "
+      "eniter ship is cleared, you will receive a reward! The catch is however "
+      "that you may only control one of your robots at a time.\n\n To switch "
+      "between which robot you are controlling press v.\n to control your "
+      "currently selected robot, use a and d to rotate the robot and w to move "
+      "fowards and space to shoot\n\n to clear a ship, you will need to "
+      "progress through a number of rooms, to do this you must defeat all "
+      "enemies in that room, and then navigate through to the bottom right "
+      "hand corner of the room to progress to the next stage.\n\n press escape "
+      "to exit",
+      {0, 0, 0, 255}, 16);
+  text->SetWrap(550);
+  popup->menu_items_ = {text};
+  while (popup_run) {
+    if (SDL_PollEvent(&e)) {
+      if (e.type == SDL_QUIT) {
+        popup_run = false;
+      }
+      if (e.type == SDL_KEYDOWN) {
+        if (e.key.keysym.sym == SDLK_ESCAPE) {
+          popup_run = false;
+        }
+      }
+    }
+    popup->Render();
+  }
+  delete popup;
+}
+// tutorial button
+MenuButton* how =
+    new MenuButton({25, 285, 200, 50}, Tutorial, NULL,
+                   new MenuText("How To", {255, 255, 255, 255}, 40));
+// tile of the game
+MenuText* title = new MenuText(25, 75, "Conscience", {255, 0, 0, 255}, 26);
+
+// amount of credits the player currently possesses
+MenuText* credits =
+    new MenuText(25, 174, "Cr: \u00A2" + std::to_string(save.GetCredits()),
+                 {0, 0, 0, 255}, 26);
+
+// player 1 GUI vars
+// which gun the player has selected
+int player_1_gun = 0;
+void reset1();
+// overlay for p1 gun menu
+void Overlay1Hide();
+// the currenyt hoverd over gun
+int player1_selector = NULL;
+// p1 overlay
+MenuItem* player1_overlay =
+    new MenuItem({304, 100, 132, 188}, SDL_Color{30, 30, 30, 120});
+// upgrde the weapon of player 1
+void UpgradeWeapon1() {
+  if (save.UpgradeWeapon(player1_selector)) {
+    Overlay1Hide();
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
+  } else {
+    Menu* popup = new Menu(410, 80);
+    MenuText* text =
+        new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
+    popup->menu_items_ = {text};
+    popup->Render();
+    SDL_Delay(3000);
+    delete popup;
+  }
+}
+MenuButton* player1_upgrade_weapon =
+    new MenuButton({314, 253, 112, 30}, UpgradeWeapon1, NULL,
+                   new MenuText("upgrade", {255, 255, 255, 255}, 19));
+void Overlay1Show(bool dir) {
+  if (dir) {
+    player1_overlay->Show();
+    player1_upgrade_weapon->Show();
+  }
+}
+// player 1 menu image
+MenuImage* player1_image = new MenuImage(314, 100, "player");
+
+// p1 gun 1
+MenuText* player1_gun1_text =
+    new MenuText(314, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost:\u00A2100",
+                 {0xff, 0xff, 0xff, 0xff}, 17);
+void Hover11(bool dir) {
+  player1_gun1_text->SetWrap(112);
+  Overlay1Show(dir);
+  if (dir) {
+    player1_selector = 0;
+    player1_gun1_text->Show();
+    std::vector<int> stats = save.GetGunStats(0);
+    player1_gun1_text->SetText("Gun 1\n\nDAM:" + std::to_string(stats[0]) +
+                               "\nROF:" + std::to_string(stats[1] / 10) +
+                               "\nSPE:1" + std::to_string(stats[2] / 10) +
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+  }
+}
+void Click11();
+MenuButton* player1_gun1 =
+    new MenuButton({274, 100, 30, 30}, Click11, Hover11,
+                   new MenuText(0, 0, "1", {255, 255, 255, 255}, 24));
+void Click11() {
+  reset1();
+  player1_gun1->SetColorDef({200, 0, 0, 255});
+  player_1_gun = 0;
+}
+
+
+// p1 gun 2
+MenuText* player1_gun2_text =
+    new MenuText(314, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
+                 {0xff, 0xff, 0xff, 0xff}, 17);
+void Hover12(bool dir) {
+  player1_gun2_text->SetWrap(112);
+  Overlay1Show(dir);
+  if (dir) {
+    player1_selector = 1;
+    player1_gun2_text->Show();
+    std::vector<int> stats = save.GetGunStats(1);
+    player1_gun2_text->SetText("Gun 2\n\nDAM:" + std::to_string(stats[0]) +
+                               "\nROF:" + std::to_string(stats[1] / 10) +
+                               "\nSPE:1" + std::to_string(stats[2] / 10) +
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+  }
+}
+void Click12();
+MenuButton* player1_gun2 =
+    new MenuButton({274, 139, 30, 30}, Click12, Hover12,
+                   new MenuText(0, 0, "2", {255, 255, 255, 255}, 24));
+void Click12() {
+  reset1();
+  player1_gun2->SetColorDef({200, 0, 0, 255});
+  player_1_gun = 1;
+}
+
+
+
+// p1 gun 3
+MenuText* player1_gun3_text =
+    new MenuText(314, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
+                 {0xff, 0xff, 0xff, 0xff}, 17);
+void Hover13(bool dir) {
+  player1_gun3_text->SetWrap(112);
+  Overlay1Show(dir);
+  if (dir) {
+    player1_selector = 2;
+    player1_gun3_text->Show();
+    std::vector<int> stats = save.GetGunStats(2);
+    player1_gun3_text->SetText("Gun 3\n\nDAM:" + std::to_string(stats[0]) +
+                               "\nROF:" + std::to_string(stats[1] / 10) +
+                               "\nSPE:1" + std::to_string(stats[2] / 10) +
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+  }
+}
+void Click13();
+MenuButton* player1_gun3 =
+    new MenuButton({274, 179, 30, 30}, Click13, Hover13,
+                   new MenuText(0, 0, "3", {255, 255, 255, 255}, 24));
+void Click13() {
+  reset1();
+  player1_gun3->SetColorDef({200, 0, 0, 255});
+  player_1_gun = 2;
+}
+
+
+
+// p1 gun 4
+MenuText* player1_gun4_text =
+    new MenuText(314, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
+                 {0xff, 0xff, 0xff, 0xff}, 17);
+void Hover14(bool dir) {
+  player1_gun4_text->SetWrap(112);
+  Overlay1Show(dir);
+  if (dir) {
+    player1_selector = 3;
+    player1_gun4_text->Show();
+    std::vector<int> stats = save.GetGunStats(3);
+    player1_gun4_text->SetText("Gun 4\n\nDAM:" + std::to_string(stats[0]) +
+                               "\nROF:" + std::to_string(stats[1] / 10) +
+                               "\nSPE:1" + std::to_string(stats[2] / 10) +
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+  }
+}
+void Click14();
+MenuButton* player1_gun4 =
+    new MenuButton({274, 219, 30, 30}, Click14, Hover14,
+                   new MenuText(0, 0, "4", {255, 255, 255, 255}, 24));
+void Click14() {
+  reset1();
+  player1_gun4->SetColorDef({200, 0, 0, 255});
+  player_1_gun = 3;
+}
+
+
+
+// p1 gun 5
+MenuText* player1_gun5_text =
+    new MenuText(314, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
+                 {0xff, 0xff, 0xff, 0xff}, 17);
+void Hover15(bool dir) {
+  player1_gun5_text->SetWrap(112);
+  Overlay1Show(dir);
+  if (dir) {
+    player1_selector = 4;
+    player1_gun5_text->Show();
+    std::vector<int> stats = save.GetGunStats(4);
+    player1_gun5_text->SetText("Gun 5\n\nDAM:" + std::to_string(stats[0]) +
+                               "\nROF:" + std::to_string(stats[1] / 10) +
+                               "\nSPE:1" + std::to_string(stats[2] / 10) +
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+  }
+}
+void Click15();
+MenuButton* player1_gun5 =
+    new MenuButton({274, 258, 30, 30}, Click15, Hover15,
+                   new MenuText(0, 0, "5", {255, 255, 255, 255}, 24));
+void Click15() {
+  reset1();
+  player1_gun5->SetColorDef({200, 0, 0, 255});
+  player_1_gun = 4;
+}
+
+// hiding of p1 overlay components
+void reset1() {
+  player1_gun1->SetColorDef({60, 60, 60, 255});
+  player1_gun2->SetColorDef({60, 60, 60, 255});
+  player1_gun3->SetColorDef({60, 60, 60, 255});
+  player1_gun4->SetColorDef({60, 60, 60, 255});
+  player1_gun5->SetColorDef({60, 60, 60, 255});
+}
+
+void Overlay1Hide() {
+  player1_overlay->Hide();
+  player1_upgrade_weapon->Hide();
+  player1_gun1_text->Hide();
+  player1_gun2_text->Hide();
+  player1_gun3_text->Hide();
+  player1_gun4_text->Hide();
+  player1_gun5_text->Hide();
+  player1_selector = NULL;
+}
+
+// p1 speed
+MenuText* p1_speed = new MenuText(
+    274, 75, "S: " + std::to_string(save.GetPlayerStats(1)[0] / 10),
+    {0, 0, 0, 255}, 20);
+MenuText* p1_armour =
+    new MenuText(360, 75, "A: " + std::to_string(save.GetPlayerStats(1)[1]),
+                 {0, 0, 0, 255}, 20);
+
+void ShowPriceP1Speed(bool dir);
+void UpgradeP1Speed() {
+  if (save.UpgradePlayer(false, 1)) {
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
+    p1_speed->SetText("S: " + std::to_string(save.GetPlayerStats(1)[0] / 10));
+  } else {
+    Menu* popup = new Menu(410, 80);
+    MenuText* text =
+        new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
+    popup->menu_items_ = {text};
+    popup->Render();
+    SDL_Delay(3000);
+    delete popup;
+  }
+}
+MenuButton* p1_upgrade_speed =
+    new MenuButton({274, 299, 80, 35}, UpgradeP1Speed, ShowPriceP1Speed,
+                   new MenuText("Speed+", {255, 255, 255, 255}, 15));
+void ShowPriceP1Speed(bool dir) {
+  MenuText* text = dynamic_cast<MenuText*>(p1_upgrade_speed->GetDisplay());
+  if (dir) {
+    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(1)[2]));
+  } else {
+    text->SetText("Speed+");
+  }
+}
+
+
+
+// p1 armour
+void ShowPriceP1Armour(bool dir);
+void UpgradeP1Armour() {
+  if (save.UpgradePlayer(true, 1)) {
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
+    p1_armour->SetText("A: " + std::to_string(save.GetPlayerStats(1)[1]));
+  } else {
+    Menu* popup = new Menu(410, 80);
+    MenuText* text =
+        new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
+    popup->menu_items_ = {text};
+    popup->Render();
+    SDL_Delay(3000);
+    delete popup;
+  }
+}
+MenuButton* p1_upgrade_armour =
+    new MenuButton({357, 299, 80, 35}, UpgradeP1Armour, ShowPriceP1Armour,
+                   new MenuText("Armor+", {255, 255, 255, 255}, 15));
+void ShowPriceP1Armour(bool dir) {
+  MenuText* text = dynamic_cast<MenuText*>(p1_upgrade_armour->GetDisplay());
+  if (dir) {
+    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(1)[3]));
+  } else {
+    text->SetText("Armor+");
+  }
+}
+
+
+// p1 damage / repair
+MenuItem* p1_damagebar =
+    new MenuItem({274, 379, static_cast<int>(save.GetDamage(1) * 1.65f), 11},
+                 {110, 59, 173, 255});
+MenuItem* p1_damagebar_bkg =
+    new MenuItem({274, 379, 165, 11}, {26, 34, 38, 255});
+
+void Repairp1() {
+  int code = save.Repair(1);
+  if (code != 1) {
+    Menu* popup = new Menu(410, 80);
+    MenuText* text;
+    if (code == 0) {
+      text = new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
+    } else {
+      text = new MenuText(93, 25, "Health full!", {0, 0, 0, 255}, 30);
+    }
+    popup->menu_items_ = {text};
+    popup->Render();
+    SDL_Delay(3000);
+    delete popup;
+  } else {
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
+    p1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
+  }
+}
+void ShowPriceP1Repair(bool dir);
+MenuButton* p1_repair =
+    new MenuButton({274, 339, 165, 35}, Repairp1, ShowPriceP1Repair,
+                   new MenuText("Repair", {255, 255, 255, 255}, 15));
+void ShowPriceP1Repair(bool dir) {
+  MenuText* text = dynamic_cast<MenuText*>(p1_repair->GetDisplay());
+  if (dir) {
+    text->SetText("\u00A2" + std::to_string(save.GetRepairCost(1)));
+  } else {
+    text->SetText("Repair");
+  }
+}
+
+// player two
+int player_2_gun = NULL;
+void reset2();
+void Overlay2Hide();
+int player2_selector = NULL;
+MenuItem* player2_overlay =
+    new MenuItem({554, 100, 132, 188}, SDL_Color{30, 30, 30, 120});
+void UpgradeWeapon2() {
+  if (save.UpgradeWeapon(player2_selector)) {
+    Overlay2Hide();
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
+  } else {
+    Menu* popup = new Menu(410, 80);
+    MenuText* text =
+        new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
+    popup->menu_items_ = {text};
+    popup->Render();
+    SDL_Delay(3000);
+    delete popup;
+  }
+}
+MenuButton* player2_upgrade_weapon =
+    new MenuButton({564, 253, 112, 30}, UpgradeWeapon2, NULL,
+                   new MenuText("upgrade", {255, 255, 255, 255}, 19));
+void Overlay2Show(bool dir) {
+  if (dir) {
+    player2_overlay->Show();
+    player2_upgrade_weapon->Show();
+  }
+}
+// player 2 menu image
+MenuImage* player2_image = new MenuImage(564, 100, "player");
+
+
+
+// p2 gun 1
+MenuText* player2_gun1_text =
+    new MenuText(564, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost:\u00A2100",
+                 {0xff, 0xff, 0xff, 0xff}, 17);
+void Hover21(bool dir) {
+  player2_gun1_text->SetWrap(112);
+  Overlay2Show(dir);
+  if (dir) {
+    player2_selector = 0;
+    player2_gun1_text->Show();
+    std::vector<int> stats = save.GetGunStats(0);
+    player2_gun1_text->SetText("Gun 1\n\nDAM:" + std::to_string(stats[0]) +
+                               "\nROF:" + std::to_string(stats[1] / 10) +
+                               "\nSPE:1" + std::to_string(stats[2] / 10) +
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+  }
+}
+void Click21();
+MenuButton* player2_gun1 =
+    new MenuButton({524, 100, 30, 30}, Click21, Hover21,
+                   new MenuText(0, 0, "1", {255, 255, 255, 255}, 24));
+void Click21() {
+  reset2();
+  player2_gun1->SetColorDef({200, 0, 0, 255});
+  player_2_gun = 0;
+}
+
+
+
+// 21 gun 2
+MenuText* player2_gun2_text =
+    new MenuText(564, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
+                 {0xff, 0xff, 0xff, 0xff}, 17);
+void Hover22(bool dir) {
+  player2_gun2_text->SetWrap(112);
+  Overlay2Show(dir);
+  if (dir) {
+    player2_selector = 1;
+    player2_gun2_text->Show();
+    std::vector<int> stats = save.GetGunStats(1);
+    player2_gun2_text->SetText("Gun 2\n\nDAM:" + std::to_string(stats[0]) +
+                               "\nROF:" + std::to_string(stats[1] / 10) +
+                               "\nSPE:1" + std::to_string(stats[2] / 10) +
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+  }
+}
+void Click22();
+MenuButton* player2_gun2 =
+    new MenuButton({524, 139, 30, 30}, Click22, Hover22,
+                   new MenuText(0, 0, "2", {255, 255, 255, 255}, 24));
+void Click22() {
+  reset2();
+  player2_gun2->SetColorDef({200, 0, 0, 255});
+  player_2_gun = 1;
+}
+
+
+
+// p2 gun 3
+MenuText* player2_gun3_text =
+    new MenuText(564, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
+                 {0xff, 0xff, 0xff, 0xff}, 17);
+void Hover23(bool dir) {
+  player2_gun3_text->SetWrap(112);
+  Overlay2Show(dir);
+  if (dir) {
+    player2_selector = 2;
+    player2_gun3_text->Show();
+    std::vector<int> stats = save.GetGunStats(2);
+    player2_gun3_text->SetText("Gun 3\n\nDAM:" + std::to_string(stats[0]) +
+                               "\nROF:" + std::to_string(stats[1] / 10) +
+                               "\nSPE:1" + std::to_string(stats[2] / 10) +
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+  }
+}
+void Click23();
+MenuButton* player2_gun3 =
+    new MenuButton({524, 179, 30, 30}, Click23, Hover23,
+                   new MenuText(0, 0, "3", {255, 255, 255, 255}, 24));
+void Click23() {
+  reset2();
+  player2_gun3->SetColorDef({200, 0, 0, 255});
+  player_2_gun = 2;
+}
+
+
+
+// p2 gun 4
+MenuText* player2_gun4_text =
+    new MenuText(564, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
+                 {0xff, 0xff, 0xff, 0xff}, 17);
+void Hover24(bool dir) {
+  player2_gun4_text->SetWrap(112);
+  Overlay2Show(dir);
+  if (dir) {
+    player2_selector = 3;
+    player2_gun4_text->Show();
+    std::vector<int> stats = save.GetGunStats(3);
+    player2_gun4_text->SetText("Gun 4\n\nDAM:" + std::to_string(stats[0]) +
+                               "\nROF:" + std::to_string(stats[1] / 10) +
+                               "\nSPE:1" + std::to_string(stats[2] / 10) +
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+  }
+}
+void Click24();
+MenuButton* player2_gun4 =
+    new MenuButton({524, 219, 30, 30}, Click24, Hover24,
+                   new MenuText(0, 0, "4", {255, 255, 255, 255}, 24));
+void Click24() {
+  reset2();
+  player2_gun4->SetColorDef({200, 0, 0, 255});
+  player_2_gun = 3;
+}
+
+
+
+// p1 gun 5
+MenuText* player2_gun5_text =
+    new MenuText(564, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
+                 {0xff, 0xff, 0xff, 0xff}, 17);
+void Hover25(bool dir) {
+  player2_gun5_text->SetWrap(112);
+  Overlay2Show(dir);
+  if (dir) {
+    player2_selector = 4;
+    player2_gun5_text->Show();
+    std::vector<int> stats = save.GetGunStats(4);
+    player2_gun5_text->SetText("Gun 5\n\nDAM:" + std::to_string(stats[0]) +
+                               "\nROF:" + std::to_string(stats[1] / 10) +
+                               "\nSPE:1" + std::to_string(stats[2] / 10) +
+                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+  }
+}
+void Click25();
+MenuButton* player2_gun5 =
+    new MenuButton({524, 258, 30, 30}, Click25, Hover25,
+                   new MenuText(0, 0, "5", {255, 255, 255, 255}, 24));
+void Click25() {
+  reset2();
+  player2_gun5->SetColorDef({200, 0, 0, 255});
+  player_2_gun = 4;
+}
+
+// hiding of p2 overlay components
+void Overlay2Hide() {
+  player2_overlay->Hide();
+  player2_upgrade_weapon->Hide();
+  player2_gun1_text->Hide();
+  player2_gun2_text->Hide();
+  player2_gun3_text->Hide();
+  player2_gun4_text->Hide();
+  player2_gun5_text->Hide();
+  player2_selector = NULL;
+}
+void reset2() {
+  player2_gun1->SetColorDef({60, 60, 60, 255});
+  player2_gun2->SetColorDef({60, 60, 60, 255});
+  player2_gun3->SetColorDef({60, 60, 60, 255});
+  player2_gun4->SetColorDef({60, 60, 60, 255});
+  player2_gun5->SetColorDef({60, 60, 60, 255});
+}
+
+// p2 speed
+MenuText* p2_speed = new MenuText(
+    524, 75, "S: " + std::to_string(save.GetPlayerStats(2)[0] / 10),
+    {0, 0, 0, 255}, 20);
+MenuText* p2_armour =
+    new MenuText(610, 75, "A: " + std::to_string(save.GetPlayerStats(2)[1]),
+                 {0, 0, 0, 255}, 20);
+
+void ShowPriceP2Speed(bool dir);
+void UpgradeP2Speed() {
+  if (save.UpgradePlayer(false, 2)) {
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
+    p2_speed->SetText("S: " + std::to_string(save.GetPlayerStats(2)[0] / 10));
+  } else {
+    Menu* popup = new Menu(410, 80);
+    MenuText* text =
+        new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
+    popup->menu_items_ = {text};
+    popup->Render();
+    SDL_Delay(3000);
+    delete popup;
+  }
+}
+MenuButton* p2_upgrade_speed =
+    new MenuButton({524, 299, 80, 35}, UpgradeP2Speed, ShowPriceP2Speed,
+                   new MenuText("Speed+", {255, 255, 255, 255}, 15));
+void ShowPriceP2Speed(bool dir) {
+  MenuText* text = dynamic_cast<MenuText*>(p2_upgrade_speed->GetDisplay());
+  if (dir) {
+    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(2)[2]));
+  } else {
+    text->SetText("Speed+");
+  }
+}
+
+
+// p2 armour
+void ShowPriceP2Armour(bool dir);
+void UpgradeP2Armour() {
+  if (save.UpgradePlayer(true, 2)) {
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
+    p2_armour->SetText("A: " + std::to_string(save.GetPlayerStats(2)[1]));
+  } else {
+    Menu* popup = new Menu(410, 80);
+    MenuText* text =
+        new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
+    popup->menu_items_ = {text};
+    popup->Render();
+    SDL_Delay(3000);
+    delete popup;
+  }
+}
+MenuButton* p2_upgrade_armour =
+    new MenuButton({607, 299, 80, 35}, UpgradeP2Armour, ShowPriceP2Armour,
+                   new MenuText("Armor+", {255, 255, 255, 255}, 15));
+void ShowPriceP2Armour(bool dir) {
+  MenuText* text = dynamic_cast<MenuText*>(p2_upgrade_armour->GetDisplay());
+  if (dir) {
+    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(2)[3]));
+  } else {
+    text->SetText("Armor+");
+  }
+}
+
+
+// p2 repair / damage
+void ShowPriceP2Repair(bool dir);
+MenuItem* p2_damagebar =
+    new MenuItem({524, 379, static_cast<int>(save.GetDamage(2) * 1.65f), 11},
+                 {110, 59, 173, 255});
+MenuItem* p2_damagebar_bkg =
+    new MenuItem({524, 379, 165, 11}, {26, 34, 38, 255});
+void Repairp2() {
+  int code = save.Repair(2);
+  if (code != 1) {
+    Menu* popup = new Menu(410, 80);
+    MenuText* text;
+    if (code == 0) {
+      text = new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
+    } else {
+      text = new MenuText(93, 25, "Health full!", {0, 0, 0, 255}, 30);
+    }
+    popup->menu_items_ = {text};
+    popup->Render();
+    SDL_Delay(3000);
+    delete popup;
+  } else {
+    credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
+    p2_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(2) * 1.65f);
+  }
+}
+MenuButton* p2_repair =
+    new MenuButton({524, 339, 165, 35}, Repairp2, ShowPriceP2Repair,
+                   new MenuText("Repair", {255, 255, 255, 255}, 15));
+void ShowPriceP2Repair(bool dir) {
+  MenuText* text = dynamic_cast<MenuText*>(p2_repair->GetDisplay());
+  if (dir) {
+    text->SetText("\u00A2" + std::to_string(save.GetRepairCost(2)));
+  } else {
+    text->SetText("Repair");
+  }
+}
+// Copyright 2024 Hugh Thompson
+
+#ifndef MENU_TEXT_H_
+#define MENU_TEXT_H_
+
+#include <string>
+
+#include "SDL2_ttf/include/SDL_ttf.h"
+
+#include "menu_item.h"
+
+// a class used to represent text in the menu screens
+class MenuText : public MenuItem {
+ public:
+  // consctructor for displaying text as a part of a button, inputs are the
+  // string of text to display, the color of the text, and the size of the text
+  MenuText(std::string text, SDL_Color text_color, int size);
+  // constctor for displaying text as standalone text.
+  // inputs are the position of the text, the string of text to display, the
+  // color of the text, and the size of the text
+  MenuText(int x, int y, std::string text, SDL_Color text_color, int size);
+  // updates the display of the text if the string has changed since last call.
+  void Update();
+  // sets the wrap of the text, inputis of this wrap in px
+  void SetWrap(int wrap);
+  // sets the text of the object
+  void SetText(std::string text);
+
+ private:
+  // the font used by this text
+  TTF_Font* font_;
+  // the string of text being displayed
+  std::string text_;
+  // the string of text last displayed when the last update was called
+  std::string last_text_;
+  // the text color
+  SDL_Color text_color_ = {0, 0, 0, 255};
+  // the warp of the text, if null, then all text will be one one line
+  int wrap_ = NULL;
+  // text size, set in consctor
+  int size_ = 28;
+};
+
+#endif  // !MENU_TEXT_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef PLAYER_H_
+#define PLAYER_H_
+
+#include "game_object.h"
+#include "gun.h"
+#include "save_manager.h"
+#include "ui_bar.h"
+
+// foward declations
+class Gun;
+// player class, used by the game to represnt a robot within the game
+class Player : public GameObject {
+ private:
+  // translation speed, set in constructor
+  int speed_ = 200;
+  // rotation speed of the player, always 1/100000 of the translational speed
+  float rotation_speed_ = 0.002;
+  // the gun the player is holding, assigned in constructor
+  Gun* gun_ = nullptr;
+  // how much damage the robot has incured
+  int damage_ = 0;
+  // the UI bar of how mcuh damage this robot has taken, assigned in consturctor
+  UIBar* damage_bar_ = nullptr;
+  // armour value, reduces damage taken, from 0 to 100 as a percentage of damage
+  // reduced
+  int armour_ = 0;
+  // unique identification number used to load in stats, based off what order
+  // the objects are constructed in. e.g first player has id of 1, next intilise
+  // has id of 2 ect...
+  // initilised in constructor
+  int id_;
+
+ public:
+  // initise the player with what gun they are holding and a reference to the
+  // current save.
+  Player(SaveManager* save, int gun);
+  // destruct and unitilise in memory safe way.
+  ~Player();
+  // convert the speed(magnitude) and rotation(angle) into x and y components to
+  // feed to parent move function, and then move the player.(smoothed with delta
+  // time)
+  void Step(int delta_time);
+  // change the rotation of the player, true is colcokwise, false is
+  // anticlockwise, will rotate the player based upon the rotation speed and is
+  // smoothed by delta time.
+  void Rotate(bool direction, int delta_time);
+  Gun* GetGun();
+  // called when the player receives damage, retuns wether or not the player is
+  // alive.
+  bool Damage(int amount);
+  UIBar* GetBar();
+  // if the player has been disabled(damgage == 100), then it will not be active
+  // (fasle), so it cannot move or shoot
+  bool active_ = true;
+  // statitc variable used to assign ids to players
+  inline static int new_id_;
+  int GetDamage();
+};
+
+#endif  // !PLAYER_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef ROOM_H_
+#define ROOM_H_
+
+#include <utility>
+#include <vector>
+
+#include "enemy.h"
+#include "save_manager.h"
+#include "SDL2/include/SDL.h"
+#include "wall.h"
+
+class Enemy;
+// A class used to represent room with the game, it is composed of wall of
+// objects arranged into a 2d dunegon layout, with enemies populating that
+// layout, used as a part of a ship object.
+class Room {
+ public:
+  // marked explicit as it is a one parameter consctor, this paramter is the
+  // save which is then passed onto the enemy objects to initialise
+  explicit Room(SaveManager* save);
+  std::vector<GameObject*> GetWalls();
+  std::vector<Enemy*>* GetEnemies();
+  // retuns the locations that are empty for enemy spawing, used to spawn
+  // eneimes
+  std::vector<std::pair<int, int>> GetFree();
+  ~Room();
+  // retruns wether or not room has been visited by the player, also sets that
+  // the room has been visited. Used by the ship class to spawn in enemies.
+  bool Visit();
+
+ private:
+  // enum of possible states that a tile in the map can be
+  enum States { kEmpty = 0, kNextToArea, kCorridor, kArea, kDoor };
+  // generate a room to be used as part of a ship
+  std::vector<std::vector<States>> Generate();
+  // returns the coordinates of the cells immedatly adjcendt to the inputted
+  // cell, used as helper function to Generate()
+  std::vector<SDL_Point> GetSurroundingCells(int x, int y);
+  // wall objects creaed from map generation
+  std::vector<GameObject*> walls_ = {};
+  // a list of free spaces (global coorinates at center of space)
+  std::vector<std::pair<int, int>> free_;
+  // wether or not this room has been visited by the player
+  bool visited_ = false;
+  // enemy objects from map generation
+  std::vector<Enemy*> enemies_ = {};
+};
+
+#endif  // !ROOM_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef SAVE_MANAGER_H_
+#define SAVE_MANAGER_H_
+
+#include <vector>
+
+class SaveManager {
+ public:
+  // unitialse
+  SaveManager();
+  // uninitalise and destruct in mem safe way
+  ~SaveManager();
+  // retuns the number of credits the player has
+  unsigned int GetCredits();
+  // called if the player clears the enitre ship, gives the player a reward in
+  // credits based on the avarege level of the player's robots
+  unsigned int Reward();
+  // returns a 4 element vector of the guns stats given a type(0 based):
+  // element 1 [0] - damage,
+  // element 2 [1] - rate of fire,
+  // element 3 [2] - bullet speed,
+  // element 4 [3] - cost of upgrade.
+  std::vector<int> GetGunStats(int type);
+  // upgrade the weapon of the given type, retuns false if the player does not
+  // have enough credits to make the purchase, retuns true the the purcahes was
+  // made sucessfully
+  bool UpgradeWeapon(int type);
+  // returns a 4 element vector of the robots stats given a robots id(1 based):
+  // element 1 [0] - robot translational speed,
+  // element 2 [1] - robot armour,
+  // element 3 [2] - cost of speed upgrade,
+  // element 4 [3] - cost of armour upgrade.
+  std::vector<int> GetPlayerStats(int player);
+  // upgrades a robot given the robot's id(1 based), and the elemet to upgarde,
+  // with fasle for speed upgarde and true for armour upgrade.
+  bool UpgradePlayer(bool upgrade, int player);
+  // money, bought full health
+  // Repairs (decreses taken damge) of a robot gievn its id(1 based) if
+  // condtions are met. if conditions (has sufficient funds and not going to
+  // take the robot to negitiave damage) are met:
+  // returns 0 for a sucessful transaction.
+  // if not met:
+  // returns 1 for insufficent funds present,
+  // returns 2 for damage being too low
+  int Repair(int player);
+  // writes the damage attined by the player to the save, used by the mainb game
+  // loop to save the player's progress after completing or fleeing a ship
+  void SetMenuDamage(int player, int damage);
+  int GetRepairCost(int player);
+  int GetDamage(int player);
+  // returns the mean level of both robot's upgrades, used as a multiplier to
+  // increase difficulty
+  int GetLevel();
+
+ private:
+  // The constants of the base guns, multipled by their respective levels to
+  // attain the gun's stats. in the from of a 3 element array where:
+  // [0] is the gun's base damage,
+  // [1] is the gun's base rate of fire,
+  // [2] is the gun's base bullet speed.
+  const int kBaseGuns[5][3] = {
+      {10, 500, 5}, {4, 200, 20}, {1, 100, 20}, {10, 600, 50}, {5, 300, 20}};
+  // The constants of the base robots, multipled by their respective levels to
+  // attain the robots's stats. in the from of a 2 element array where:
+  // [0] is the robot's base speed,
+  // [1] is the robot's base armour.
+  const int kBasePlayer[2] = {200, 2};
+
+  // 12 element vector of data loaded in from the save file where:
+  // [0] is the amount of credits,
+  // [1] is the damage of player 1,
+  // [2] is the level of player 1's speed,
+  // [3] is the level of player 1's armour,
+  // [4] is the damage of player 2,
+  // [5] is the level of player 2's speed,
+  // [6] is the level of player 2's armour,
+  // [7] is the level of gun 0,
+  // [8] is the level of gun 1,
+  // [9] is the level of gun 2,
+  // [10] is the level of gun 3,
+  // [11] is the level of gun 4.
+  std::vector<int> data_;
+};
+#endif  // !SAVE_MANAGER_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef SCREEN_H_
+#define SCREEN_H_
+
+#include <iostream>
+#include <utility>
+#include <vector>
+
+#include "SDL2/include/SDL.h"
+
+#include "game_object.h"
+#include "player.h"
+#include "ui_bar.h"
+
+// object to control a window on screen, used by the main.cc to create a window,
+// so use instantiate the object with a screen position (top left corner) and
+// and then render objects to the screen using the render function that takes a
+// vector of game objects as an argument. the screen camrea postion can be set
+// to the location of a game object using the attach method.
+class Screen {
+ private:
+  // SDL window data
+  SDL_Window* win_;
+  // SDL window data
+  SDL_Renderer* renderer_;
+  // an ID for when the need to distunguish between windows, set in constructor
+  int window_id_;
+  // camera pos x
+  float x_ = 0;
+  // camera pos y
+  float y_ = 0;
+  // object following
+  Player* following_ = nullptr;
+  // the camera offset
+  std::pair<int, int> offset_ = {0, 0};
+  // the list of UI_Bars this screen should currently be displaying
+  std::vector<UIBar*> bars_;
+  // the background color for all bars on this screen
+  const SDL_Color background_color_ = {26, 34, 38};
+
+ public:
+  // inputs are the loction of the screen object's window on the actual screen
+  Screen(int x, int y);
+  // uninitalise and destruct in a mem safe way
+  ~Screen();
+  // render all objects in veiw of camrea on screen, called in main method every
+  // frame
+  void Render(std::vector<std::vector<GameObject*>> game_ojbects);
+  // bind camrea position to the inputted player's position, and disply the
+  // health of that player on screen
+  void Attach(Player* target);
+  // adds a bar to the list of bars, and consequently to the screen
+  UIBar* AddBar(int max_value, SDL_Color color, SDL_Rect rect, int value);
+  // removes a given bar from the screen object.
+  void RemoveBar(UIBar* bar_to_remove);
+  Player* GetAttached();
+  std::vector<UIBar*>* GetBars();
+};
+
+#endif  // !SCREEN_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef SHIP_H_
+#define SHIP_H_
+
+#include <iostream>
+#include <utility>
+#include <vector>
+
+#include "enemy.h"
+#include "game_object.h"
+#include "room.h"
+
+// A collection of rooms, and an acessible way to naviate through them. Used by
+// the main script to generate rooms, load them in and navigate through them
+class Ship {
+ public:
+  // the constuctor, the input is a pointer to the current list of gameobjects
+  // used, sorted by type, so that it may be modified to add, remove and modify
+  // game objects from the game, maked explicit as it is a single paramter
+  // constuctor
+  Ship(std::vector<std::vector<GameObject*>>* game_objects,
+                SaveManager* save);
+  // uninitalise and destruct in a mem safe way
+  ~Ship();
+  // Retuns the dimensions, in px of the current room
+  std::pair<int, int> GetDimensions();
+  // if the input is true, the current room will advance by 1, if false, the
+  // current room will decrease by 1.
+  // Retuns whether or not this navigation is outside the range of the number of
+  // rooms.
+  // Used by the main game lopop when the player needs to be moved to the next
+  // or previous level
+  bool MoveRoom(bool dir);
+
+ private:
+  // A vector of pointers to the rooms in a ship
+  std::vector<Room*> rooms_;
+  // an index value of which room is currenlty loaded in / being played
+  unsigned int room_number_ = 0;
+  // a reference to the game object list
+  std::vector<std::vector<GameObject*>>* game_objects_;
+  // Loads in the room number inputted, this will remove the currenlty loaded
+  // room's game objects from the game object list, and add the new room's ones
+  // in the correct positions
+  void LoadRoom(int room_number);
+};
+
+#endif  // !SHIP_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef UI_BAR_H_
+#define UI_BAR_H_
+
+#include <iostream>
+#include <utility>
+
+#include "SDL2/include/SDL.h"
+
+// a class used to display infomation to the player in the from of a bar, theese
+// bars are assigned to an induvidular screen object which will display them.
+class UIBar {
+ public:
+  // constructor, takes a max value, the color of that bar and a rect
+  // represneting what place(in screen space) and dimensions the bar should
+  // occupy
+  UIBar(int max_value, SDL_Color color, SDL_Rect rect);
+  void SetValue(int value);
+  void ChangeValue(float delta_value);
+  // returns the a rect and color of the coloured part of the bar, called in the
+  // render method in the screen object to display the bar
+  std::pair<SDL_Rect*, SDL_Color> GetBar();
+  SDL_Rect* GetRect();
+  // retruns wether or not this bar's value is equal to the max value of that
+  // bar
+  bool Full();
+  float GetValue();
+  // modifies the position of the bar on the screen by the inputted amount
+  void Move(int x, int y);
+  void SetPos(int x, int y);
+
+ private:
+  // rectangle of the bar, used for display purposes (coorinates are in screen
+  // space)
+  SDL_Rect rect_ = {0, 0, 0, 0};
+  // color of the bar, used for display purposes
+  SDL_Color color_ = {255, 0, 0};
+  // current value of the bar. used for display and game object purposes, can be
+  // externally acessed via the GetValue() method
+  float value_ = 0;
+  // the maximum value the bar can be, defined in the constuctor and used for
+  // diplay purposes and to cehck if the bar is full
+  float max_value_ = 0;
+  // The border size(in px) between the colored bit of the bar and the
+  // background.
+  static const int border = 2;
+};
+
+#endif  // !UI_BAR_H_
+// Copyright 2024 Hugh Thompson
+
+#ifndef VECTOR_H_
+#define VECTOR_H_
+
+#include <cmath>
+// a structure containing a 2d vector mathmatical/physics sense.
+struct Vector {
+  // x componet of the vector
+  float x = 0;
+  // y component of the vector
+  float y = 0;
+  // retuns the length or normal of the vector
+  float Norm() {
+    float norm = sqrt(pow(x, 2) + pow(y, 2));
+    return norm;
+  }
+  // retuns the vector, but scaled so that the normal is a length of 1
+  Vector Normalised() {
+    Vector normlisied = {this->x / this->Norm(), this->y / this->Norm()};
+    return normlisied;
+  }
+  // retuns the dot product of this vector and another inputted vector
+  float Dot(Vector other) { return (this->x * other.x) + (this->y * other.y); }
+  // retuns this vector, but scaled by the input
+  Vector Scaled(float scalar) {
+    return {this->x * scalar, this->y * scalar};
+  }
+};
+
+#endif  // !VECTOR_H_
+// Copyright (C) 2024 Hugh Thompson
+
+#ifndef WALL_H_
+#define WALL_H_
+
+#include <iostream>
+#include <vector>
+
+#include "game_object.h"
+#include "player.h"
+
+// An in game wall peice, can collide with other objects using the collide
+// method, used to add visable wall objects to the game.
+class Wall : public GameObject {
+ public:
+  // initalise the wall and given coorinates
+  Wall(int x, int y);
+  // Used for checking collision for collision against a game  object, and then
+  // move obj accordingly. Will check for circular collision aginst rectangular
+  // wall. the inputted object is the one that the collision check will be
+  // performed against
+  bool Collision(GameObject* obj);
+};
+
+#endif  // !WALL_H_
+// Copyright 2024 Hugh Thompson
+
+#include "bullet.h"
+
+#include <stack>
+
+#include "enemy.h"
+#include "main.h"
+#include "wall.h"
+
+Bullet::Bullet(GameObject* shooter, int damage, int speed)
+    : GameObject(
+          shooter->GetCenter()->x + shooter->GetRect().x +
+              (sin(shooter->GetRotation()) * shooter->GetCenter()->y),
+          shooter->GetCenter()->y + shooter->GetRect().y +
+              (cos(shooter->GetRotation()) * shooter->GetCenter()->y * -1),
+          "bullet") {
+  // setting bullet properties
+  damage_ = damage;
+  shooter_ = shooter;
+  speed_ = speed;
+  // setting kinematic properites
+  float x = sin(shooter->GetRotation()) * speed_;
+  float y = cos(shooter->GetRotation()) * speed_ * -1;
+  rotation_ = shooter->GetRotation();
+  velocity_ = {x, y};
+}
+
+bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
+  bool destruct = false;
+  // step
+  Move(velocity_.x, velocity_.y);
+  std::stack<GameObject*> to_remove;
+  // iterate though all objects to check for collisions
+  for (int i = 0; i < objects->size() - 1; i++) {
+    for (GameObject* obj : objects->at(i)) {
+      // dont interact with self
+      if (obj != shooter_) {
+        // walls
+        if (i == kWalls) {
+          int x_diff = abs((obj->GetCenter()->x + obj->GetRect().x) -
+                           (rotation_center_.x + rect_.x));
+          int y_diff = abs((obj->GetCenter()->y + obj->GetRect().y) -
+                           (rotation_center_.y + rect_.y));
+          if (x_diff < obj->GetRect().w / 2 && y_diff < obj->GetRect().h / 2) {
+            destruct = true;
+            break;
+          }
+        }
+        // enemies take damage
+        if (i == kEnemies) {
+          Enemy* enemy = dynamic_cast<Enemy*>(obj);
+          if (enemy) {
+            Vector diff = {(rotation_center_.x + rect_.x) -
+                               (obj->GetCenter()->x + obj->GetRect().x),
+                           (rotation_center_.y + rect_.y) -
+                               (obj->GetCenter()->y + obj->GetRect().y)};
+            if (diff.Norm() <= obj->GetCenter()->x) {
+              if (enemy->Damage(damage_)) {
+                to_remove.push(obj);
+              }
+              destruct = true;
+              break;
+            }
+          } else {
+            std::cout << "incorrect type allocated to list" << std::endl;
+            +kEnemies;
+          }
+        }
+        // players take damage
+        if (i == kPlayers) {
+          Player* player = dynamic_cast<Player*>(obj);
+          if (player) {
+            Vector diff = {(rotation_center_.x + rect_.x) -
+                               (obj->GetCenter()->x + obj->GetRect().x),
+                           (rotation_center_.y + rect_.y) -
+                               (obj->GetCenter()->y + obj->GetRect().y)};
+            if (diff.Norm() <= obj->GetCenter()->x) {
+              player->Damage(damage_);
+              destruct = true;
+              break;
+            }
+          } else {
+            std::cout << "incorrect type allocated to list" << std::endl;
+          }
+        }
+      }
+    }
+  }
+  // deconstuct and remove enemies that have run out of health.
+  while (!to_remove.empty()) {
+    GameObject* removed = to_remove.top();
+    to_remove.pop();
+    for (int i = kPlayers; i < kBullets; i++) {
+      objects->at(i).erase(
+          std::remove(objects->at(i).begin(), objects->at(i).end(), removed),
+          objects->at(i).end());
+      if (i == kEnemies) {
+        Enemy* enemy = dynamic_cast<Enemy*>(removed);
+        if (enemy) {
+          delete enemy;
+        } else {
+          std::cout << "incorrect type allocated to list " << std::endl;
+        }
+      }
+    }
+  }
+  // retruns true if the bullet has collided with somthing
+  return destruct;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "door.h"
+
+Door::Door(int x, int y) : GameObject(x, y, "door") { open_ = false; }
+
+bool Door::Open() {
+  // reverse the open_ var
+  open_ = !open_;
+  return open_;
+}
+
+bool Door::Collide(GameObject* obj) {
+  bool rv = false;
+  // if not rendered, no point in wasting memory, and if closed
+  if (rendered_ && !open_) {
+    std::pair<bool, bool> move = {false, false};
+    Vector diff = {(obj->GetCenter()->x + obj->GetRect().x) -
+                       (rect_.x + rotation_center_.x),
+                   (obj->GetCenter()->y + obj->GetRect().y) -
+                       (rect_.y + rotation_center_.y)};
+    float circle_distance_x = abs(diff.x);
+    float circle_distance_y = abs(diff.y);
+    int r = obj->GetCenter()->x;
+
+    // checking if the obj is overlapping
+    if (circle_distance_x < (rect_.w / 2 + r)) {
+      if (circle_distance_y < (rect_.h / 2 + r)) {
+        if (circle_distance_x <= (rect_.w / 2)) {
+          // on y axis
+          rv = true;
+          move.second = true;
+        }
+        if (circle_distance_y <= (rect_.h / 2)) {
+          // on x axis
+          rv = true;
+          move.first = true;
+        }
+        float cornerdistance_sq = pow((circle_distance_x - rect_.w / 2), 2) +
+                                  pow((circle_distance_y - rect_.h / 2), 2);
+        // checking overlapping on corner
+        if (cornerdistance_sq <= pow(r, 2)) {
+          rv = true;
+          // only cancel out velocity moving towards object
+          move.first = (obj->GetVelocity().x / abs(obj->GetVelocity().x) !=
+                        diff.x / abs(diff.x));
+          move.second = (obj->GetVelocity().y / abs(obj->GetVelocity().y) !=
+                         diff.y / abs(diff.y));
+        }
+      }
+    }
+    // canceling out motion according to collision
+    obj->Move(obj->GetVelocity().x * -1 * move.first,
+              obj->GetVelocity().y * -1 * move.second);
+  }
+  return rv;
+}
+
+bool Door::GetState() { return open_; }
+// Copyright 2024 Hugh Thompson
+
+#include "enemy.h"
+
+#include <algorithm>
+#include <iostream>
+#include <string>
+
+#include "door.h"
+#include "main.h"
+#include "wall.h"
+
+Enemy::Enemy(int x, int y, int type, Room* room, SaveManager* save)
+    : GameObject(x, y, "enemy_" + std::to_string(type + 1)) {
+  // var initilaistion
+  SetPos(x, y);
+  room_ = room;
+  rotation_center_.y = (rect_.h - 28);
+  gun_ = new Gun(type, this, save);
+  type_ = type;
+  // setting up AI
+  for (size_t i = 0; i < kNumRays; i++) {
+    float angle = (i * 2 * M_PI) / kNumRays;
+    ray_directions_[i] = {cos(angle), sin(angle)};
+  }
+  // setting up enemy type and loading in stats
+  speed_ = kEnemyStats[type][0];
+  attack_range_ = kEnemyStats[type][1];
+  max_health_ =
+      kEnemyStats[type][2] + ((kEnemyStats[type][2] * save->GetLevel()) / 10);
+  // health bar
+  health_bar_ = new UIBar(
+      max_health_, {135, 211, 124},
+      SDL_Rect{static_cast<int>(rect_.x), static_cast<int>(rect_.y - 10),
+               static_cast<int>(rect_.w), 10});
+  health_bar_->SetValue(max_health_);
+}
+
+bool Enemy::Damage(int amount) {
+  bool rv = false;
+  health_ -= amount;
+  // speed boost if on low health
+  if (health_ < max_health_ / 4) {
+    speed_ *= 1.3;
+  }
+  // cehcking if the enemy is dead
+  if (health_ <= 0) {
+    rv = true;
+    dead_ = true;
+    health_bar_->SetValue(0);
+  } else {
+    health_bar_->SetValue(health_);
+  }
+  return rv;
+}
+
+void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
+  std::vector<Vector> diff;
+  // looping through players and adding to lists
+  for (GameObject* player : game_objects->at(kPlayers)) {
+    if (static_cast<Player*>(player)) {
+      diff.push_back({(player->GetRect().x + player->GetCenter()->x) -
+                          (rect_.x + rotation_center_.x),
+                      (player->GetRect().y + player->GetCenter()->y) -
+                          (rect_.y + rotation_center_.y)});
+    } else {
+      std::cout << "incorrect type allocated to list" << std::endl;
+    }
+  }
+  // cehcking if in range of player
+  if (!dead_ && (diff[0].Norm() < 500 || diff[1].Norm() < 500)) {
+    if (delta == 0) {
+      delta = 1;
+    }
+    // buffer lists of objects
+    std::vector<GameObject*> danger_objects;
+    std::vector<Vector> interest_objects;
+    // iterating through all game objects and adding them to the buffer lists
+    for (int i = 0; i < game_objects->size() - 1; i++) {
+      for (GameObject* obj : game_objects->at(i)) {
+        // if wall in search range, add to danger
+        if (i == kWalls) {
+          if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
+                         (rect_.x + rotation_center_.x),
+                     (obj->GetRect().y + obj->GetCenter()->y) -
+                         (rect_.y + rotation_center_.y)}
+                  .Norm() < search_range_) {
+            danger_objects.push_back(obj);
+          }
+        }
+        // if other enemy in search range, add to danger
+        if (i == kEnemies) {
+          if (obj != this) {
+            if (Vector{(obj->GetRect().x + obj->GetCenter()->x) -
+                           (rect_.x + rotation_center_.x),
+                       (obj->GetRect().y + obj->GetCenter()->y) -
+                           (rect_.y + rotation_center_.y)}
+                    .Norm() < search_range_) {
+              danger_objects.push_back(obj);
+            }
+          }
+        }
+        // if player in range, add to interest, if low health, add inverse to
+        // interest, if in attack range attack
+        if (i == kPlayers) {
+          Vector diff = {(obj->GetRect().x + obj->GetCenter()->x) -
+                             (rect_.x + rotation_center_.x),
+                         (obj->GetRect().y + obj->GetCenter()->y) -
+                             (rect_.y + rotation_center_.y)};
+          if (diff.Norm() <= search_range_ * 3) {
+            if (health_ < max_health_ / 4) {
+              interest_objects.push_back(Vector{obj->GetRect().x - rect_.x,
+                                                obj->GetRect().y - rect_.y});
+              if (diff.Norm() < attack_range_) {
+                Bullet* bullet = Attack(diff);
+                if (speed_ > 1) {
+                  speed_ *= 0.95;
+                }
+                if (bullet) {
+                  game_objects->at(kBullets).push_back(bullet);
+                }
+              } else {
+                speed_ = kEnemyStats[type_][0];
+              }
+            } else {
+              speed_ = kEnemyStats[type_][0] * 1.2;
+              interest_objects.push_back(
+                  Vector{(obj->GetRect().x - rect_.x) * -1,
+                         (obj->GetRect().y - rect_.y) * -1});
+            }
+          }
+        }
+      }
+    }
+    // set interest
+    std::vector<float> interest(kNumRays);
+    if (!interest_objects.empty()) {
+      interest = SetInterest(interest_objects[0]);
+    } else {
+      interest = SetInterest({0, 0});
+    }
+    // set dangeer
+    std::vector<float> danger = SetDanger(danger_objects);
+    // combine interest and danger
+    for (int i = 0; i < kNumRays; i++) {
+      if (danger[i] != 0.0f) {
+        interest[i] = danger[i];
+      }
+    }
+    // calculate net direction
+    Vector chosen_dir = {0, 0};
+    for (int i = 0; i < kNumRays; i++) {
+      chosen_dir.x += interest[i] * ray_directions_[i].x;
+      chosen_dir.y += interest[i] * ray_directions_[i].y;
+    }
+    // steering calculations
+    if (chosen_dir.x != 0 && chosen_dir.y != 0) {
+      Vector steer = {
+          ((chosen_dir.Normalised().x) - velocity_.x) * steer_force_,
+          ((chosen_dir.Normalised().y) - velocity_.y) * steer_force_};
+      Vector chosen_direction = {velocity_.x + steer.x, velocity_.y + steer.y};
+      Move(((chosen_direction.Normalised().x * speed_ * delta) / 1000),
+           ((chosen_direction.Normalised().y * speed_ * delta) / 1000));
+      velocity_ = {(chosen_direction.Normalised().x * speed_ * delta) / 1000,
+                   (chosen_direction.Normalised().y * speed_ * delta) / 1000};
+      float new_rotation = SetRotationFromVector(chosen_direction);
+      if (abs(new_rotation - rotation_) > M_PI) {
+        float amount =
+            ((2 * M_PI) - abs(new_rotation - rotation_)) * steer_force_ / 5;
+        if (rotation_ > new_rotation) {
+          rotation_ += amount;
+        } else {
+          rotation_ -= amount;
+        }
+      } else {
+        rotation_ += ((new_rotation - rotation_) * steer_force_ / 5);
+      }
+      if (rotation_ >= 2 * M_PI) {
+        rotation_ -= 2 * M_PI;
+      }
+      if (rotation_ <= 0) {
+        rotation_ += 2 * M_PI;
+      }
+    } else {
+      velocity_ = {0, 0};
+    }
+  }
+}
+
+UIBar* Enemy::GetBar() { return health_bar_; }
+
+Enemy::~Enemy() {
+  // remove enmies in a memory safe way
+  if (room_->GetEnemies()->size() != 0) {
+    std::vector<Enemy*>* room_emenies = room_->GetEnemies();
+    room_emenies->erase(
+        std::remove(room_emenies->begin(), room_emenies->end(), this),
+        room_emenies->end());
+  }
+  std::cout << "enemy destroyed!" << std::endl;
+  delete health_bar_;
+  delete gun_;
+}
+
+std::vector<float> Enemy::SetInterest(Vector direction) {
+  // reurns the chosen dirction represneted in the from of all the rays in the
+  // ray dirctions scaled so that the sum of theese rays is equal to the
+  // inputted dirctions.
+  std::vector<float> interest_aray(kNumRays);
+  for (int i = 0; i < kNumRays; i++) {
+    float interest =
+        ray_directions_[i].Normalised().Dot(direction.Normalised());
+    interest_aray[i] = std::max(0.0f, interest);
+  }
+  return interest_aray;
+}
+
+std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
+  std::vector<float> danger_aray(kNumRays);
+  for (int i = 0; i < kNumRays; i++) {
+    // calculating cast ray
+    std::pair<SDL_Point, SDL_Point> ray = {
+        SDL_Point{static_cast<int>(ray_directions_[i].Scaled(search_range_).x) +
+                      static_cast<int>(rect_.x + rotation_center_.x),
+                  static_cast<int>(ray_directions_[i].Scaled(search_range_).y) +
+                      static_cast<int>(rect_.y + rotation_center_.y)},
+        SDL_Point{static_cast<int>(rect_.x + rotation_center_.y),
+                  static_cast<int>(rect_.y + rotation_center_.y)}};
+    // iterates through all given game objects and checks for dangerous objects
+    // in ray path
+    for (GameObject* obj : objects) {
+      // r is shorthand for the rect, not called rect as this uses too much
+      // horizontal space
+      SDL_Rect r = {obj->GetRect().x, obj->GetRect().y, obj->GetRect().w,
+                    obj->GetRect().h};
+      // division of that rectangle into its component line segments
+      std::vector<std::pair<SDL_Point, SDL_Point>> lines = {
+          {SDL_Point{r.x, r.y}, SDL_Point{r.x + r.w, r.y}},
+          {SDL_Point{r.x + r.w, r.y}, SDL_Point{r.x + r.w, r.y + r.h}},
+          {SDL_Point{r.x + r.w, r.y + r.h}, SDL_Point{r.x, r.y + r.h}},
+          {SDL_Point{r.x, r.y + r.h}, SDL_Point{r.x, r.y}}};
+      // checks each line segmemt of intercetions with the cast ray
+      for (std::pair<SDL_Point, SDL_Point> line : lines) {
+        float danger = 0;
+        if (Intersect(line.first, line.second, ray.first, ray.second)) {
+          // intersection with an object
+          float diffrence;
+          if (line.first.x == line.second.x) {
+            diffrence = abs(line.first.x - (rect_.x + rotation_center_.x));
+          } else {
+            diffrence = abs(line.first.y - (rect_.y + rotation_center_.y));
+          }
+          Wall* wall_type = static_cast<Wall*>(obj);
+          Door* door_type = static_cast<Door*>(obj);
+          Enemy* enemy_type = static_cast<Enemy*>(obj);
+          // wall or door else enemy
+          if (wall_type || door_type) {
+            danger = ((search_range_ - r.w) - diffrence) * 0.025;
+          } else if (enemy_type) {
+            danger = -0.001f;
+          }
+        }
+        // if the ray has hit somthing, then no need to loop over the rest of
+        // the objects
+        danger_aray[i] = danger;
+        if (danger != 0.0f && danger != -0.001f) {
+          break;
+        }
+      }
+      if (danger_aray[i] != 0.0f) {
+        break;
+      }
+    }
+  }
+  return danger_aray;
+}
+
+bool Enemy::Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2) {
+  // algorithm from:
+  // https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/,
+  // checks orientation of the two tragnes formed by the lines, if diffrent
+  // the the lines intersect
+  int o1 = Orientation(p1, q1, p2);
+  int o2 = Orientation(p1, q1, q2);
+  int o3 = Orientation(p2, q2, p1);
+  int o4 = Orientation(p2, q2, q1);
+  if (o1 != o2 && o3 != o4) {
+    return true;
+  }
+  return false;
+}
+
+int Enemy::Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3) {
+  int val = (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y);
+  if (val == 0) return 0;    // collinear
+  return (val > 0) ? 1 : 2;  // clock or counterclock wise
+}
+Bullet* Enemy::Attack(Vector location) {
+  Bullet* bullet = gun_->Shoot();
+  return bullet;
+}
+
+float Enemy::SetRotationFromVector(Vector rotation) {
+  // basic angle, but only from 0 to PI/2
+  float new_rotation = atan(velocity_.y / velocity_.x);
+  // adding based of vector to get angle from 0 to 2PI
+  if (rotation.y > 0) {
+    if (rotation.x < 0) {
+      new_rotation += M_PI;
+    } else {
+      new_rotation += M_PI * 2;
+    }
+  } else {
+    if (rotation.x < 0) {
+      new_rotation += M_PI;
+    }
+  }
+  if (new_rotation < 0) {
+    new_rotation += M_PI * 2;
+  }
+  new_rotation += M_PI / 2;
+  if (new_rotation >= 2 * M_PI) {
+    new_rotation -= 2 * M_PI;
+  }
+  return new_rotation;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "game_object.h"
+
+#include <filesystem>
+
+void GameObject::Cast() {}
+
+GameObject::GameObject(int x, int y, std::string name) {
+  // setting posistion
+  rect_.x = x;
+  rect_.y = y;
+
+  // image loader, finds folder based off _name, loads the assets into a 2d aray
+  // of frames in animations and frame numbers.
+  std::string path = "assets/" + name + "/";
+  int index_pointer = 0;
+  for (const auto& entry : std::filesystem::directory_iterator(path)) {
+    std::string animation_path = (entry.path()).string() + "/";
+    std::vector<SDL_Surface*> empty;
+    surfaces_.emplace_back(empty);
+    for (const auto& animation_entry :
+         std::filesystem::directory_iterator(animation_path)) {
+      SDL_Surface* surface_buffer =
+          IMG_Load(((animation_entry.path()).string()).c_str());
+      surfaces_[index_pointer].emplace_back(surface_buffer);
+    }
+    index_pointer += 1;
+  }
+
+  // setting dimensions
+  rect_.w = surfaces_[0][0]->w;
+  rect_.h = surfaces_[0][0]->h;
+
+  // rotation center default
+  rotation_center_.x = (rect_.w / 2);
+  rotation_center_.y = (rect_.h / 2);
+}
+
+GameObject::~GameObject() {
+  for (std::vector<SDL_Surface*> surfaces : surfaces_) {
+    for (SDL_Surface* surface : surfaces) {
+      SDL_FreeSurface(surface);
+    }
+  }
+}
+
+void GameObject::SetPos(int x, int y) {
+  // update postion
+  rect_.x = x;
+  rect_.y = y;
+  // set velocity
+  velocity_ = {0, 0};
+}
+
+void GameObject::Move(float x, float y) {
+  // update postion
+  rect_.x += x;
+  rect_.y += y;
+}
+
+SDL_Surface* GameObject::GetSurface() {
+  // animation calcuation, if there is an animation update it based off the del
+  // t since last this function called, and chages animation to next in que if
+  // applicple when animaion repeats.
+  if (surfaces_[state_].size() != 1) {
+    int ticks = SDL_GetTicks64();
+    int delta_time = ticks - last_step_;
+    if (delta_time != 0) {
+      int mspf = std::pow((static_cast<float>(fps_) / 1000), -1);
+      int step = delta_time / mspf;
+      if (step >= 1) {
+        frame_ += step;
+        if (step > surfaces_[state_].size() - 1) {
+          frame_ = 0;
+          if (state_que_.size() != 0) {
+            state_ = state_que_.back();
+            state_que_.pop_back();
+          }
+        }
+      }
+    }
+  }
+  return surfaces_[state_][frame_];
+}
+
+void GameObject::Setstate(int state) { state_ = state; }
+
+void GameObject::QueState(int state) {
+  state_que_.insert(state_que_.begin(), state);
+}
+
+SDL_FRect GameObject::GetRect() { return rect_; }
+
+float GameObject::GetRotation() { return rotation_; }
+
+SDL_Point* GameObject::GetCenter() { return &rotation_center_; }
+
+Vector GameObject::GetVelocity() { return velocity_; }
+// Copyright 2024 Hugh Thompson
+
+#include "gun.h"
+
+#include "SDL2/include/SDL.h"
+
+Gun::Gun(int type, GameObject* holder, SaveManager* save) {
+  held_by_ = holder;
+  // setting stats from save
+  std::vector<int> stats = save->GetGunStats(type);
+  damage_ = stats[0];
+  cooldown_ = stats[1];
+  speed_ = stats[2];
+}
+
+Bullet* Gun::Shoot() {
+  Bullet* rv = nullptr;
+  // setting the fire rate of the weapon
+  if (SDL_GetTicks64() - last_shot_ > cooldown_) {
+    last_shot_ = SDL_GetTicks64();
+    rv = new Bullet(held_by_, damage_, speed_);
+  }
+  return rv;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "main.h"
+
+#include <iostream>
+#include <stack>
+#include <vector>
+
+#include "SDL2/include/SDL.h"
+#include "SDL2_ttf/include/SDL_TTF.h"
+
+#include "door.h"
+#include "enemy.h"
+#include "game_object.h"
+#include "gun.h"
+#include "menu.h"
+#include "menu_button.h"
+#include "menu_image.h"
+#include "menu_text.h"
+#include "player.h"
+#include "room.h"
+#include "save_manager.h"
+#include "screen.h"
+#include "ship.h"
+#include "ui_bar.h"
+#include "wall.h"
+
+bool run = true;
+bool menu_run = true;
+bool game_run = true;
+SaveManager save;
+
+#include "menu_items.h"
+
+int main(int argc, char* args[]) {
+  srand(time(0));
+  // intlising SDL with window and renderer, errors are thrown if initilaides
+  // incorrectly
+  if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+    printf("error initializing SDL: %s\n", SDL_GetError());
+  }
+  // adding menuitems from menu_items.h
+  menu->menu_items_ = {player1_image,
+                       player2_image,
+                       player1_gun1,
+                       player1_gun2,
+                       player1_gun3,
+                       player1_gun4,
+                       player1_gun5,
+                       player2_gun1,
+                       player2_gun2,
+                       player2_gun3,
+                       player2_gun4,
+                       player2_gun5,
+                       player1_overlay,
+                       player1_upgrade_weapon,
+                       player1_gun1_text,
+                       player1_gun2_text,
+                       player1_gun3_text,
+                       player1_gun4_text,
+                       player1_gun5_text,
+                       player2_overlay,
+                       player2_upgrade_weapon,
+                       player2_gun1_text,
+                       player2_gun2_text,
+                       player2_gun3_text,
+                       player2_gun4_text,
+                       player2_gun5_text,
+                       p1_speed,
+                       p1_armour,
+                       p1_upgrade_speed,
+                       p1_upgrade_armour,
+                       p1_repair,
+                       p1_damagebar_bkg,
+                       p1_damagebar,
+                       p2_speed,
+                       p2_armour,
+                       p2_upgrade_speed,
+                       p2_upgrade_armour,
+                       p2_repair,
+                       p2_damagebar_bkg,
+                       p2_damagebar,
+                       play,
+                       title,
+                       quit,
+                       how,
+                       credits};
+  // setting speicilsed things about the items in menu_items.h
+  title->SetWrap(200);
+  player1_gun1->SetColorDef({200, 0, 0, 255});
+  player2_gun1->SetColorDef({200, 0, 0, 255});
+  menu->ChangeVisability();
+  SDL_Event e;
+  // full game loop
+  while (run) {
+    // menu
+    // show menu
+    menu->ChangeVisability();
+    menu->Render();
+    // updating bars
+    p1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
+    p2_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(2) * 1.65f);
+    if (death_menu) {
+      // death popup
+      MenuText* dead = new MenuText(120, 25, "You Died", {255, 0, 0, 255}, 30);
+      death_menu->menu_items_ = {dead};
+      death_menu->Render();
+      SDL_Delay(3000);
+      delete death_menu;
+      death_menu = nullptr;
+    }
+    if (reward_menu) {
+      // reward pop up
+      reward_menu->Render();
+      SDL_Delay(3000);
+      delete reward_menu;
+      reward_menu = nullptr;
+      credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
+    }
+    menu_run = true;
+    while (menu_run) {
+      if (SDL_PollEvent(&e)) {
+        if (e.type == SDL_QUIT) {
+          // quit
+          menu_run = false;
+          game_run = false;
+          run = false;
+        }
+        if (e.type == SDL_KEYDOWN) {
+          if (e.key.keysym.sym == SDLK_ESCAPE) {
+            // quit
+            menu_run = false;
+            game_run = false;
+            run = false;
+          }
+        }
+      }
+      // hovering over the overlays
+      SDL_Rect rect = *player1_overlay->GetRect();
+      int x, y;
+      SDL_GetMouseState(&x, &y);
+      if (!(x > rect.x && x < rect.x + rect.w && y > rect.y &&
+            y < rect.y + rect.h)) {
+        Overlay1Hide();
+      }
+      SDL_Rect rect2 = *player2_overlay->GetRect();
+      if (!(x > rect2.x && x < rect2.x + rect2.w && y > rect2.y &&
+            y < rect2.y + rect2.h)) {
+        Overlay2Hide();
+      }
+      // render
+      menu->Render();
+    }
+    menu->ChangeVisability();
+
+    if (game_run) {
+      // creating windows
+      Screen screen1(100, SDL_WINDOWPOS_CENTERED);
+      Screen screen2(600, SDL_WINDOWPOS_CENTERED);
+      UIBar* swtich_bar = nullptr;
+
+      // robot intitilastion
+      Player::new_id_ = 1;
+      Player player1(&save, player_1_gun);
+      Player player2(&save, player_2_gun);
+      player1.SetPos(256, 256);
+      player2.SetPos(256, 256);
+
+      // game objects list, indexed by type
+      std::vector<std::vector<GameObject*>> game_objects = {{}, {}, {}, {}, {}};
+      // adding objects to lists
+      game_objects[kPlayers].push_back(&player1);
+      game_objects[kPlayers].push_back(&player2);
+
+      // ship
+      Ship ship1(&game_objects, &save);
+
+      // assign robots to screens
+      screen2.Attach(&player2);
+      screen1.Attach(&player1);
+      // game vars
+      Screen* controlling = &screen1;
+      int swich_cooldown = 0;
+
+      // keyboard inputs
+      const Uint8* key_state = SDL_GetKeyboardState(NULL);
+
+      // delta time vars
+      int delta_time = 0;
+      int last = SDL_GetTicks64();
+      const int frame_cap = 30;
+      // game loop
+      while (game_run) {
+        // inputs
+        SDL_PumpEvents();
+        if (key_state[SDL_SCANCODE_W] == 1) {
+          controlling->GetAttached()->Step(delta_time);
+        }
+        if (key_state[SDL_SCANCODE_A] == 1) {
+          controlling->GetAttached()->Rotate(0, delta_time);
+        }
+        if (key_state[SDL_SCANCODE_D] == 1) {
+          controlling->GetAttached()->Rotate(1, delta_time);
+        }
+        if (key_state[SDL_SCANCODE_SPACE] == 1) {
+          // shoot
+          if (controlling->GetAttached()->active_) {
+            Bullet* bullet = controlling->GetAttached()->GetGun()->Shoot();
+            if (bullet) {
+              game_objects[kBullets].push_back(bullet);
+            }
+          }
+        }
+        if (key_state[SDL_SCANCODE_V] == 1) {
+          // switching robots
+          if (swtich_bar) {
+            swtich_bar->ChangeValue(2 * (delta_time / 10));
+            std::cout << swtich_bar->GetValue() << std::endl;
+            if (swtich_bar->Full()) {
+              controlling->RemoveBar(swtich_bar);
+              swtich_bar = nullptr;
+              swich_cooldown = 1000;
+              if (controlling == &screen1) {
+                controlling = &screen2;
+              } else {
+                controlling = &screen1;
+              }
+            }
+          } else if (swich_cooldown <= 0) {
+            swtich_bar =
+                controlling->AddBar(100, {45, 136, 255}, {150, 225, 200, 50},
+                                    3 * (delta_time / 10));
+          }
+        }
+
+        // game logic
+
+        // unlocking of doors
+        if (game_objects[kEnemies].size() == 0) {
+          Door* door = dynamic_cast<Door*>(game_objects[kDoors].back());
+          if (!door->GetState()) {
+            door->Open();
+          }
+        }
+        // death
+        if (!player1.active_ && !player2.active_) {
+          game_run = false;
+          death_menu = new Menu(400, 80);
+        }
+        // room advancing / ship completion / fleeing
+        for (GameObject* obj : game_objects[kPlayers]) {
+          Player* player = dynamic_cast<Player*>(obj);
+          if (player) {
+            SDL_FRect rect = player->GetRect();
+            if (rect.x < 0 || rect.y < 0) {
+              if (!ship1.MoveRoom(false)) {
+                player1.SetPos(ship1.GetDimensions().first - 256,
+                               ship1.GetDimensions().second - 256);
+                player2.SetPos(ship1.GetDimensions().first - 256,
+                               ship1.GetDimensions().second - 256);
+              } else {
+                game_run = false;
+                save.SetMenuDamage(1, player1.GetDamage());
+                save.SetMenuDamage(2, player2.GetDamage());
+              }
+              break;
+            }
+            if (rect.x > ship1.GetDimensions().first + 64 ||
+                rect.y > ship1.GetDimensions().second + 64) {
+              if (!ship1.MoveRoom(true)) {
+                player1.SetPos(256, 256);
+                player2.SetPos(256, 256);
+              } else {
+                game_run = false;
+                int amount = save.Reward();
+                MenuText* dead = new MenuText(
+                    25, 25, "Reward: \u00A2" + std::to_string(amount),
+                    {255, 0, 0, 255}, 30);
+                reward_menu = new Menu(dead->GetRect()->w + 50, 80);
+                reward_menu->menu_items_ = {dead};
+                save.SetMenuDamage(1, player1.GetDamage());
+                save.SetMenuDamage(1, player2.GetDamage());
+              }
+              break;
+            }
+          } else {
+            std::cout << "incorrect type allocated to list" << std::endl;
+          }
+        }
+
+        // enemy AI
+        for (GameObject* obj : game_objects[kEnemies]) {
+          Enemy* enemy = dynamic_cast<Enemy*>(obj);
+          if (enemy) {
+            enemy->AI(&game_objects, delta_time);
+          }
+        }
+        // wall collision
+        for (GameObject* obj : game_objects[kWalls]) {
+          Wall* wall = dynamic_cast<Wall*>(obj);
+          if (wall) {
+            wall->Collision(controlling->GetAttached());
+            wall->rendered_ = false;
+          } else {
+            std::cout << "incorrect type allocated to list" << std::endl;
+          }
+        }
+        // door collision
+        for (GameObject* obj : game_objects[kDoors]) {
+          Door* door = dynamic_cast<Door*>(obj);
+          if (door) {
+            bool colliding = door->Collide(controlling->GetAttached());
+            door->rendered_ = false;
+          } else {
+            std::cout << "incorrect type allocated to list" << std::endl;
+          }
+        }
+        // switching players
+        if (swich_cooldown > 0) {
+          swich_cooldown -= delta_time;
+        }
+        if (swtich_bar) {
+          swtich_bar->ChangeValue(-1 * (delta_time / 10));
+          if (swtich_bar->GetValue() <= 0) {
+            controlling->RemoveBar(swtich_bar);
+            swtich_bar = nullptr;
+            swich_cooldown = 1000;
+          }
+        }
+        // bullets
+        std::stack<Bullet*> to_remove;
+        for (GameObject* obj : game_objects[kBullets]) {
+          Bullet* bullet = dynamic_cast<Bullet*>(obj);
+          if (bullet) {
+            if (bullet->Update(&game_objects)) {
+              to_remove.push(bullet);
+            }
+          } else {
+            std::cout << "incorrect type allocated to list" << std::endl;
+          }
+        }
+        while (!to_remove.empty()) {
+          std::vector<GameObject*>* bullets = &game_objects[kBullets];
+          bullets->erase(
+              std::remove(bullets->begin(), bullets->end(), to_remove.top()),
+              bullets->end());
+          delete to_remove.top();
+          to_remove.pop();
+        }
+
+        // rendering
+        screen1.Render(game_objects);
+        screen2.Render(game_objects);
+
+        // delta time calculation
+        delta_time = SDL_GetTicks64() - last;
+        last = SDL_GetTicks64();
+
+        // frame capping
+        if (delta_time < pow(frame_cap * 1000, -1)) {
+          SDL_Delay(pow(frame_cap * 1000, -1) - delta_time);
+        }
+      }
+      // clean up
+      for (GameObject* bullet : game_objects[kBullets]) {
+        delete bullet;
+      }
+    }
+  }
+  SDL_Quit();
+  delete menu;
+  return 0;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "menu.h"
+
+#include <iostream>
+
+#include "menu_button.h"
+
+Menu::Menu() {
+  // window creation using SDL and error caputre
+  win_ = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED,
+                          SDL_WINDOWPOS_CENTERED, 750, 465, 0);
+  if (win_ == NULL) {
+    std::cout << "Error window creation";
+  }
+  renderer_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
+  if (renderer_ == NULL) {
+    std::cout << "Error renderer creation";
+  }
+  // font initilasation
+  if (TTF_Init() < 0) {
+    std::cout << "Error initializing SDL_ttf: " << TTF_GetError();
+  }
+  // make it so that alpha values work correctly for transparency
+  SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
+}
+
+Menu::~Menu() {
+  // deleting all menu items
+  for (MenuItem* item : menu_items_) {
+    delete item;
+  }
+  // destruction of window
+  SDL_DestroyRenderer(renderer_);
+  SDL_DestroyWindow(win_);
+}
+
+void Menu::Render() {
+  SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
+  SDL_RenderClear(renderer_);
+  // rendering border for popup
+  if (border_) {
+    SDL_RaiseWindow(win_);
+    int w, h;
+    SDL_GetWindowSize(win_, &w, &h);
+    SDL_Rect rect = {0, 0, w, h};
+    SDL_SetRenderDrawColor(renderer_, 60, 60, 60, 255);
+    SDL_RenderDrawRect(renderer_, &rect);
+    SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
+  }
+  // rendering menu items
+  for (MenuItem* item : menu_items_) {
+    if (item) {
+      // update
+      item->Update();
+      if (item->Visable()) {
+        // if a color is present, render a rectangle
+        if (item->GetColor().r) {
+          SDL_SetRenderDrawColor(renderer_, item->GetColor().r,
+                                 item->GetColor().g, item->GetColor().b,
+                                 item->GetColor().a);
+          SDL_RenderFillRect(renderer_, item->GetRect());
+          SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
+        }
+        SDL_Texture* texture = nullptr;
+        // if a texture is present, render a texture
+        if (item->GetSurface()) {
+          texture = SDL_CreateTextureFromSurface(renderer_, item->GetSurface());
+          SDL_RenderCopy(renderer_, texture, NULL, item->GetRect());
+        }
+        MenuButton* button = dynamic_cast<MenuButton*>(item);
+        // render the button's display
+        if (button) {
+          MenuItem* display = button->GetDisplay();
+          if (display) {
+            display->Update();
+            texture =
+                SDL_CreateTextureFromSurface(renderer_, display->GetSurface());
+            SDL_RenderCopy(renderer_, texture, NULL, display->GetRect());
+          }
+        }
+        // clean up
+        SDL_DestroyTexture(texture);
+      }
+    }
+  }
+  // push to screen
+  SDL_RenderPresent(renderer_);
+}
+
+void Menu::ChangeVisability() {
+  // revers the visablity staus and show/ hide the window
+  if (visability_) {
+    SDL_HideWindow(win_);
+  } else {
+    SDL_ShowWindow(win_);
+  }
+  visability_ = !visability_;
+}
+
+Menu::Menu(int x, int y) {
+  // window creation using SDL, borderless window, error capture
+  win_ = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED,
+                          SDL_WINDOWPOS_CENTERED, x, y, SDL_WINDOW_BORDERLESS);
+  if (win_ == NULL) {
+    std::cout << "Error window creation";
+  }
+  renderer_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
+  if (renderer_ == NULL) {
+    std::cout << "Error renderer creation";
+  }
+  // font initialisation
+  if (TTF_Init() < 0) {
+    std::cout << "Error initializing SDL_ttf: " << TTF_GetError();
+  }
+  // set so alpha values / tarnsparrence work on screen
+  SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
+  // custom border
+  border_ = true;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "menu_button.h"
+
+#include "iostream"
+
+#include "menu_text.h"
+
+MenuButton::MenuButton(SDL_Rect rect, void (*Click)(), void (*Hover)(bool dir),
+                       MenuItem* display)
+    : MenuItem(rect.x, rect.y) {
+  // rect intilaistion
+  rect_ = rect;
+  // actions
+  OnClick = Click;
+  OnHover = Hover;
+  // display initailsation
+  display_ = display;
+  // set display to center of button
+  if (display_) {
+    display_->GetRect()->x = rect_.x + ((rect.w - display_->GetRect()->w) / 2);
+    display_->GetRect()->y = rect_.y + ((rect.h - display_->GetRect()->h) / 2);
+    // wrap text to dimension of button
+    MenuText* text = dynamic_cast<MenuText*>(display_);
+    if (text) {
+      text->SetWrap(rect_.w);
+    }
+  }
+  // setting color
+  color_ = {60, 60, 60, 255};
+}
+
+MenuButton::~MenuButton() { delete display_; }
+
+void MenuButton::Update() {
+  // getting mouse position
+  int x, y;
+  SDL_GetMouseState(&x, &y);
+  if (visable_) {
+    // checking if the button is being hovered over
+    if (x > rect_.x && x < rect_.x + rect_.w && y > rect_.y &&
+        y < rect_.y + rect_.h) {
+      SDL_Event e;
+      color_ = {220, 20, 20, 255};
+      // execute hover code
+      if (OnHover) {
+        OnHover(true);
+      }
+      // checking if the button is clicked
+      if (SDL_PollEvent(&e)) {
+        if (e.type == SDL_MOUSEBUTTONDOWN) {
+          if (OnClick) {
+            OnClick();
+          }
+        }
+      }
+    } else {
+      // revers hover code
+      if (OnHover) {
+        OnHover(false);
+      }
+      color_ = color_def_;
+    }
+  }
+}
+
+MenuItem* MenuButton::GetDisplay() { return display_; }
+
+void MenuButton::SetColorDef(SDL_Color color) { color_def_ = color; }
+// Copyright 2024 Hugh Thompson
+
+#include "menu_image.h"
+
+MenuImage::MenuImage(int x, int y, std::string name) : MenuItem(x, y) {
+  // loading in image from given name
+  SetSurface(IMG_Load(("assets/menu/" + name + ".png").c_str()));
+}
+// Copyright 2024 Hugh Thompson
+
+#include "menu_item.h"
+
+SDL_Rect* MenuItem::GetRect() { return &rect_; }
+
+SDL_Surface* MenuItem::GetSurface() { return surface_; }
+
+void MenuItem::Show() { visable_ = true; }
+
+void MenuItem::Hide() { visable_ = false; }
+
+void MenuItem::Update() { return (void)10; }
+
+SDL_Color MenuItem::GetColor() { return color_; }
+
+bool MenuItem::Visable() { return visable_; }
+
+void MenuItem::SetSurface(SDL_Surface* surface) {
+  // setting surface
+  surface_ = surface;
+  // adjusting rect to that surface
+  rect_.w = surface->w;
+  rect_.h = surface->h;
+}
+
+MenuItem::MenuItem(int x, int y) {
+  // setting position
+  rect_.x = x;
+  rect_.y = y;
+}
+
+MenuItem::MenuItem(SDL_Rect rect, SDL_Color color) {
+  // setting postion and dimension
+  rect_ = rect;
+  // setting color
+  color_ = color;
+}
+
+MenuItem::~MenuItem() {
+  // deleting the surface if present
+  if (surface_) {
+    SDL_FreeSurface(surface_);
+  }
+}
+// Copyright 2024 Hugh Thompson
+
+#include "menu_text.h"
+
+#include <iostream>
+
+MenuText::MenuText(std::string text, SDL_Color text_color, int size)
+    : MenuItem(0, 0) {
+  // setting font paramters
+  size_ = size;
+  text_ = text;
+  // loading in font and error capture
+  font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", size);
+  if (!font_) {
+    std::cout << TTF_GetError() << std::endl;
+  }
+  // setting text color if given, otherwise will default to {0,0,0,255}(black)
+  if (text_color.r) {
+    text_color_ = text_color;
+  }
+  // convert text to surface and set that surface to this surface
+  SetSurface(TTF_RenderText_Solid(font_, text_.c_str(), text_color_));
+}
+
+MenuText::MenuText(int x, int y, std::string text, SDL_Color text_color,
+                   int size)
+    : MenuItem(x, y) {
+  // setting font paramters
+  text_ = text;
+  size_ = size;
+  // loading in font and error capture
+  font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", size_);
+  if (!font_) {
+    std::cout << TTF_GetError() << std::endl;
+  }
+  // setting text color if given, otherwise will default to {0,0,0,255}(black)
+  if (text_color.r) {
+    text_color_ = text_color;
+  }
+  // convert text to surface and set that surface to this surface
+  SetSurface(TTF_RenderText_Solid(font_, text_.c_str(), text_color_));
+}
+
+void MenuText::Update() {
+  // update if the text has changed since last called
+  if (text_ != last_text_) {
+    last_text_ = text_;
+    if (wrap_) {
+      // convert text to surface and set that surface to this surface with
+      // wrapping
+      SetSurface(TTF_RenderText_Solid_Wrapped(font_, text_.c_str(), text_color_,
+                                              wrap_));
+    } else {
+      // convert text to surface and set that surface to this surface
+      SetSurface(TTF_RenderText_Solid(font_, text_.c_str(), text_color_));
+    }
+  }
+}
+
+void MenuText::SetWrap(int wrap) { wrap_ = wrap; }
+
+void MenuText::SetText(std::string text) { text_ = text; }
+// Copyright 2024 Hugh Thompson
+
+#include "player.h"
+
+#include <cmath>
+
+Player::Player(SaveManager* save, int gun) : GameObject(0, 0, "player") {
+  // setting id
+  id_ = new_id_;
+  new_id_++;
+  // loading in from save
+  std::vector<int> stats = save->GetPlayerStats(id_);
+  speed_ = stats[0];
+  rotation_speed_ = static_cast<float>(stats[0]) / 100000;
+  armour_ = stats[1];
+  damage_ = save->GetDamage(id_);
+  // roataion center to center of player charter
+  rotation_center_.y = (rect_.h - 28) + rect_.y;
+  // gun initialisation
+  gun_ = new Gun(gun, this, save);
+  // damage bar initialisation
+  damage_bar_ = new UIBar(
+      100, {110, 59, 173},
+      {static_cast<int>(rect_.x), static_cast<int>(rect_.y), 250, 40});
+  damage_bar_->SetValue(damage_);
+}
+
+Player::~Player() { delete gun_; }
+
+void Player::Step(int delta_time) {
+  // caluclating the componets of the vector to move given the rotation and
+  // speed (scaled by delta time) if active
+  if (active_) {
+    float x = sin(rotation_) * speed_ * delta_time / 1000;
+    float y = cos(rotation_) * speed_ * delta_time / 1000 * -1;
+    velocity_ = {x, y};
+    this->Move(x, y);
+  }
+}
+
+void Player::Rotate(bool dir, int delta_time) {
+  // roatate based on direction if active
+  if (active_) {
+    if (dir == 1) {
+      rotation_ += rotation_speed_ * delta_time;
+    }
+    if (dir == 0) {
+      rotation_ -= rotation_speed_ * delta_time;
+    }
+  }
+}
+
+Gun* Player::GetGun() { return gun_; }
+
+bool Player::Damage(int amount) {
+  bool rv = false;
+  int real_damage = amount - ((amount * armour_) / 100);
+  // conditions based on if the player has reached the maximim damage
+  damage_ += real_damage;
+  if (damage_ >= 100) {
+    rv = true;
+    damage_bar_->SetValue(100);
+    damage_ = 100;
+    active_ = false;
+  } else {
+    damage_bar_->SetValue(damage_);
+  }
+  return rv;
+}
+
+UIBar* Player::GetBar() { return damage_bar_; }
+
+int Player::GetDamage() { return damage_; }
+// Copyright 2024 Hugh Thompson
+
+#include "room.h"
+
+#include <time.h>
+
+#include <cstdlib>
+#include <iostream>
+#include <stack>
+
+#include "door.h"
+#include "vector.h"
+
+Room::Room(SaveManager* save) {
+  // convereting genretaed map into walls and doors
+  std::vector<std::vector<Room::States>> map = Generate();
+  for (int y = 0; y < map.size() - 1; y++) {
+    for (int x = 0; x < map[0].size() - 1; x++) {
+      if (y == 0 && x == 1) {
+        Door* door = new Door(x * 128, y * 128);
+        walls_.push_back(door);
+        door->Open();
+      } else if (map[y][x] == kEmpty || map[y][x] == kNextToArea) {
+        walls_.push_back(new Wall(x * 128, y * 128));
+      } else {
+        free_.push_back({(x * 128) + 64, (y * 128) + 64});
+      }
+    }
+    walls_.push_back(new Wall((map[0].size() - 1) * 128, y * 128));
+    std::cout << std::endl;
+  }
+  // edge
+  for (int x = 0; x < map[0].size(); x++) {
+    if (x == map[0].size() - 2) {
+      walls_.push_back(new Door(x * 128, (map.size() - 1) * 128));
+    } else {
+      walls_.push_back(new Wall(x * 128, (map.size() - 1) * 128));
+    }
+  }
+  // enemy generation
+  int size = (((rand() % (61)) + 70) / 100.0f) * (free_.size() / 12);
+  for (int i = 0; i < size; i++) {
+    int random = rand() % free_.size();
+    int enemy_type = rand() % 5;
+    Enemy* enemy = new Enemy(free_[random].first, free_[random].second,
+                             enemy_type, this, save);
+    free_.erase(free_.begin() + random);
+    enemy->Move(-1 * enemy->GetCenter()->x, -1 * enemy->GetCenter()->y);
+    enemies_.push_back(enemy);
+  }
+}
+
+std::vector<GameObject*> Room::GetWalls() { return walls_; }
+
+std::vector<Enemy*>* Room::GetEnemies() { return &enemies_; }
+
+std::vector<std::pair<int, int>> Room::GetFree() { return free_; }
+
+Room::~Room() {
+  // as enemy deconstructor deletes itself from enemy list, the enemies cannot
+  // be deleted while iterating over that list as it chnages size while
+  // iterating.
+  std::stack<Enemy*> delete_stack;
+  for (Enemy* enemy : enemies_) {
+    delete_stack.push(enemy);
+  }
+  while (!delete_stack.empty()) {
+    delete delete_stack.top();
+    delete_stack.pop();
+  }
+  for (GameObject* wall : walls_) {
+    delete wall;
+  }
+}
+
+bool Room::Visit() {
+  bool rv = visited_;
+  visited_ = true;
+  return rv;
+}
+
+std::vector<std::vector<Room::States>> Room::Generate() {
+  std::vector<std::vector<Room::States>> output;
+  // generate blank feild
+  int width = (rand() % (22 - 12 + 1)) + 12;
+  int height = (rand() % (22 - 12 + 1)) + 12;
+  std::vector<Room::States> push;
+  for (int i = 0; i < width; i++) {
+    push.push_back(kEmpty);
+  }
+  for (int i = 0; i < height; i++) {
+    output.push_back(push);
+  }
+  // 3x3 end room generation
+  for (int l = height - 5; l < height; l++) {
+    for (int f = width - 5; f < width; f++) {
+      if (l == height - 5 || l == height || f == width - 5 || f == width) {
+        output[l][f] = kNextToArea;
+
+      } else {
+        output[l][f] = kArea;
+      }
+    }
+  }
+  // 3x3 starting room generation
+  for (int l = 0; l < 5; l++) {
+    for (int f = 0; f < 5; f++) {
+      if (l == 0 || l == 5 || f == 0 || f == 5) {
+        output[l][f] = kNextToArea;
+
+      } else {
+        output[l][f] = kArea;
+      }
+    }
+  }
+  // room generation
+  int area = width * height;
+  for (int i = 0; i < area / 10; i++) {
+    // random room size
+    int room_width = (rand() % ((width / 2) - (width / 5) + 1)) + (width / 5);
+    int room_height =
+        (rand() % ((height / 2) - (height / 5) + 1)) + (width / 5);
+    for (int j = 0; j < 50; j++) {
+      // random position
+      bool placable = true;
+      int x = rand() % (width - room_width) + 1;
+      int y = rand() % (height - room_height) + 1;
+      // checking if the room is placeble
+      for (int l = 0; l < room_height; l++) {
+        for (int f = 0; f < room_width; f++) {
+          if (output[l + y][x + f] != kEmpty) {
+            placable = false;
+          }
+        }
+      }
+      if (placable) {
+        for (int l = -1; l < room_height + 1; l++) {
+          for (int f = -1; f < room_width + 1; f++) {
+            if (l < 0 || l >= room_height || f < 0 || f >= room_width) {
+              if ((l + y) > 0 && (l + y) < height - 1 && (f + x) > 0 &&
+                  (f + x) < width - 1) {
+                // placing in room
+                output[l + y][x + f] = kNextToArea;
+              }
+            } else {
+              // placing in room
+              output[l + y][x + f] = kArea;
+            }
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  // corridor generation
+  std::vector<SDL_Point> starting_points = {};
+  // getting a list of possible starting points
+  for (int i = 1; i < output.size() - 2; i++) {
+    for (int j = 1; j < output[i].size() - 2; j++) {
+      if (output[i][j] == kEmpty) {
+        int startable = false;
+        for (SDL_Point pos : GetSurroundingCells(j, i)) {
+          if (output[pos.y][pos.x] == kEmpty ||
+              output[pos.y][pos.x] == kNextToArea) {
+            startable++;
+          }
+        }
+        if (startable == 4) {
+          starting_points.push_back({j, i});
+        }
+      }
+    }
+  }
+  while (starting_points.size() != 0) {
+    // getting a starting point
+    SDL_Point starting_point = starting_points[rand() % starting_points.size()];
+
+    // staring maze generation algorithim
+    std::stack<SDL_Point> pos;
+    pos.push(starting_point);
+
+    while (!pos.empty()) {
+      std::stack<Vector> directions;
+      output[pos.top().y][pos.top().x] = kCorridor;
+      // left
+      if (pos.top().x > 1) {
+        if (output[pos.top().y][pos.top().x - 1] == kEmpty &&
+            output[pos.top().y][pos.top().x - 2] != kCorridor &&
+            output[pos.top().y + 1][pos.top().x - 1] != kCorridor &&
+            output[pos.top().y - 1][pos.top().x - 1] != kCorridor) {
+          directions.push({-1, 0});
+        }
+      }
+      // right
+      if (pos.top().x < width - 2) {
+        if (output[pos.top().y][pos.top().x + 1] == kEmpty &&
+            output[pos.top().y][pos.top().x + 2] != kCorridor &&
+            output[pos.top().y + 1][pos.top().x + 1] != kCorridor &&
+            output[pos.top().y - 1][pos.top().x + 1] != kCorridor) {
+          directions.push({1, 0});
+        }
+      }
+      // up
+      if (pos.top().y > 1) {
+        if (output[pos.top().y - 1][pos.top().x] == kEmpty &&
+            output[pos.top().y - 2][pos.top().x] != kCorridor &&
+            output[pos.top().y - 1][pos.top().x + 1] != kCorridor &&
+            output[pos.top().y - 1][pos.top().x - 1] != kCorridor) {
+          directions.push({0, -1});
+        }
+      }
+      // down
+      if (pos.top().y < height - 2) {
+        if (output[pos.top().y + 1][pos.top().x] == kEmpty &&
+            output[pos.top().y + 2][pos.top().x] != kCorridor &&
+            output[pos.top().y + 1][pos.top().x + 1] != kCorridor &&
+            output[pos.top().y + 1][pos.top().x - 1] != kCorridor) {
+          directions.push({0, 1});
+        }
+      }
+      // if the direction is empty, retreat to previous position
+      if (directions.empty()) {
+        pos.pop();
+      } else {
+        // get random direction
+        if (directions.size() - 1 != 0) {
+          int length = rand() % directions.size() - 1;
+          for (int i = 0; i < length; i++) {
+            directions.pop();
+          }
+        }
+        // push new position
+        SDL_Point next = {(pos.top().x + directions.top().x),
+                          (pos.top().y + directions.top().y)};
+        pos.push(next);
+      }
+    }
+    // re-get possible starting points
+    starting_points = {};
+    for (int i = 1; i < output.size() - 2; i++) {
+      for (int j = 1; j < output[i].size() - 2; j++) {
+        if (output[i][j] == kEmpty) {
+          int startable = false;
+          for (SDL_Point pos : GetSurroundingCells(j, i)) {
+            if (output[pos.y][pos.x] == kEmpty ||
+                output[pos.y][pos.x] == kNextToArea) {
+              startable++;
+            }
+          }
+          if (startable == 4) {
+            starting_points.push_back({j, i});
+          }
+        }
+      }
+    }
+  }
+  // doorways
+  std::stack<SDL_Point> group;
+  unsigned int group_counter = 0;
+
+  // horizontal
+  for (int y = 1; y < output.size() - 2; y++) {
+    for (int x = 1; x < output[0].size() - 2; x++) {
+      int area = 0;
+      int corridor = 0;
+      // checking if the cell is a potential doorway
+      std::vector<SDL_Point> cells = GetSurroundingCells(x, y);
+      for (int i = 0; i < 4; i += 2) {
+        SDL_Point point = cells[i];
+        if (output[point.y][point.x] == kArea) {
+          area++;
+        }
+        if (output[point.y][point.x] == kCorridor) {
+          corridor++;
+        }
+      }
+      if ((area >= 2 || (area + corridor >= 2 && corridor == 1)) &&
+          (output[y][x] == kEmpty || output[y][x] == kNextToArea)) {
+        // to figure out where the door should be placed
+        if (!group.empty()) {
+          if (group.top().x == x - 1) {
+            group_counter++;
+            group.push({x, y});
+          } else {
+            if (group_counter > 0) {
+              int length = rand() % group_counter + 1;
+              if (length != 0) {
+                for (int i = 0; i < length; i++) {
+                  group.pop();
+                }
+              }
+              output[group.top().y][group.top().x] = kDoor;
+              length = group.size();
+              for (int i = 0; i < length; i++) {
+                group.pop();
+              }
+              group_counter = 0;
+              group.push({x, y});
+            } else {
+              output[group.top().y][group.top().x] = kDoor;
+              group.pop();
+              group.push({x, y});
+            }
+          }
+        } else {
+          group.push({x, y});
+        }
+      }
+    }
+  }
+  output[group.top().y][group.top().x] = kDoor;
+  group = {};
+  group_counter = 0;
+  // vertical
+  for (int x = 1; x < output[0].size() - 2; x++) {
+    for (int y = 1; y < output.size() - 2; y++) {
+      int area = 0;
+      int corridor = 0;
+      // checking if the cell is a potential doorway
+      std::vector<SDL_Point> cells = GetSurroundingCells(x, y);
+      for (int i = 1; i < 4; i += 2) {
+        SDL_Point point = cells[i];
+        if (output[point.y][point.x] == kArea) {
+          area++;
+        }
+        if (output[point.y][point.x] == kCorridor) {
+          corridor++;
+        }
+      }
+      if ((area >= 2 || (area + corridor >= 2 && corridor == 1)) &&
+          (output[y][x] == kEmpty || output[y][x] == kNextToArea)) {
+        // to figure out where the door should be placed
+        if (!group.empty()) {
+          if (group.top().y == y - 1) {
+            group_counter++;
+            group.push({x, y});
+          } else {
+            if (group_counter > 0) {
+              int length = rand() % group_counter + 1;
+              if (length != 0) {
+                for (int i = 0; i < length; i++) {
+                  group.pop();
+                }
+              }
+              output[group.top().y][group.top().x] = kDoor;
+              length = group.size();
+              for (int i = 0; i < length; i++) {
+                group.pop();
+              }
+              group_counter = 0;
+              group.push({x, y});
+            } else {
+              output[group.top().y][group.top().x] = kDoor;
+              group.pop();
+              group.push({x, y});
+            }
+          }
+        } else {
+          group.push({x, y});
+        }
+      }
+    }
+  }
+  output[group.top().y][group.top().x] = kDoor;
+
+  // cleanup and dead end deletion
+  int number_of_dead_ends = 1;
+  while (number_of_dead_ends != 0) {
+    number_of_dead_ends = 0;
+    for (int y = 1; y < output.size() - 1; y++) {
+      for (int x = 1; x < output[0].size() - 1; x++) {
+        if (output[y][x] != kEmpty && output[y][x] != kNextToArea) {
+          int sum = 0;
+          for (SDL_Point cell : GetSurroundingCells(x, y)) {
+            if (output[cell.y][cell.x] != kEmpty &&
+                output[cell.y][cell.x] != kNextToArea) {
+              sum++;
+            }
+          }
+          if (sum <= 1) {
+            output[y][x] = kEmpty;
+            number_of_dead_ends++;
+          }
+        }
+      }
+    }
+  }
+  return output;
+}
+
+std::vector<SDL_Point> Room::GetSurroundingCells(int x, int y) {
+  std::vector<SDL_Point> rv = {{x, y - 1}, {x + 1, y}, {x, y + 1}, {x - 1, y}};
+  return rv;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "save_manager.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <string>
+
+SaveManager::SaveManager() {
+  // open file
+  std::fstream data("assets/save.txt");
+  std::string line;
+  // read data into data variable line by line
+  while (getline(data, line)) {
+    data_.push_back(std::stoi(line));
+  }
+  // close file
+  data.close();
+}
+
+SaveManager::~SaveManager() {
+  // delete old save
+  std::remove("assets/save.txt");
+  // create and open new save file
+  std::ofstream data("assets/save.txt");
+  // input data into file from data_
+  for (int i : data_) {
+    data << std::to_string(i) << "\n";
+  }
+  // clsoe file
+  data.close();
+}
+
+unsigned int SaveManager::GetCredits() { return data_[0]; }
+
+unsigned int SaveManager::Reward() {
+  // calculation of reward based on player level
+  float avrgae_level = (data_[2] + data_[3] + data_[5] + data_[6]) / 4.0f;
+  int reward = avrgae_level * 100.0f;
+  data_[0] += reward;
+  return reward;
+}
+
+std::vector<int> SaveManager::GetGunStats(int type) {
+  float level = data_[7 + type];
+  float multiplier = level / 10;
+  // exponential cost based off level
+  int cost = 10 * pow(1.1, level);
+  // linear incrase in upgrdae
+  std::vector<int> stats = {
+      static_cast<int>(static_cast<float>(kBaseGuns[type][0]) *
+                       (1.0f + multiplier)),
+      kBaseGuns[type][1], kBaseGuns[type][2], cost};
+  return stats;
+}
+
+bool SaveManager::UpgradeWeapon(int type) {
+  int cost = GetGunStats(type)[3];
+  bool bought = false;
+  // if suffuicent funds
+  if (cost <= data_[0]) {
+    data_[7 + type] += 1;
+    data_[0] -= cost;
+    bought = true;
+  }
+  return bought;
+}
+
+std::vector<int> SaveManager::GetPlayerStats(int player) {
+  // setting index base off robot inputted
+  int index = 2;
+  if (player == 2) {
+    index = 5;
+  }
+  float speed_mul = static_cast<float>(data_[index]) / 100.0f;
+  float armour_mul = static_cast<float>(data_[index + 1]) / 10.0f;
+  int speed_cost = 100 * pow(1.1, data_[index]);
+  int armour_cost = 100 * pow(1.1, data_[index + 1]);
+  return {
+      static_cast<int>(static_cast<float>(kBasePlayer[0]) * (1.0f + speed_mul)),
+      static_cast<int>(static_cast<float>(kBasePlayer[1]) *
+                       (1.0f + armour_mul)),
+      speed_cost, armour_cost};
+}
+
+bool SaveManager::UpgradePlayer(bool upgrade, int player) {
+  // setting index base off robot inputted
+  int index = 2;
+  if (player == 2) {
+    index = 5;
+  }
+  int cost = GetPlayerStats(player)[2 + upgrade];
+  bool bought = false;
+  if (cost <= data_[0]) {
+    data_[index + upgrade] += 1;
+    data_[0] -= cost;
+    bought = true;
+  }
+  return bought;
+}
+
+int SaveManager::Repair(int player) {
+  // setting index base off robot inputted
+  int index = 1;
+  if (player == 2) {
+    index = 4;
+  }
+  int cost = GetRepairCost(player);
+  int bought = 0;
+  if (cost <= data_[0]) {
+    bought = 2;
+    if (data_[index] >= 5) {
+      data_[index] -= 5;
+      data_[0] -= cost;
+      bought = 1;
+    }
+  }
+  return bought;
+}
+
+void SaveManager::SetMenuDamage(int player, int damage) {
+  // setting index base off robot inputted
+  int index = 1;
+  if (player == 2) {
+    index = 4;
+  }
+  data_[index] = damage;
+}
+
+int SaveManager::GetRepairCost(int player) {
+  // setting index base off robot inputted
+  int index = 1;
+  if (player == 2) {
+    index = 4;
+  }
+  int avg_level = (data_[index + 1] + data_[index + 2]) / 2;
+  int cost = 10 * pow(1.1, avg_level);
+  if (data_[index] == 0) {
+    cost *= 10;
+  }
+  return cost;
+}
+
+int SaveManager::GetDamage(int player) {
+  // setting index base off robot inputted
+  int index = 1;
+  if (player == 2) {
+    index = 4;
+  }
+  return data_[index];
+}
+
+int SaveManager::GetLevel() {
+  // calculates the mean level of the robots
+  return (data_[2] + data_[3] + data_[5] + data_[6]) / 4;
+}
+// Copyright 2024 Hugh Thompson
+
+#include "screen.h"
+
+#include <cmath>
+#include <stack>
+
+#include "enemy.h"
+
+Screen::Screen(int x, int y) {
+  // window creation using SDL
+  win_ = SDL_CreateWindow("Window", x, y, 500, 500, SDL_WINDOW_BORDERLESS);
+  if (win_ == NULL) {
+    std::cout << "Error window creation";
+  }
+  renderer_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
+  if (renderer_ == NULL) {
+    std::cout << "Error renderer creation";
+  }
+  // setting window id
+  window_id_ = SDL_GetWindowID(win_);
+}
+
+Screen::~Screen() {
+  // clean up to avoid memory leaks
+  SDL_DestroyRenderer(renderer_);
+  SDL_DestroyWindow(win_);
+  for (UIBar* bar : bars_) {
+    delete bar;
+  }
+}
+
+void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
+  // renderer setup
+  SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
+  SDL_RenderClear(renderer_);
+  // update of cam postion if bound to object
+  if (following_) {
+    x_ = following_->GetRect().x;
+    y_ = following_->GetRect().y;
+  }
+  // rendering enemy bars
+  int enemy_bars = 0;
+  // iterate through all game objects, rendering all if conditions met
+  for (std::vector<GameObject*> type_vector : game_objects) {
+    for (GameObject* obj : type_vector) {
+      // calcuate position on screen
+      SDL_FRect actual_rect = obj->GetRect();
+      SDL_Rect render_rect = {(actual_rect.x - x_ + offset_.first),
+                              (actual_rect.y - y_ + offset_.second),
+                              actual_rect.w, actual_rect.h};
+      // if the object is on screen, then render it
+      if (render_rect.x > -1 * actual_rect.w && render_rect.x < 600 &&
+          render_rect.y > -1 * actual_rect.h && render_rect.y < 600) {
+        // render object on screen
+        obj->rendered_ = true;
+        SDL_Texture* texture =
+            SDL_CreateTextureFromSurface(renderer_, obj->GetSurface());
+        float angle = obj->GetRotation() * (180 / M_PI);
+        SDL_RenderCopyEx(renderer_, texture, NULL, &render_rect, angle,
+                         obj->GetCenter(), SDL_FLIP_NONE);
+        SDL_DestroyTexture(texture);
+        // add any on screen enemy's health bar to list of bars, and set the
+        // position of that bar in screen space
+        Enemy* enemy_type = dynamic_cast<Enemy*>(obj);
+        if (enemy_type) {
+          bars_.push_back(enemy_type->GetBar());
+          enemy_bars++;
+          SDL_FRect rect = enemy_type->GetRect();
+          enemy_type->GetBar()->SetPos(rect.x - x_ + offset_.first,
+                                       (rect.y + 20) - y_ + offset_.second);
+        }
+      }
+    }
+  }
+  // UI_Bar rendering of bars attached to this screen
+  if (bars_.size() > 0) {
+    std::stack<UIBar*> to_remove;
+    for (UIBar* bar : bars_) {
+      if (!bar) {
+        to_remove.push(bar);
+      } else {
+        SDL_SetRenderDrawColor(renderer_, background_color_.r,
+                               background_color_.g, background_color_.b, 1);
+        SDL_RenderFillRect(renderer_, bar->GetRect());
+        SDL_SetRenderDrawColor(renderer_, bar->GetBar().second.r,
+                               bar->GetBar().second.g, bar->GetBar().second.b,
+                               1);
+        SDL_RenderFillRect(renderer_, bar->GetBar().first);
+      }
+    }
+    // remove enemy health bars from list of bars
+    while (enemy_bars > 0) {
+      bars_.pop_back();
+      enemy_bars--;
+    }
+    // remove nullpointer bars from list of bars
+    SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 1);
+    while (!to_remove.empty()) {
+      bars_.erase(std::remove(bars_.begin(), bars_.end(), to_remove.top()),
+                  bars_.end());
+      to_remove.pop();
+    }
+  }
+  // Update screen
+  SDL_RenderPresent(renderer_);
+}
+
+void Screen::Attach(Player* target) {
+  // set target
+  following_ = target;
+  // set offset so target is centered on screen
+  offset_.first = 250 - following_->GetCenter()->x;
+  offset_.second = 250 - following_->GetCenter()->y;
+  // add the damage bar of the robot to the list of bars
+  bars_.push_back(following_->GetBar());
+  bars_.back()->SetPos(10, 450);
+}
+UIBar* Screen::AddBar(int max_value, SDL_Color color, SDL_Rect rect,
+                      int value) {
+  bars_.push_back(new UIBar(max_value, color, rect));
+  bars_.back()->SetValue(value);
+  return bars_.back();
+}
+
+void Screen::RemoveBar(UIBar* bar_to_remove) {
+  bars_.erase(std::remove(bars_.begin(), bars_.end(), bar_to_remove),
+              bars_.end());
+  delete bar_to_remove;
+}
+
+Player* Screen::GetAttached() { return following_; }
+
+std::vector<UIBar*>* Screen::GetBars() { return &bars_; }
+// Copyright 2024 Hugh Thompson
+
+#include "ship.h"
+
+#include <random>
+
+#include "main.h"
+#include "door.h"
+
+Ship::Ship(std::vector<std::vector<GameObject*>>* game_objects,
+           SaveManager* save) {
+  game_objects_ = game_objects;
+  // room generation, from 2 to 5 rooms generated
+  for (int i = 0; i < (rand() % 4) + 2; i++) {
+    rooms_.push_back(new Room(save));
+  }
+  // loads inital room into gameobjects
+  LoadRoom(0);
+}
+
+Ship::~Ship() {
+  // destrcution of rooms
+  for (Room* room : rooms_) {
+    delete room;
+  }
+}
+
+std::pair<int, int> Ship::GetDimensions() {
+  return {rooms_[room_number_]->GetWalls().back()->GetRect().x,
+          rooms_[room_number_]->GetWalls().back()->GetRect().y
+  };
+}
+
+bool Ship::MoveRoom(bool dir) {
+  bool rv = false;
+  int to_be_loaded = room_number_;
+  // increment room if input is positive, decermesemt the room if negitave.
+  if (dir) {
+    if (room_number_ < rooms_.size() - 1) {
+      to_be_loaded++;
+    } else {
+      rv = true;
+    }
+  } else {
+    if (room_number_ >= 1) {
+      to_be_loaded--;
+    } else {
+      rv = true;
+    }
+  }
+  // load new room
+  if (to_be_loaded != room_number_) {
+    LoadRoom(to_be_loaded);
+  }
+  return rv;
+}
+
+void Ship::LoadRoom(int room_number) {
+  // deleteing all old wall and door objects
+  game_objects_->at(kWalls).clear();
+  game_objects_->at(kDoors).clear();
+  // removing old enemy objects from game object list
+  game_objects_->at(kEnemies).clear();
+  // upadting room index
+  room_number_ = room_number;
+  Room* room = rooms_[room_number_];
+  // loading in new walls
+  std::vector<GameObject*> walls = room->GetWalls();
+  for (GameObject* obj : walls) {
+    int type = NULL;
+    if (dynamic_cast<Wall*>(obj)) {
+      type = kWalls;
+    }
+    if (dynamic_cast<Door*>(obj)) {
+      type = kDoors;
+    }
+    game_objects_->at(type).push_back(obj);
+  }
+  // loading in enemies
+  for (Enemy* enemy : *rooms_[room_number_]->GetEnemies()) {
+    if (enemy) {
+      game_objects_->at(kEnemies).push_back(enemy);
+    }
+  }
+}
+// Copyright 2024 Hugh Thompson
+
+#include "ui_bar.h"
+
+UIBar::UIBar(int max_value, SDL_Color color, SDL_Rect rect) {
+  // initialsiation of values
+  rect_ = rect;
+  color_ = color;
+  max_value_ = max_value;
+}
+
+void UIBar::SetValue(int value) { value_ = value; }
+
+void UIBar::ChangeValue(float delta_value) {
+  if (value_ < max_value_) {
+    value_ += delta_value;
+  }
+}
+
+std::pair<SDL_Rect*, SDL_Color> UIBar::GetBar() {
+  SDL_Rect bar = {
+      rect_.x + border, rect_.y + border,
+      (rect_.w - (border * static_cast<float>(2))) / max_value_ * value_,
+      rect_.h - (border * 2)};
+  return {&bar, color_};
+}
+
+SDL_Rect* UIBar::GetRect() { return &rect_; }
+
+bool UIBar::Full() { return value_ >= max_value_; }
+
+float UIBar::GetValue() { return value_; }
+
+void UIBar::Move(int x, int y) {
+  rect_.x += x;
+  rect_.y += y;
+}
+
+void UIBar::SetPos(int x, int y) {
+  rect_.x = x;
+  rect_.y = y;
+}
+// Copyright (C) 2024 Hugh Thompson
+
+#include "wall.h"
+
+#include <algorithm>
+#include <cmath>
+
+Wall::Wall(int x, int y) : GameObject(x, y, "wall") {}
+
+bool Wall::Collision(GameObject* obj) {
+  bool rv = false;
+  // if not rendered, no point in wasting memory
+  if (rendered_) {
+    std::pair<bool, bool> move = {false, false};
+    Vector diff = {(obj->GetCenter()->x + obj->GetRect().x) -
+                       (rect_.x + rotation_center_.x),
+                   (obj->GetCenter()->y + obj->GetRect().y) -
+                       (rect_.y + rotation_center_.y)};
+    float circle_distance_x = abs(diff.x);
+    float circle_distance_y = abs(diff.y);
+    int r = obj->GetCenter()->x;
+
+    // checking if the obj is overlapping
+    if (circle_distance_x < (rect_.w / 2 + r)) {
+      if (circle_distance_y < (rect_.h / 2 + r)) {
+        if (circle_distance_x <= (rect_.w / 2)) {
+          // on y axis
+          rv = true;
+          move.second = true;
+        }
+        if (circle_distance_y <= (rect_.h / 2)) {
+          // on x axis
+          rv = true;
+          move.first = true;
+        }
+        float cornerdistance_sq = pow((circle_distance_x - rect_.w / 2), 2) +
+                                  pow((circle_distance_y - rect_.h / 2), 2);
+        // checking overlapping on corner
+        if (cornerdistance_sq <= pow(r, 2)) {
+          rv = true;
+          // only cancel out velocity moving towards object
+          move.first = (obj->GetVelocity().x / abs(obj->GetVelocity().x) !=
+                        diff.x / abs(diff.x));
+          move.second = (obj->GetVelocity().y / abs(obj->GetVelocity().y) !=
+                         diff.y / abs(diff.y));
+        }
+      }
+    }
+    // canceling out motion according to collision
+    obj->Move(obj->GetVelocity().x * -1 * move.first,
+              obj->GetVelocity().y * -1 * move.second);
+  }
+  return rv;
+}
