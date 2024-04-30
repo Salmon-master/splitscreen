@@ -20,7 +20,9 @@ class Room {
   // marked explicit as it is a one parameter consctor, this paramter is the
   // save which is then passed onto the enemy objects to initialise
   explicit Room(SaveManager* save);
+  // retuns the list of wall pointers in the room
   std::vector<GameObject*> GetWalls();
+  // retuns a list of pointer to the enemies in the room
   std::vector<Enemy*>* GetEnemies();
   // retuns the locations that are empty for enemy spawing, used to spawn
   // eneimes

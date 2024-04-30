@@ -16,18 +16,23 @@ class UIBar {
   // represneting what place(in screen space) and dimensions the bar should
   // occupy
   UIBar(int max_value, SDL_Color color, SDL_Rect rect);
+  // set the value of the bar
   void SetValue(int value);
+  // modifies the value of the bar by the inputted amount
   void ChangeValue(float delta_value);
   // returns the a rect and color of the coloured part of the bar, called in the
   // render method in the screen object to display the bar
   std::pair<SDL_Rect*, SDL_Color> GetBar();
+  // retuns the rect of the bar's background(x, y, width, height)
   SDL_Rect* GetRect();
   // retruns wether or not this bar's value is equal to the max value of that
   // bar
   bool Full();
+  // returns the value of the bar
   float GetValue();
   // modifies the position of the bar on the screen by the inputted amount
   void Move(int x, int y);
+  // sets the bar's position in screen space.
   void SetPos(int x, int y);
 
  private:

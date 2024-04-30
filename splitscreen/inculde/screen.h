@@ -54,7 +54,9 @@ class Screen {
   UIBar* AddBar(int max_value, SDL_Color color, SDL_Rect rect, int value);
   // removes a given bar from the screen object.
   void RemoveBar(UIBar* bar_to_remove);
+  // returns a pointer to the currently attached player
   Player* GetAttached();
+  // retuns a pointer to the screen's bars
   std::vector<UIBar*>* GetBars();
 };
 

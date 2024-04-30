@@ -46,6 +46,7 @@ class Player : public GameObject {
   // anticlockwise, will rotate the player based upon the rotation speed and is
   // smoothed by delta time.
   void Rotate(bool direction, int delta_time);
+  // retuns a pointer to the current gun the robot is weilding
   Gun* GetGun();
   // called when the player receives damage, retuns wether or not the player is
   // alive.

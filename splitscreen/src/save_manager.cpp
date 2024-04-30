@@ -10,11 +10,22 @@
 
 SaveManager::SaveManager() {
   // open file
-  std::fstream data("assets/save.txt");
+  std::ifstream data("assets/save.txt");
+  if (!data.good()) {
+    std::cout << "save file not found, please copy the backup save form "
+                 "assets/backup into the assets folder"
+              << std::endl;
+  }
   std::string line;
   // read data into data variable line by line
   while (getline(data, line)) {
     data_.push_back(std::stoi(line));
+  }
+  if (data_.size() != 12) {
+    std::cout << "save file corrupted, please copy the backup save from "
+                 "assets/backup into the assets folder"
+              << std::endl;
+    std::abort();
   }
   // close file
   data.close();

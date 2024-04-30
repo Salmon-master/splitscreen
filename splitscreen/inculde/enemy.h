@@ -28,6 +28,7 @@ class Enemy : public GameObject {
   // calculate the direction the enemy wants to go in, interpritation of
   // alorightm at https://kidscancode.org/godot_recipes/3.x/ai/context_map/
   void AI(std::vector<std::vector<GameObject*>>* game_objects, int delta);
+  // retunes the enemy health bar
   UIBar* GetBar();
   ~Enemy();
 

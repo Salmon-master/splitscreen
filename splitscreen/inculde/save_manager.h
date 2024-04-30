@@ -47,7 +47,9 @@ class SaveManager {
   // writes the damage attined by the player to the save, used by the mainb game
   // loop to save the player's progress after completing or fleeing a ship
   void SetMenuDamage(int player, int damage);
+  // retuns the repair cost given a givens robot's id(1 based)
   int GetRepairCost(int player);
+  // retuns the damage of a givens robot's id(1 based)
   int GetDamage(int player);
   // returns the mean level of both robot's upgrades, used as a multiplier to
   // increase difficulty

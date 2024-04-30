@@ -72,7 +72,7 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
     if (delta == 0) {
       delta = 1;
     }
-    // buffer lists of objects
+    // buffer lists of objects for use
     std::vector<GameObject*> danger_objects;
     std::vector<Vector> interest_objects;
     // iterating through all game objects and adding them to the buffer lists
@@ -107,8 +107,8 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
                              (rect_.x + rotation_center_.x),
                          (obj->GetRect().y + obj->GetCenter()->y) -
                              (rect_.y + rotation_center_.y)};
-          if (diff.Norm() <= search_range_ * 3) {
-            if (health_ > max_health_ / 4) {
+          if (diff.Norm() < search_range_ * 3) {
+            if (health_ < max_health_ / 4) {
               interest_objects.push_back(Vector{obj->GetRect().x - rect_.x,
                                                 obj->GetRect().y - rect_.y});
               if (diff.Norm() < attack_range_) {

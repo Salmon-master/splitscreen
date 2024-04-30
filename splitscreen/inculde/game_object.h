@@ -64,9 +64,13 @@ class GameObject {
   // aslo used to set the current amination, but ques the animation to run after
   // the current animation is finished playing.
   void QueState(int state);
+  // retuns the rect(x, y, width, height) of the game object
   SDL_FRect GetRect();
+  // retuns the roataion, in radians, of the game object
   float GetRotation();
+  // retuns the center of the player relivte to the top left corner
   SDL_Point* GetCenter();
+  // retuns the velocity vector of the game object
   Vector GetVelocity();
 };
 

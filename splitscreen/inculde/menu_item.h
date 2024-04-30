@@ -17,7 +17,9 @@ class MenuItem {
   // dimenison in a rect and a color for diplay
   MenuItem(SDL_Rect rect, SDL_Color color);
   ~MenuItem();
+  // retuns the rect(x,y, width, height) of the bar
   SDL_Rect* GetRect();
+  // retuns a pointer to the surface of the menu item
   SDL_Surface* GetSurface();
   // sets the visablitiy of the object to show
   void Show();
@@ -26,6 +28,7 @@ class MenuItem {
   // virtual update function, not implemeted by this object but child objcets
   // have implemtations, and this is called evry frame by the menu.
   virtual void Update();
+  // retuns the color of the object
   SDL_Color GetColor();
   // retuns the visaublity staus of the object, true for visable, false for
   // hidden

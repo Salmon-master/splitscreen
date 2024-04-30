@@ -3,6 +3,7 @@
 #include "game_object.h"
 
 #include <filesystem>
+#include <iostream>
 
 void GameObject::Cast() {}
 
@@ -23,6 +24,10 @@ GameObject::GameObject(int x, int y, std::string name) {
          std::filesystem::directory_iterator(animation_path)) {
       SDL_Surface* surface_buffer =
           IMG_Load(((animation_entry.path()).string()).c_str());
+      if (!surface_buffer) {
+        std::cout << "image" + (animation_entry.path()).string() + "not found"
+                  << std::endl;
+      }
       surfaces_[index_pointer].emplace_back(surface_buffer);
     }
     index_pointer += 1;
