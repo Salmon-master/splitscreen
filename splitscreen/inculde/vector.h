@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef VECTOR_H_
-#define VECTOR_H_
+#ifndef SPLITSCREEN_VECTOR_H_
+#define SPLITSCREEN_VECTOR_H_
 
 #include <cmath>
 // a structure containing a 2d vector mathmatical/physics sense.
@@ -28,4 +28,4 @@ struct Vector {
   }
 };
 
-#endif  // !VECTOR_H_
+#endif  // !SPLITSCREEN_VECTOR_H_

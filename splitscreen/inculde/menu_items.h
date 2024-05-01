@@ -1,6 +1,9 @@
 // Copyright 2024 Hugh Thompson
 
-#pragma once
+#ifndef SPLITSCREEN_MENU_ITEMS_H_
+#define SPLITSCREEN_MENU_ITEMS_H_
+
+
 
 #include <vector>
 
@@ -686,3 +689,4 @@ void ShowPriceP2Repair(bool dir) {
     text->SetText("Repair");
   }
 }
+#endif  // !SPLITSCREEN_MENU_ITEMS_H_

@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef MENU_IMAGE_H_
-#define MENU_IMAGE_H_
+#ifndef SPLITSCREEN_MENU_IMAGE_H_
+#define SPLITSCREEN_MENU_IMAGE_H_
 
 #include <string>
 
@@ -19,4 +19,4 @@ class MenuImage : public MenuItem {
   MenuImage(int x, int y, std::string name);
 };
 
-#endif  // !MENU_IMAGE_H_
+#endif  // !SPLITSCREEN_MENU_IMAGE_H_

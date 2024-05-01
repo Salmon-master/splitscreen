@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef ROOM_H_
-#define ROOM_H_
+#ifndef SPLITSCREEN_ROOM_H_
+#define SPLITSCREEN_ROOM_H_
 
 #include <utility>
 #include <vector>
@@ -50,4 +50,4 @@ class Room {
   std::vector<Enemy*> enemies_ = {};
 };
 
-#endif  // !ROOM_H_
+#endif  // !SPLITSCREEN_ROOM_H_

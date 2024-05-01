@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef MENU_TEXT_H_
-#define MENU_TEXT_H_
+#ifndef SPLITSCREEN_MENU_TEXT_H_
+#define SPLITSCREEN_MENU_TEXT_H_
 
 #include <string>
 
@@ -41,4 +41,4 @@ class MenuText : public MenuItem {
   int size_ = 28;
 };
 
-#endif  // !MENU_TEXT_H_
+#endif  // !SPLITSCREEN_MENU_TEXT_H_

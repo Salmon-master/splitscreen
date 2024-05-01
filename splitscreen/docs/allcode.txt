@@ -89,6 +89,7 @@ class Enemy : public GameObject {
   // calculate the direction the enemy wants to go in, interpritation of
   // alorightm at https://kidscancode.org/godot_recipes/3.x/ai/context_map/
   void AI(std::vector<std::vector<GameObject*>>* game_objects, int delta);
+  // retunes the enemy health bar
   UIBar* GetBar();
   ~Enemy();
 
@@ -212,9 +213,13 @@ class GameObject {
   // aslo used to set the current amination, but ques the animation to run after
   // the current animation is finished playing.
   void QueState(int state);
+  // retuns the rect(x, y, width, height) of the game object
   SDL_FRect GetRect();
+  // retuns the roataion, in radians, of the game object
   float GetRotation();
+  // retuns the center of the player relivte to the top left corner
   SDL_Point* GetCenter();
+  // retuns the velocity vector of the game object
   Vector GetVelocity();
 };
 
@@ -332,6 +337,7 @@ class MenuButton : public MenuItem {
   //  called by the menu's renderer evey frame to update the buttons asthetics
   //  and to check for hovering and clicking
   void Update();
+  // retuns the menuitem bound to the display 
   MenuItem* GetDisplay();
   // sets the default color of the button when not hoverd over
   void SetColorDef(SDL_Color color);
@@ -394,7 +400,9 @@ class MenuItem {
   // dimenison in a rect and a color for diplay
   MenuItem(SDL_Rect rect, SDL_Color color);
   ~MenuItem();
+  // retuns the rect(x,y, width, height) of the bar
   SDL_Rect* GetRect();
+  // retuns a pointer to the surface of the menu item
   SDL_Surface* GetSurface();
   // sets the visablitiy of the object to show
   void Show();
@@ -403,6 +411,7 @@ class MenuItem {
   // virtual update function, not implemeted by this object but child objcets
   // have implemtations, and this is called evry frame by the menu.
   virtual void Update();
+  // retuns the color of the object
   SDL_Color GetColor();
   // retuns the visaublity staus of the object, true for visable, false for
   // hidden
@@ -441,19 +450,8 @@ Menu* reward_menu = nullptr;
 
 // run the game
 void Play() {
-  // if players are both active
-  if (save.GetDamage(1) < 100 && save.GetDamage(2) < 100) {
-    menu_run = false;
-    game_run = true;
-  } else{
-    Menu* popup = new Menu(517, 70);
-    MenuText* text =
-        new MenuText(25, 25, "Both Robots must be active to play", {0, 0, 0, 255}, 20);
-    popup->menu_items_ = {text};
-    popup->Render();
-    SDL_Delay(3000);
-    delete popup;
-  }
+  menu_run = false;
+  game_run = true;
 }
 
 // play button
@@ -1213,6 +1211,7 @@ class Player : public GameObject {
   // anticlockwise, will rotate the player based upon the rotation speed and is
   // smoothed by delta time.
   void Rotate(bool direction, int delta_time);
+  // retuns a pointer to the current gun the robot is weilding
   Gun* GetGun();
   // called when the player receives damage, retuns wether or not the player is
   // alive.
@@ -1249,7 +1248,9 @@ class Room {
   // marked explicit as it is a one parameter consctor, this paramter is the
   // save which is then passed onto the enemy objects to initialise
   explicit Room(SaveManager* save);
+  // retuns the list of wall pointers in the room
   std::vector<GameObject*> GetWalls();
+  // retuns a list of pointer to the enemies in the room
   std::vector<Enemy*>* GetEnemies();
   // retuns the locations that are empty for enemy spawing, used to spawn
   // eneimes
@@ -1327,7 +1328,9 @@ class SaveManager {
   // writes the damage attined by the player to the save, used by the mainb game
   // loop to save the player's progress after completing or fleeing a ship
   void SetMenuDamage(int player, int damage);
+  // retuns the repair cost given a givens robot's id(1 based)
   int GetRepairCost(int player);
+  // retuns the damage of a givens robot's id(1 based)
   int GetDamage(int player);
   // returns the mean level of both robot's upgrades, used as a multiplier to
   // increase difficulty
@@ -1419,7 +1422,9 @@ class Screen {
   UIBar* AddBar(int max_value, SDL_Color color, SDL_Rect rect, int value);
   // removes a given bar from the screen object.
   void RemoveBar(UIBar* bar_to_remove);
+  // returns a pointer to the currently attached player
   Player* GetAttached();
+  // retuns a pointer to the screen's bars
   std::vector<UIBar*>* GetBars();
 };
 
@@ -1491,18 +1496,23 @@ class UIBar {
   // represneting what place(in screen space) and dimensions the bar should
   // occupy
   UIBar(int max_value, SDL_Color color, SDL_Rect rect);
+  // set the value of the bar
   void SetValue(int value);
+  // modifies the value of the bar by the inputted amount
   void ChangeValue(float delta_value);
   // returns the a rect and color of the coloured part of the bar, called in the
   // render method in the screen object to display the bar
   std::pair<SDL_Rect*, SDL_Color> GetBar();
+  // retuns the rect of the bar's background(x, y, width, height)
   SDL_Rect* GetRect();
   // retruns wether or not this bar's value is equal to the max value of that
   // bar
   bool Full();
+  // returns the value of the bar
   float GetValue();
   // modifies the position of the bar on the screen by the inputted amount
   void Move(int x, int y);
+  // sets the bar's position in screen space.
   void SetPos(int x, int y);
 
  private:
@@ -1822,7 +1832,7 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
     if (delta == 0) {
       delta = 1;
     }
-    // buffer lists of objects
+    // buffer lists of objects for use
     std::vector<GameObject*> danger_objects;
     std::vector<Vector> interest_objects;
     // iterating through all game objects and adding them to the buffer lists
@@ -1857,7 +1867,7 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
                              (rect_.x + rotation_center_.x),
                          (obj->GetRect().y + obj->GetCenter()->y) -
                              (rect_.y + rotation_center_.y)};
-          if (diff.Norm() <= search_range_ * 3) {
+          if (diff.Norm() < search_range_ * 3) {
             if (health_ < max_health_ / 4) {
               interest_objects.push_back(Vector{obj->GetRect().x - rect_.x,
                                                 obj->GetRect().y - rect_.y});
@@ -2079,6 +2089,7 @@ float Enemy::SetRotationFromVector(Vector rotation) {
 #include "game_object.h"
 
 #include <filesystem>
+#include <iostream>
 
 void GameObject::Cast() {}
 
@@ -2099,6 +2110,10 @@ GameObject::GameObject(int x, int y, std::string name) {
          std::filesystem::directory_iterator(animation_path)) {
       SDL_Surface* surface_buffer =
           IMG_Load(((animation_entry.path()).string()).c_str());
+      if (!surface_buffer) {
+        std::cout << "image" + (animation_entry.path()).string() + "not found"
+                  << std::endl;
+      }
       surfaces_[index_pointer].emplace_back(surface_buffer);
     }
     index_pointer += 1;
@@ -2763,9 +2778,14 @@ void MenuButton::SetColorDef(SDL_Color color) { color_def_ = color; }
 
 #include "menu_image.h"
 
+#include <iostream>
+
 MenuImage::MenuImage(int x, int y, std::string name) : MenuItem(x, y) {
   // loading in image from given name
   SetSurface(IMG_Load(("assets/menu/" + name + ".png").c_str()));
+  if (!surface_) {
+    std::cout << "image assets/menu/" + name + ".png not found" << std::endl;
+  }
 }
 // Copyright 2024 Hugh Thompson
 
@@ -3354,11 +3374,22 @@ std::vector<SDL_Point> Room::GetSurroundingCells(int x, int y) {
 
 SaveManager::SaveManager() {
   // open file
-  std::fstream data("assets/save.txt");
+  std::ifstream data("assets/save.txt");
+  if (!data.good()) {
+    std::cout << "save file not found, please copy the backup save form "
+                 "assets/backup into the assets folder"
+              << std::endl;
+  }
   std::string line;
   // read data into data variable line by line
   while (getline(data, line)) {
     data_.push_back(std::stoi(line));
+  }
+  if (data_.size() != 12) {
+    std::cout << "save file corrupted, please copy the backup save from "
+                 "assets/backup into the assets folder"
+              << std::endl;
+    std::abort();
   }
   // close file
   data.close();

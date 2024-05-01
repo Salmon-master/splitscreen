@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef UI_BAR_H_
-#define UI_BAR_H_
+#ifndef SPLITSCREEN_UI_BAR_H_
+#define SPLITSCREEN_UI_BAR_H_
 
 #include <iostream>
 #include <utility>
@@ -52,4 +52,4 @@ class UIBar {
   static const int border = 2;
 };
 
-#endif  // !UI_BAR_H_
+#endif  // !SPLITSCREEN_UI_BAR_H_

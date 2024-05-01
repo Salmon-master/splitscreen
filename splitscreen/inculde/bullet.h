@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef BULLET_H_
-#define BULLET_H_
+#ifndef SPLITSCREEN_BULLET_H_
+#define SPLITSCREEN_BULLET_H_
 
 #include "game_object.h"
 #include "player.h"
@@ -33,4 +33,4 @@ class Bullet : public GameObject {
   GameObject* shooter_;
 };
 
-#endif  // !BULLET_H_
+#endif  // !SPLITSCREEN_BULLET_H_

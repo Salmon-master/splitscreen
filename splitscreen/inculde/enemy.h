@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef ENEMY_H_
-#define ENEMY_H_
+#ifndef SPLITSCREEN_ENEMY_H_
+#define SPLITSCREEN_ENEMY_H_
 
 #include <vector>
 
@@ -85,4 +85,4 @@ class Enemy : public GameObject {
   int type_;
 };
 
-#endif  // !ENEMY_H_
+#endif  // !SPLITSCREEN_ENEMY_H_

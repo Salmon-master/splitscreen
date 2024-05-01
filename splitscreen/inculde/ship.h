@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef SHIP_H_
-#define SHIP_H_
+#ifndef SPLITSCREEN_SHIP_H_
+#define SPLITSCREEN_SHIP_H_
 
 #include <iostream>
 #include <utility>
@@ -46,4 +46,4 @@ class Ship {
   void LoadRoom(int room_number);
 };
 
-#endif  // !SHIP_H_
+#endif  // !SPLITSCREEN_SHIP_H_

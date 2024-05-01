@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef SCREEN_H_
-#define SCREEN_H_
+#ifndef SPLITSCREEN_SCREEN_H_
+#define SPLITSCREEN_SCREEN_H_
 
 #include <iostream>
 #include <utility>
@@ -60,4 +60,4 @@ class Screen {
   std::vector<UIBar*>* GetBars();
 };
 
-#endif  // !SCREEN_H_
+#endif  // !SPLITSCREEN_SCREEN_H_

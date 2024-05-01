@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Hugh Thompson
 
-#ifndef WALL_H_
-#define WALL_H_
+#ifndef SPLITSCREEN_WALL_H_
+#define SPLITSCREEN_WALL_H_
 
 #include <iostream>
 #include <vector>
@@ -22,4 +22,4 @@ class Wall : public GameObject {
   bool Collision(GameObject* obj);
 };
 
-#endif  // !WALL_H_
+#endif  // !SPLITSCREEN_WALL_H_

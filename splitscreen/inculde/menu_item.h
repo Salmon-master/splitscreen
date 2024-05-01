@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef MENU_ITEM_H_
-#define MENU_ITEM_H_
+#ifndef SPLITSCREEN_MENU_ITEM_H_
+#define SPLITSCREEN_MENU_ITEM_H_
 
 #include "SDL2/include/SDL.h"
 
@@ -47,4 +47,4 @@ class MenuItem {
   SDL_Color color_ = {NULL, NULL, NULL};
 };
 
-#endif  // !MENU_ITEM_H_
+#endif  // !SPLITSCREEN_MENU_ITEM_H_

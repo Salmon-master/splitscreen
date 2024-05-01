@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef MENU_BUTTON_H_
-#define MENU_BUTTON_H_
+#ifndef SPLITSCREEN_MENU_BUTTON_H_
+#define SPLITSCREEN_MENU_BUTTON_H_
 
 #include "menu_item.h"
 
@@ -40,4 +40,4 @@ class MenuButton : public MenuItem {
   SDL_Color color_def_ = {60, 60, 60, 255};
 };
 
-#endif  // !MENU_BUTTON_H_
+#endif  // !SPLITSCREEN_MENU_BUTTON_H_

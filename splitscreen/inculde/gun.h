@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef GUN_H_
-#define GUN_H_
+#ifndef SPLITSCREEN_GUN_H_
+#define SPLITSCREEN_GUN_H_
 
 #include "bullet.h"
 #include "player.h"
@@ -39,4 +39,4 @@ class Gun {
   GameObject* held_by_ = nullptr;
 };
 
-#endif  // !GUN_H_
+#endif  // !SPLITSCREEN_GUN_H_

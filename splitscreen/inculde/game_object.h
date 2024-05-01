@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef GAME_OBJECT_H_
-#define GAME_OBJECT_H_
+#ifndef SPLITSCREEN_GAME_OBJECT_H_
+#define SPLITSCREEN_GAME_OBJECT_H_
 
 #include <iostream>
 #include <string>
@@ -74,4 +74,4 @@ class GameObject {
   Vector GetVelocity();
 };
 
-#endif  // !GAME_OBJECT_H_
+#endif  // !SPLITSCREEN_GAME_OBJECT_H_

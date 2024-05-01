@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef SAVE_MANAGER_H_
-#define SAVE_MANAGER_H_
+#ifndef SPLITSCREEN_SAVE_MANAGER_H_
+#define SPLITSCREEN_SAVE_MANAGER_H_
 
 #include <vector>
 
@@ -84,4 +84,4 @@ class SaveManager {
   // [11] is the level of gun 4.
   std::vector<int> data_;
 };
-#endif  // !SAVE_MANAGER_H_
+#endif  // !SPLITSCREEN_SAVE_MANAGER_H_

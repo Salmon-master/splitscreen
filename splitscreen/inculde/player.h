@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef PLAYER_H_
-#define PLAYER_H_
+#ifndef SPLITSCREEN_PLAYER_H_
+#define SPLITSCREEN_PLAYER_H_
 
 #include "game_object.h"
 #include "gun.h"
@@ -60,4 +60,4 @@ class Player : public GameObject {
   int GetDamage();
 };
 
-#endif  // !PLAYER_H_
+#endif  // !SPLITSCREEN_PLAYER_H_

@@ -1,7 +1,7 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef MENU_H_
-#define MENU_H_
+#ifndef SPLITSCREEN_MENU_H_
+#define SPLITSCREEN_MENU_H_
 
 #include <vector>
 
@@ -36,4 +36,4 @@ class Menu {
   bool border_ = false;
 };
 
-#endif  // !MENU_H_
+#endif  // !SPLITSCREEN_MENU_H_
