@@ -68,7 +68,7 @@ class GameObject {
   SDL_FRect GetRect();
   // retuns the roataion, in radians, of the game object
   float GetRotation();
-  // retuns the center of the player relivte to the top left corner
+  // retuns the center of the robot relivte to the top left corner
   SDL_Point* GetCenter();
   // retuns the velocity vector of the game object
   Vector GetVelocity();

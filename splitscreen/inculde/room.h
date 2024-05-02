@@ -28,7 +28,7 @@ class Room {
   // eneimes
   std::vector<std::pair<int, int>> GetFree();
   ~Room();
-  // retruns wether or not room has been visited by the player, also sets that
+  // retruns wether or not room has been visited by the robot, also sets that
   // the room has been visited. Used by the ship class to spawn in enemies.
   bool Visit();
 
@@ -44,7 +44,7 @@ class Room {
   std::vector<GameObject*> walls_ = {};
   // a list of free spaces (global coorinates at center of space)
   std::vector<std::pair<int, int>> free_;
-  // wether or not this room has been visited by the player
+  // wether or not this room has been visited by the robot
   bool visited_ = false;
   // enemy objects from map generation
   std::vector<Enemy*> enemies_ = {};

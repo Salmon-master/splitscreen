@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "game_object.h"
-#include "player.h"
+#include "robot.h"
 
 // An in game wall peice, can collide with other objects using the collide
 // method, used to add visable wall objects to the game.

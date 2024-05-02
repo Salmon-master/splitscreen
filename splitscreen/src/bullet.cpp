@@ -67,16 +67,16 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
             +kEnemies;
           }
         }
-        // players take damage
-        if (i == kPlayers) {
-          Player* player = dynamic_cast<Player*>(obj);
-          if (player) {
+        // robots take damage
+        if (i == kRobots) {
+          Robot* robot = dynamic_cast<Robot*>(obj);
+          if (robot) {
             Vector diff = {(rotation_center_.x + rect_.x) -
                                (obj->GetCenter()->x + obj->GetRect().x),
                            (rotation_center_.y + rect_.y) -
                                (obj->GetCenter()->y + obj->GetRect().y)};
             if (diff.Norm() <= obj->GetCenter()->x) {
-              player->Damage(damage_);
+              robot->Damage(damage_);
               destruct = true;
               break;
             }
@@ -91,7 +91,7 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
   while (!to_remove.empty()) {
     GameObject* removed = to_remove.top();
     to_remove.pop();
-    for (int i = kPlayers; i < kBullets; i++) {
+    for (int i = kRobots; i < kBullets; i++) {
       objects->at(i).erase(
           std::remove(objects->at(i).begin(), objects->at(i).end(), removed),
           objects->at(i).end());

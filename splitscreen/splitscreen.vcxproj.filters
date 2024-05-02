@@ -24,7 +24,7 @@
     <ClCompile Include="src\game_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\player.cpp">
+    <ClCompile Include="src\robot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\wall.cpp">
@@ -80,7 +80,7 @@
     <ClInclude Include="inculde\game_object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inculde\player.h">
+    <ClInclude Include="inculde\robot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inculde\wall.h">

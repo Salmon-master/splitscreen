@@ -8,7 +8,7 @@
 
 #include "SDL2/include/SDL.h"
 
-// a class used to display infomation to the player in the from of a bar, theese
+// a class used to display infomation to the robot in the from of a bar, theese
 // bars are assigned to an induvidular screen object which will display them.
 class UIBar {
  public:

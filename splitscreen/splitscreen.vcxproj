@@ -30,7 +30,7 @@
     <ClCompile Include="src\menu_image.cpp" />
     <ClCompile Include="src\menu_item.cpp" />
     <ClCompile Include="src\menu_text.cpp" />
-    <ClCompile Include="src\player.cpp" />
+    <ClCompile Include="src\robot.cpp" />
     <ClCompile Include="src\room.cpp" />
     <ClCompile Include="src\save_manager.cpp" />
     <ClCompile Include="src\screen.cpp" />
@@ -51,7 +51,7 @@
     <ClInclude Include="inculde\menu_image.h" />
     <ClInclude Include="inculde\menu_item.h" />
     <ClInclude Include="inculde\menu_text.h" />
-    <ClInclude Include="inculde\player.h" />
+    <ClInclude Include="inculde\robot.h" />
     <ClInclude Include="inculde\room.h" />
     <ClInclude Include="inculde\save_manager.h" />
     <ClInclude Include="inculde\screen.h" />

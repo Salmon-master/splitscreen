@@ -47,7 +47,7 @@ SaveManager::~SaveManager() {
 unsigned int SaveManager::GetCredits() { return data_[0]; }
 
 unsigned int SaveManager::Reward() {
-  // calculation of reward based on player level
+  // calculation of reward based on robot level
   float avrgae_level = (data_[2] + data_[3] + data_[5] + data_[6]) / 4.0f;
   int reward = avrgae_level * 100.0f;
   data_[0] += reward;
@@ -79,10 +79,10 @@ bool SaveManager::UpgradeWeapon(int type) {
   return bought;
 }
 
-std::vector<int> SaveManager::GetPlayerStats(int player) {
+std::vector<int> SaveManager::GetRobotStats(int robot) {
   // setting index base off robot inputted
   int index = 2;
-  if (player == 2) {
+  if (robot == 2) {
     index = 5;
   }
   float speed_mul = static_cast<float>(data_[index]) / 100.0f;
@@ -90,19 +90,19 @@ std::vector<int> SaveManager::GetPlayerStats(int player) {
   int speed_cost = 100 * pow(1.1, data_[index]);
   int armour_cost = 100 * pow(1.1, data_[index + 1]);
   return {
-      static_cast<int>(static_cast<float>(kBasePlayer[0]) * (1.0f + speed_mul)),
-      static_cast<int>(static_cast<float>(kBasePlayer[1]) *
+      static_cast<int>(static_cast<float>(kBaseRobot[0]) * (1.0f + speed_mul)),
+      static_cast<int>(static_cast<float>(kBaseRobot[1]) *
                        (1.0f + armour_mul)),
       speed_cost, armour_cost};
 }
 
-bool SaveManager::UpgradePlayer(bool upgrade, int player) {
+bool SaveManager::UpgradeRobot(bool upgrade, int robot) {
   // setting index base off robot inputted
   int index = 2;
-  if (player == 2) {
+  if (robot == 2) {
     index = 5;
   }
-  int cost = GetPlayerStats(player)[2 + upgrade];
+  int cost = GetRobotStats(robot)[2 + upgrade];
   bool bought = false;
   if (cost <= data_[0]) {
     data_[index + upgrade] += 1;
@@ -112,13 +112,13 @@ bool SaveManager::UpgradePlayer(bool upgrade, int player) {
   return bought;
 }
 
-int SaveManager::Repair(int player) {
+int SaveManager::Repair(int robot) {
   // setting index base off robot inputted
   int index = 1;
-  if (player == 2) {
+  if (robot == 2) {
     index = 4;
   }
-  int cost = GetRepairCost(player);
+  int cost = GetRepairCost(robot);
   int bought = 0;
   if (cost <= data_[0]) {
     bought = 2;
@@ -131,19 +131,19 @@ int SaveManager::Repair(int player) {
   return bought;
 }
 
-void SaveManager::SetMenuDamage(int player, int damage) {
+void SaveManager::SetMenuDamage(int robot, int damage) {
   // setting index base off robot inputted
   int index = 1;
-  if (player == 2) {
+  if (robot == 2) {
     index = 4;
   }
   data_[index] = damage;
 }
 
-int SaveManager::GetRepairCost(int player) {
+int SaveManager::GetRepairCost(int robot) {
   // setting index base off robot inputted
   int index = 1;
-  if (player == 2) {
+  if (robot == 2) {
     index = 4;
   }
   int avg_level = (data_[index + 1] + data_[index + 2]) / 2;
@@ -154,10 +154,10 @@ int SaveManager::GetRepairCost(int player) {
   return cost;
 }
 
-int SaveManager::GetDamage(int player) {
+int SaveManager::GetDamage(int robot) {
   // setting index base off robot inputted
   int index = 1;
-  if (player == 2) {
+  if (robot == 2) {
     index = 4;
   }
   return data_[index];

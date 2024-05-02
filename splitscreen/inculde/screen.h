@@ -10,7 +10,7 @@
 #include "SDL2/include/SDL.h"
 
 #include "game_object.h"
-#include "player.h"
+#include "robot.h"
 #include "ui_bar.h"
 
 // object to control a window on screen, used by the main.cc to create a window,
@@ -31,7 +31,7 @@ class Screen {
   // camera pos y
   float y_ = 0;
   // object following
-  Player* following_ = nullptr;
+  Robot* following_ = nullptr;
   // the camera offset
   std::pair<int, int> offset_ = {0, 0};
   // the list of UI_Bars this screen should currently be displaying
@@ -47,15 +47,15 @@ class Screen {
   // render all objects in veiw of camrea on screen, called in main method every
   // frame
   void Render(std::vector<std::vector<GameObject*>> game_ojbects);
-  // bind camrea position to the inputted player's position, and disply the
-  // health of that player on screen
-  void Attach(Player* target);
+  // bind camrea position to the inputted robot's position, and disply the
+  // health of that robot on screen
+  void Attach(Robot* target);
   // adds a bar to the list of bars, and consequently to the screen
   UIBar* AddBar(int max_value, SDL_Color color, SDL_Rect rect, int value);
   // removes a given bar from the screen object.
   void RemoveBar(UIBar* bar_to_remove);
-  // returns a pointer to the currently attached player
-  Player* GetAttached();
+  // returns a pointer to the currently attached robot
+  Robot* GetAttached();
   // retuns a pointer to the screen's bars
   std::vector<UIBar*>* GetBars();
 };

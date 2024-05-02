@@ -41,9 +41,9 @@ class Enemy : public GameObject {
   std::vector<float> SetDanger(std::vector<GameObject*> objects);
   // checks if two line segments intersect, used mainly for ray casting , line
   // segments are given by two sets points(start and end) of each line
-  // line 1 = p1-q1
-  // line 2 = p2-q2
-  bool Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2);
+  // line 1 = r1-q1
+  // line 2 = r2-q2
+  bool Intersect(SDL_Point r1, SDL_Point q1, SDL_Point r2, SDL_Point q2);
   // the health of the enemy.
   int health_ = 0;
   // the staring health of the enemy, set in constrctor.
@@ -64,7 +64,7 @@ class Enemy : public GameObject {
   float steer_force_ = 0.35;
   // retuns the orenatation of three points, could be either colcokwise(1),
   // anitclockwise(2) or colinear(0)
-  int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);
+  int Orientation(SDL_Point r1, SDL_Point r2, SDL_Point p3);
   // a pointer to the enemies health bar, initiaised in constructor
   UIBar* health_bar_ = nullptr;
   // wether or not the enenmy is alive
@@ -78,7 +78,7 @@ class Enemy : public GameObject {
   float SetRotationFromVector(Vector rotation);
   // a pointer to the room which the enemy is in, initised in consctor
   Room* room_ = nullptr;
-  // base enemy stats, multiplied in constucor by avrage player level
+  // base enemy stats, multiplied in constucor by avrage robot level
   const int kEnemyStats[5][3] = {
       {30, 64, 20}, {60, 128, 10}, {85, 96, 5}, {50, 256, 10}, {60, 128, 10}};
   // the type of the enmey (0 based)

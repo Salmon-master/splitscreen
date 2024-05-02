@@ -4,11 +4,11 @@
 #define SPLITSCREEN_BULLET_H_
 
 #include "game_object.h"
-#include "player.h"
+#include "robot.h"
 #include "vector"
 #include "vector.h"
 
-class Player;
+class Robot;
 
 // a class used to represent an in game bullet
 class Bullet : public GameObject {

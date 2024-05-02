@@ -29,7 +29,7 @@ class Ship {
   // current room will decrease by 1.
   // Retuns whether or not this navigation is outside the range of the number of
   // rooms.
-  // Used by the main game lopop when the player needs to be moved to the next
+  // Used by the main game lopop when the robot needs to be moved to the next
   // or previous level
   bool MoveRoom(bool dir);
 

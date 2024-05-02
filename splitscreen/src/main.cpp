@@ -17,7 +17,7 @@
 #include "menu_button.h"
 #include "menu_image.h"
 #include "menu_text.h"
-#include "player.h"
+#include "robot.h"
 #include "room.h"
 #include "save_manager.h"
 #include "screen.h"
@@ -40,46 +40,46 @@ int main(int argc, char* args[]) {
     printf("error initializing SDL: %s\n", SDL_GetError());
   }
   // adding menuitems from menu_items.h
-  menu->menu_items_ = {player1_image,
-                       player2_image,
-                       player1_gun1,
-                       player1_gun2,
-                       player1_gun3,
-                       player1_gun4,
-                       player1_gun5,
-                       player2_gun1,
-                       player2_gun2,
-                       player2_gun3,
-                       player2_gun4,
-                       player2_gun5,
-                       player1_overlay,
-                       player1_upgrade_weapon,
-                       player1_gun1_text,
-                       player1_gun2_text,
-                       player1_gun3_text,
-                       player1_gun4_text,
-                       player1_gun5_text,
-                       player2_overlay,
-                       player2_upgrade_weapon,
-                       player2_gun1_text,
-                       player2_gun2_text,
-                       player2_gun3_text,
-                       player2_gun4_text,
-                       player2_gun5_text,
-                       p1_speed,
-                       p1_armour,
-                       p1_upgrade_speed,
-                       p1_upgrade_armour,
-                       p1_repair,
-                       p1_damagebar_bkg,
-                       p1_damagebar,
-                       p2_speed,
-                       p2_armour,
-                       p2_upgrade_speed,
-                       p2_upgrade_armour,
-                       p2_repair,
-                       p2_damagebar_bkg,
-                       p2_damagebar,
+  menu->menu_items_ = {robot1_image,
+                       robot2_image,
+                       robot1_gun1,
+                       robot1_gun2,
+                       robot1_gun3,
+                       robot1_gun4,
+                       robot1_gun5,
+                       robot2_gun1,
+                       robot2_gun2,
+                       robot2_gun3,
+                       robot2_gun4,
+                       robot2_gun5,
+                       robot1_overlay,
+                       robot1_upgrade_weapon,
+                       robot1_gun1_text,
+                       robot1_gun2_text,
+                       robot1_gun3_text,
+                       robot1_gun4_text,
+                       robot1_gun5_text,
+                       robot2_overlay,
+                       robot2_upgrade_weapon,
+                       robot2_gun1_text,
+                       robot2_gun2_text,
+                       robot2_gun3_text,
+                       robot2_gun4_text,
+                       robot2_gun5_text,
+                       r1_speed,
+                       r1_armour,
+                       r1_upgrade_speed,
+                       r1_upgrade_armour,
+                       r1_repair,
+                       r1_damagebar_bkg,
+                       r1_damagebar,
+                       r2_speed,
+                       r2_armour,
+                       r2_upgrade_speed,
+                       r2_upgrade_armour,
+                       r2_repair,
+                       r2_damagebar_bkg,
+                       r2_damagebar,
                        play,
                        title,
                        quit,
@@ -87,8 +87,8 @@ int main(int argc, char* args[]) {
                        credits};
   // setting speicilsed things about the items in menu_items.h
   title->SetWrap(200);
-  player1_gun1->SetColorDef({200, 0, 0, 255});
-  player2_gun1->SetColorDef({200, 0, 0, 255});
+  robot1_gun1->SetColorDef({200, 0, 0, 255});
+  robot2_gun1->SetColorDef({200, 0, 0, 255});
   menu->ChangeVisability();
   SDL_Event e;
   // full game loop
@@ -98,8 +98,8 @@ int main(int argc, char* args[]) {
     menu->ChangeVisability();
     menu->Render();
     // updating bars
-    p1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
-    p2_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(2) * 1.65f);
+    r1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
+    r2_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(2) * 1.65f);
     if (death_menu) {
       // death popup
       MenuText* dead = new MenuText(120, 25, "You Died", {255, 0, 0, 255}, 30);
@@ -136,14 +136,14 @@ int main(int argc, char* args[]) {
         }
       }
       // hovering over the overlays
-      SDL_Rect rect = *player1_overlay->GetRect();
+      SDL_Rect rect = *robot1_overlay->GetRect();
       int x, y;
       SDL_GetMouseState(&x, &y);
       if (!(x > rect.x && x < rect.x + rect.w && y > rect.y &&
             y < rect.y + rect.h)) {
         Overlay1Hide();
       }
-      SDL_Rect rect2 = *player2_overlay->GetRect();
+      SDL_Rect rect2 = *robot2_overlay->GetRect();
       if (!(x > rect2.x && x < rect2.x + rect2.w && y > rect2.y &&
             y < rect2.y + rect2.h)) {
         Overlay2Hide();
@@ -160,24 +160,24 @@ int main(int argc, char* args[]) {
       UIBar* swtich_bar = nullptr;
 
       // robot intitilastion
-      Player::new_id_ = 1;
-      Player player1(&save, player_1_gun);
-      Player player2(&save, player_2_gun);
-      player1.SetPos(256, 256);
-      player2.SetPos(256, 256);
+      Robot::new_id_ = 1;
+      Robot robot1(&save, robot_1_gun);
+      Robot robot2(&save, robot_2_gun);
+      robot1.SetPos(256, 256);
+      robot2.SetPos(256, 256);
 
       // game objects list, indexed by type
       std::vector<std::vector<GameObject*>> game_objects = {{}, {}, {}, {}, {}};
       // adding objects to lists
-      game_objects[kPlayers].push_back(&player1);
-      game_objects[kPlayers].push_back(&player2);
+      game_objects[kRobots].push_back(&robot1);
+      game_objects[kRobots].push_back(&robot2);
 
       // ship
-      Ship ship1(&game_objects, &save);
+      Ship shir1(&game_objects, &save);
 
       // assign robots to screens
-      screen2.Attach(&player2);
-      screen1.Attach(&player1);
+      screen2.Attach(&robot2);
+      screen1.Attach(&robot1);
       // game vars
       Screen* controlling = &screen1;
       int swich_cooldown = 0;
@@ -243,33 +243,33 @@ int main(int argc, char* args[]) {
           }
         }
         // death
-        if (!player1.active_ && !player2.active_) {
+        if (!robot1.active_ && !robot2.active_) {
           game_run = false;
           death_menu = new Menu(400, 80);
         }
         // room advancing / ship completion / fleeing
-        for (GameObject* obj : game_objects[kPlayers]) {
-          Player* player = dynamic_cast<Player*>(obj);
-          if (player) {
-            SDL_FRect rect = player->GetRect();
+        for (GameObject* obj : game_objects[kRobots]) {
+          Robot* robot = dynamic_cast<Robot*>(obj);
+          if (robot) {
+            SDL_FRect rect = robot->GetRect();
             if (rect.x < 0 || rect.y < 0) {
-              if (!ship1.MoveRoom(false)) {
-                player1.SetPos(ship1.GetDimensions().first - 256,
-                               ship1.GetDimensions().second - 256);
-                player2.SetPos(ship1.GetDimensions().first - 256,
-                               ship1.GetDimensions().second - 256);
+              if (!shir1.MoveRoom(false)) {
+                robot1.SetPos(shir1.GetDimensions().first - 256,
+                               shir1.GetDimensions().second - 256);
+                robot2.SetPos(shir1.GetDimensions().first - 256,
+                               shir1.GetDimensions().second - 256);
               } else {
                 game_run = false;
-                save.SetMenuDamage(1, player1.GetDamage());
-                save.SetMenuDamage(2, player2.GetDamage());
+                save.SetMenuDamage(1, robot1.GetDamage());
+                save.SetMenuDamage(2, robot2.GetDamage());
               }
               break;
             }
-            if (rect.x > ship1.GetDimensions().first + 64 ||
-                rect.y > ship1.GetDimensions().second + 64) {
-              if (!ship1.MoveRoom(true)) {
-                player1.SetPos(256, 256);
-                player2.SetPos(256, 256);
+            if (rect.x > shir1.GetDimensions().first + 64 ||
+                rect.y > shir1.GetDimensions().second + 64) {
+              if (!shir1.MoveRoom(true)) {
+                robot1.SetPos(256, 256);
+                robot2.SetPos(256, 256);
               } else {
                 game_run = false;
                 int amount = save.Reward();
@@ -278,8 +278,8 @@ int main(int argc, char* args[]) {
                     {255, 0, 0, 255}, 30);
                 reward_menu = new Menu(dead->GetRect()->w + 50, 80);
                 reward_menu->menu_items_ = {dead};
-                save.SetMenuDamage(1, player1.GetDamage());
-                save.SetMenuDamage(1, player2.GetDamage());
+                save.SetMenuDamage(1, robot1.GetDamage());
+                save.SetMenuDamage(1, robot2.GetDamage());
               }
               break;
             }
@@ -315,7 +315,7 @@ int main(int argc, char* args[]) {
             std::cout << "incorrect type allocated to list" << std::endl;
           }
         }
-        // switching players
+        // switching robots
         if (swich_cooldown > 0) {
           swich_cooldown -= delta_time;
         }

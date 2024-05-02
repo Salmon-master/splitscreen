@@ -56,18 +56,18 @@ bool Enemy::Damage(int amount) {
 
 void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
   std::vector<Vector> diff;
-  // looping through players and adding to lists
-  for (GameObject* player : game_objects->at(kPlayers)) {
-    if (static_cast<Player*>(player)) {
-      diff.push_back({(player->GetRect().x + player->GetCenter()->x) -
+  // looping through robots and adding to lists
+  for (GameObject* robot : game_objects->at(kRobots)) {
+    if (static_cast<Robot*>(robot)) {
+      diff.push_back({(robot->GetRect().x + robot->GetCenter()->x) -
                           (rect_.x + rotation_center_.x),
-                      (player->GetRect().y + player->GetCenter()->y) -
+                      (robot->GetRect().y + robot->GetCenter()->y) -
                           (rect_.y + rotation_center_.y)});
     } else {
       std::cout << "incorrect type allocated to list" << std::endl;
     }
   }
-  // cehcking if in range of player
+  // cehcking if in range of robot
   if (!dead_ && (diff[0].Norm() < 500 || diff[1].Norm() < 500)) {
     if (delta == 0) {
       delta = 1;
@@ -100,9 +100,9 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
             }
           }
         }
-        // if player in range, add to interest, if low health, add inverse to
+        // if robot in range, add to interest, if low health, add inverse to
         // interest, if in attack range attack
-        if (i == kPlayers) {
+        if (i == kRobots) {
           Vector diff = {(obj->GetRect().x + obj->GetCenter()->x) -
                              (rect_.x + rotation_center_.x),
                          (obj->GetRect().y + obj->GetCenter()->y) -
@@ -275,23 +275,23 @@ std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
   return danger_aray;
 }
 
-bool Enemy::Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2) {
+bool Enemy::Intersect(SDL_Point r1, SDL_Point q1, SDL_Point r2, SDL_Point q2) {
   // algorithm from:
   // https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/,
   // checks orientation of the two tragnes formed by the lines, if diffrent
   // the the lines intersect
-  int o1 = Orientation(p1, q1, p2);
-  int o2 = Orientation(p1, q1, q2);
-  int o3 = Orientation(p2, q2, p1);
-  int o4 = Orientation(p2, q2, q1);
+  int o1 = Orientation(r1, q1, r2);
+  int o2 = Orientation(r1, q1, q2);
+  int o3 = Orientation(r2, q2, r1);
+  int o4 = Orientation(r2, q2, q1);
   if (o1 != o2 && o3 != o4) {
     return true;
   }
   return false;
 }
 
-int Enemy::Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3) {
-  int val = (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y);
+int Enemy::Orientation(SDL_Point r1, SDL_Point r2, SDL_Point p3) {
+  int val = (r2.y - r1.y) * (p3.x - r2.x) - (r2.x - r1.x) * (p3.y - r2.y);
   if (val == 0) return 0;    // collinear
   return (val > 0) ? 1 : 2;  // clock or counterclock wise
 }

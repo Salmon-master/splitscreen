@@ -4,13 +4,13 @@
 #define SPLITSCREEN_GUN_H_
 
 #include "bullet.h"
-#include "player.h"
+#include "robot.h"
 #include "save_manager.h"
 
-class Player;
+class Robot;
 class Bullet;
 
-// a class used to represnt the weapon held by either an enemy or player, used
+// a class used to represnt the weapon held by either an enemy or robot, used
 // by either of these classes to controll what anyting relating to the combat
 // element of the game.
 class Gun {

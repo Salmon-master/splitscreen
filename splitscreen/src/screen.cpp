@@ -106,7 +106,7 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
   SDL_RenderPresent(renderer_);
 }
 
-void Screen::Attach(Player* target) {
+void Screen::Attach(Robot* target) {
   // set target
   following_ = target;
   // set offset so target is centered on screen
@@ -129,6 +129,6 @@ void Screen::RemoveBar(UIBar* bar_to_remove) {
   delete bar_to_remove;
 }
 
-Player* Screen::GetAttached() { return following_; }
+Robot* Screen::GetAttached() { return following_; }
 
 std::vector<UIBar*>* Screen::GetBars() { return &bars_; }
