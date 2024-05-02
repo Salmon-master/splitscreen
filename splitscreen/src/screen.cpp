@@ -11,11 +11,15 @@ Screen::Screen(int x, int y) {
   // window creation using SDL
   win_ = SDL_CreateWindow("Window", x, y, 500, 500, SDL_WINDOW_BORDERLESS);
   if (win_ == NULL) {
-    std::cout << "Error window creation";
+    std::cout << "Error window creation, try reinstalling the program, if that does "
+           "not work, contact devloper at thompshw20@cashmere.school.nz"
+        << std::endl;
   }
   renderer_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
   if (renderer_ == NULL) {
-    std::cout << "Error renderer creation";
+    std::cout << "Error renderer creation try reinstalling the program, if that does "
+           "not work, contact devloper at thompshw20@cashmere.school.nz"
+        << std::endl;
   }
   // setting window id
   window_id_ = SDL_GetWindowID(win_);

@@ -11,15 +11,24 @@ Menu::Menu() {
   win_ = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED,
                           SDL_WINDOWPOS_CENTERED, 750, 465, 0);
   if (win_ == NULL) {
-    std::cout << "Error window creation";
+    std::cout
+        << "Error window creation, try reinstalling the program, if that does "
+           "not work, contact devloper at thompshw20@cashmere.school.nz"
+        << std::endl;
   }
   renderer_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
   if (renderer_ == NULL) {
-    std::cout << "Error renderer creation";
+    std::cout << "Error renderer creation, try reinstalling the program, if "
+                 "that does "
+                 "not work, contact devloper at thompshw20@cashmere.school.nz"
+              << std::endl;
   }
   // font initilasation
   if (TTF_Init() < 0) {
-    std::cout << "Error initializing SDL_ttf: " << TTF_GetError();
+    std::cout << "Error initializing SDL_ttf: " << TTF_GetError()
+              << "try reinstalling the program, if that does "
+                 "not work, contact devloper at thompshw20@cashmere.school.nz"
+              << std::endl;
   }
   // make it so that alpha values work correctly for transparency
   SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
@@ -103,15 +112,24 @@ Menu::Menu(int x, int y) {
   win_ = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED,
                           SDL_WINDOWPOS_CENTERED, x, y, SDL_WINDOW_BORDERLESS);
   if (win_ == NULL) {
-    std::cout << "Error window creation";
+    std::cout
+        << "Error window creation try reinstalling the program, if that does "
+           "not work, contact devloper at thompshw20@cashmere.school.nz"
+        << std::endl;
   }
   renderer_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
   if (renderer_ == NULL) {
-    std::cout << "Error renderer creation";
+    std::cout
+        << "Error renderer creation try reinstalling the program, if that does "
+           "not work, contact devloper at thompshw20@cashmere.school.nz"
+        << std::endl;
   }
   // font initialisation
   if (TTF_Init() < 0) {
-    std::cout << "Error initializing SDL_ttf: " << TTF_GetError();
+    std::cout << "Error initializing SDL_ttf: " << TTF_GetError()
+              << "try reinstalling the program, if that does "
+                 "not work, contact devloper at thompshw20@cashmere.school.nz"
+              << std::endl;
   }
   // set so alpha values / tarnsparrence work on screen
   SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);

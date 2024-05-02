@@ -26,6 +26,7 @@ GameObject::GameObject(int x, int y, std::string name) {
           IMG_Load(((animation_entry.path()).string()).c_str());
       if (!surface_buffer) {
         std::cout << "image" + (animation_entry.path()).string() + "not found"
+                  << "reinstalling the program should fix this error"
                   << std::endl;
       }
       surfaces_[index_pointer].emplace_back(surface_buffer);

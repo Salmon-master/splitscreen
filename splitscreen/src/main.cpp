@@ -215,7 +215,6 @@ int main(int argc, char* args[]) {
           // switching robots
           if (swtich_bar) {
             swtich_bar->ChangeValue(2 * (delta_time / 10));
-            std::cout << swtich_bar->GetValue() << std::endl;
             if (swtich_bar->Full()) {
               controlling->RemoveBar(swtich_bar);
               swtich_bar = nullptr;

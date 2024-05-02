@@ -12,7 +12,10 @@ MenuText::MenuText(std::string text, SDL_Color text_color, int size)
   // loading in font and error capture
   font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", size);
   if (!font_) {
-    std::cout << TTF_GetError() << std::endl;
+    std::cout << TTF_GetError() << std::endl
+              << "try reinstalling the program, if that does "
+                 "not work, contact devloper at thompshw20@cashmere.school.nz"
+              << std::endl;
   }
   // setting text color if given, otherwise will default to {0,0,0,255}(black)
   if (text_color.r) {
@@ -31,7 +34,10 @@ MenuText::MenuText(int x, int y, std::string text, SDL_Color text_color,
   // loading in font and error capture
   font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", size_);
   if (!font_) {
-    std::cout << TTF_GetError() << std::endl;
+    std::cout << TTF_GetError() << std::endl
+              << "try reinstalling the program, if that does "
+                 "not work, contact devloper at thompshw20@cashmere.school.nz"
+              << std::endl;
   }
   // setting text color if given, otherwise will default to {0,0,0,255}(black)
   if (text_color.r) {

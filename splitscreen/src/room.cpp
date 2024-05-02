@@ -27,7 +27,6 @@ Room::Room(SaveManager* save) {
       }
     }
     walls_.push_back(new Wall((map[0].size() - 1) * 128, y * 128));
-    std::cout << std::endl;
   }
   // edge
   for (int x = 0; x < map[0].size(); x++) {
