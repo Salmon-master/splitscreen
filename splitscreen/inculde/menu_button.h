@@ -19,7 +19,7 @@ class MenuButton : public MenuItem {
   //  called by the menu's renderer evey frame to update the buttons asthetics
   //  and to check for hovering and clicking
   void Update();
-  // retuns the menuitem bound to the display 
+  // retuns the menuitem bound to the display
   MenuItem* GetDisplay();
   // sets the default color of the button when not hoverd over
   void SetColorDef(SDL_Color color);
