@@ -5,6 +5,8 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "splitscreen", "splitscreen\splitscreen.vcxproj", "{54D04EAB-9FA9-4AC1-893F-82951888781C}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "splitscreen_setup", "splitscreen_setup\splitscreen_setup.vdproj", "{EE16B05C-BFD6-4153-A973-F00CF0473BAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,11 @@ Global
 		{54D04EAB-9FA9-4AC1-893F-82951888781C}.Release|x64.Build.0 = Release|x64
 		{54D04EAB-9FA9-4AC1-893F-82951888781C}.Release|x86.ActiveCfg = Release|Win32
 		{54D04EAB-9FA9-4AC1-893F-82951888781C}.Release|x86.Build.0 = Release|Win32
+		{EE16B05C-BFD6-4153-A973-F00CF0473BAE}.Debug|x64.ActiveCfg = Debug
+		{EE16B05C-BFD6-4153-A973-F00CF0473BAE}.Debug|x86.ActiveCfg = Debug
+		{EE16B05C-BFD6-4153-A973-F00CF0473BAE}.Release|x64.ActiveCfg = Release
+		{EE16B05C-BFD6-4153-A973-F00CF0473BAE}.Release|x64.Build.0 = Release
+		{EE16B05C-BFD6-4153-A973-F00CF0473BAE}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -131,9 +131,17 @@
     <ClInclude Include="inculde\save_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\menu\player.png">
+    <ResourceCompile Include="splitscreen.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\icon.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

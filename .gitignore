@@ -368,3 +368,6 @@ FodyWeavers.xsd
 #videos
 *.wmv
 *.mp4
+
+# build msi
+splitscreen_setup/

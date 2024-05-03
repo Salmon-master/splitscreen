@@ -1,14 +1,14 @@
 // Copyright 2024 Hugh Thompson
 
-#ifndef BULLET_H_
-#define BULLET_H_
+#ifndef SPLITSCREEN_BULLET_H_
+#define SPLITSCREEN_BULLET_H_
 
 #include "game_object.h"
-#include "player.h"
+#include "robot.h"
 #include "vector"
 #include "vector.h"
 
-class Player;
+class Robot;
 
 // a class used to represent an in game bullet
 class Bullet : public GameObject {
@@ -33,11 +33,11 @@ class Bullet : public GameObject {
   GameObject* shooter_;
 };
 
-#endif  // !BULLET_H_
+#endif  // !SPLITSCREEN_BULLET_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef DOOR_H_
-#define DOOR_H_
+#ifndef SPLITSCREEN_DOOR_H_
+#define SPLITSCREEN_DOOR_H_
 
 #include "game_object.h"
 
@@ -58,11 +58,11 @@ class Door : public GameObject {
   bool open_ = false;
 };
 
-#endif  // !DOOR_H_
+#endif  // !SPLITSCREEN_DOOR_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef ENEMY_H_
-#define ENEMY_H_
+#ifndef SPLITSCREEN_ENEMY_H_
+#define SPLITSCREEN_ENEMY_H_
 
 #include <vector>
 
@@ -102,9 +102,9 @@ class Enemy : public GameObject {
   std::vector<float> SetDanger(std::vector<GameObject*> objects);
   // checks if two line segments intersect, used mainly for ray casting , line
   // segments are given by two sets points(start and end) of each line
-  // line 1 = p1-q1
-  // line 2 = p2-q2
-  bool Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2);
+  // line 1 = r1-q1
+  // line 2 = r2-q2
+  bool Intersect(SDL_Point r1, SDL_Point q1, SDL_Point r2, SDL_Point q2);
   // the health of the enemy.
   int health_ = 0;
   // the staring health of the enemy, set in constrctor.
@@ -125,7 +125,7 @@ class Enemy : public GameObject {
   float steer_force_ = 0.35;
   // retuns the orenatation of three points, could be either colcokwise(1),
   // anitclockwise(2) or colinear(0)
-  int Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3);
+  int Orientation(SDL_Point r1, SDL_Point r2, SDL_Point p3);
   // a pointer to the enemies health bar, initiaised in constructor
   UIBar* health_bar_ = nullptr;
   // wether or not the enenmy is alive
@@ -139,18 +139,18 @@ class Enemy : public GameObject {
   float SetRotationFromVector(Vector rotation);
   // a pointer to the room which the enemy is in, initised in consctor
   Room* room_ = nullptr;
-  // base enemy stats, multiplied in constucor by avrage player level
+  // base enemy stats, multiplied in constucor by avrage robot level
   const int kEnemyStats[5][3] = {
       {30, 64, 20}, {60, 128, 10}, {85, 96, 5}, {50, 256, 10}, {60, 128, 10}};
   // the type of the enmey (0 based)
   int type_;
 };
 
-#endif  // !ENEMY_H_
+#endif  // !SPLITSCREEN_ENEMY_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef GAME_OBJECT_H_
-#define GAME_OBJECT_H_
+#ifndef SPLITSCREEN_GAME_OBJECT_H_
+#define SPLITSCREEN_GAME_OBJECT_H_
 
 #include <iostream>
 #include <string>
@@ -217,26 +217,26 @@ class GameObject {
   SDL_FRect GetRect();
   // retuns the roataion, in radians, of the game object
   float GetRotation();
-  // retuns the center of the player relivte to the top left corner
+  // retuns the center of the robot relivte to the top left corner
   SDL_Point* GetCenter();
   // retuns the velocity vector of the game object
   Vector GetVelocity();
 };
 
-#endif  // !GAME_OBJECT_H_
+#endif  // !SPLITSCREEN_GAME_OBJECT_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef GUN_H_
-#define GUN_H_
+#ifndef SPLITSCREEN_GUN_H_
+#define SPLITSCREEN_GUN_H_
 
 #include "bullet.h"
-#include "player.h"
+#include "robot.h"
 #include "save_manager.h"
 
-class Player;
+class Robot;
 class Bullet;
 
-// a class used to represnt the weapon held by either an enemy or player, used
+// a class used to represnt the weapon held by either an enemy or robot, used
 // by either of these classes to controll what anyting relating to the combat
 // element of the game.
 class Gun {
@@ -265,22 +265,25 @@ class Gun {
   GameObject* held_by_ = nullptr;
 };
 
-#endif  // !GUN_H_
+#endif  // !SPLITSCREEN_GUN_H_
 // Copyright 2024 Hugh Thompson
 
-#pragma once
+#ifndef SPLITSCREEN_MAIN_H_
+#define SPLITSCREEN_MAIN_H_
 
 #include "SDL2/include/SDL.h"
 
 // enumerated indexes of the game object types in gameobjects
-enum Types { kPlayers = 0, kWalls = 1, kEnemies = 2, kBullets = 3, kDoors = 4 };
+enum Types { kRobots = 0, kWalls = 1, kEnemies = 2, kBullets = 3, kDoors = 4 };
 
 // a constasnt for the use of setting a null color
 const SDL_Color kNullColor = {NULL, NULL, NULL, NULL};
+
+#endif  // !SPLITSCREEN_MAIN_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef MENU_H_
-#define MENU_H_
+#ifndef SPLITSCREEN_MENU_H_
+#define SPLITSCREEN_MENU_H_
 
 #include <vector>
 
@@ -315,11 +318,11 @@ class Menu {
   bool border_ = false;
 };
 
-#endif  // !MENU_H_
+#endif  // !SPLITSCREEN_MENU_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef MENU_BUTTON_H_
-#define MENU_BUTTON_H_
+#ifndef SPLITSCREEN_MENU_BUTTON_H_
+#define SPLITSCREEN_MENU_BUTTON_H_
 
 #include "menu_item.h"
 
@@ -358,11 +361,11 @@ class MenuButton : public MenuItem {
   SDL_Color color_def_ = {60, 60, 60, 255};
 };
 
-#endif  // !MENU_BUTTON_H_
+#endif  // !SPLITSCREEN_MENU_BUTTON_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef MENU_IMAGE_H_
-#define MENU_IMAGE_H_
+#ifndef SPLITSCREEN_MENU_IMAGE_H_
+#define SPLITSCREEN_MENU_IMAGE_H_
 
 #include <string>
 
@@ -380,11 +383,11 @@ class MenuImage : public MenuItem {
   MenuImage(int x, int y, std::string name);
 };
 
-#endif  // !MENU_IMAGE_H_
+#endif  // !SPLITSCREEN_MENU_IMAGE_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef MENU_ITEM_H_
-#define MENU_ITEM_H_
+#ifndef SPLITSCREEN_MENU_ITEM_H_
+#define SPLITSCREEN_MENU_ITEM_H_
 
 #include "SDL2/include/SDL.h"
 
@@ -430,10 +433,11 @@ class MenuItem {
   SDL_Color color_ = {NULL, NULL, NULL};
 };
 
-#endif  // !MENU_ITEM_H_
+#endif  // !SPLITSCREEN_MENU_ITEM_H_
 // Copyright 2024 Hugh Thompson
 
-#pragma once
+#ifndef SPLITSCREEN_MENU_ITEMS_H_
+#define SPLITSCREEN_MENU_ITEMS_H_
 
 #include <vector>
 
@@ -443,12 +447,14 @@ class MenuItem {
 #include "menu_item.h"
 #include "menu_text.h"
 
-// menus and popups
+// main menu
 Menu* menu = new Menu;
+// reward pop up
 Menu* death_menu = nullptr;
+// death pop up
 Menu* reward_menu = nullptr;
 
-// run the game
+// runs the game
 void Play() {
   menu_run = false;
   game_run = true;
@@ -468,11 +474,12 @@ void Quit() {
 MenuButton* quit =
     new MenuButton({25, 340, 200, 50}, Quit, NULL,
                    new MenuText("Quit", {255, 255, 255, 255}, 40));
-// popup tutorial
+// show the tutorial pop up
 void Tutorial() {
   Menu* popup = new Menu(600, 430);
   bool popup_run = true;
   SDL_Event e;
+  // text for the pop up to display
   MenuText* text = new MenuText(
       25, 25,
       "Naviagte your way though enemy spaceships using your two robots, if an "
@@ -488,7 +495,9 @@ void Tutorial() {
       {0, 0, 0, 255}, 16);
   text->SetWrap(550);
   popup->menu_items_ = {text};
+  // menu loop
   while (popup_run) {
+    // input for qutiiting the pop up
     if (SDL_PollEvent(&e)) {
       if (e.type == SDL_QUIT) {
         popup_run = false;
@@ -502,6 +511,7 @@ void Tutorial() {
     popup->Render();
   }
   delete popup;
+  // clean up
 }
 // tutorial button
 MenuButton* how =
@@ -515,23 +525,26 @@ MenuText* credits =
     new MenuText(25, 174, "Cr: \u00A2" + std::to_string(save.GetCredits()),
                  {0, 0, 0, 255}, 26);
 
-// player 1 GUI vars
-// which gun the player has selected
-int player_1_gun = 0;
+// which gun the robot has selected
+int robot_1_gun = 0;
+// sets the color of all robot 1's gun selctor icons to the defaukt color({60,
+// 60, 60, 255})
 void reset1();
-// overlay for p1 gun menu
+// hide the overlay for robot 1 gun menu
 void Overlay1Hide();
-// the currenyt hoverd over gun
-int player1_selector = NULL;
-// p1 overlay
-MenuItem* player1_overlay =
+// the current hoverd over gun for robot 1
+int robot1_selector = NULL;
+// robot 1 overlay
+MenuItem* robot1_overlay =
     new MenuItem({304, 100, 132, 188}, SDL_Color{30, 30, 30, 120});
-// upgrde the weapon of player 1
+// upgrde the weapon of robot 1
 void UpgradeWeapon1() {
-  if (save.UpgradeWeapon(player1_selector)) {
+  if (save.UpgradeWeapon(robot1_selector)) {
+    // upgrade sucessful
     Overlay1Hide();
     credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
   } else {
+    // not enough money
     Menu* popup = new Menu(410, 80);
     MenuText* text =
         new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
@@ -541,258 +554,306 @@ void UpgradeWeapon1() {
     delete popup;
   }
 }
-MenuButton* player1_upgrade_weapon =
+// weapon upgrade button
+MenuButton* robot1_upgrade_weapon =
     new MenuButton({314, 253, 112, 30}, UpgradeWeapon1, NULL,
                    new MenuText("upgrade", {255, 255, 255, 255}, 19));
+// shows the overlay for robot 1 gun menu
 void Overlay1Show(bool dir) {
   if (dir) {
-    player1_overlay->Show();
-    player1_upgrade_weapon->Show();
+    robot1_overlay->Show();
+    robot1_upgrade_weapon->Show();
   }
 }
-// player 1 menu image
-MenuImage* player1_image = new MenuImage(314, 100, "player");
+// robot 1 menu image
+MenuImage* robot1_image = new MenuImage(314, 100, "robot");
 
-// p1 gun 1
-MenuText* player1_gun1_text =
+// text displing the robot 1 gun 1 stats
+MenuText* robot1_gun1_text =
     new MenuText(314, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
+// displays gun 1's stats(damage rate of fire, bullet speed and cost) on the
+// robot 1 overlay.
 void Hover11(bool dir) {
-  player1_gun1_text->SetWrap(112);
+  robot1_gun1_text->SetWrap(112);
   Overlay1Show(dir);
   if (dir) {
-    player1_selector = 0;
-    player1_gun1_text->Show();
+    robot1_selector = 0;
+    robot1_gun1_text->Show();
     std::vector<int> stats = save.GetGunStats(0);
-    player1_gun1_text->SetText("Gun 1\n\nDAM:" + std::to_string(stats[0]) +
-                               "\nROF:" + std::to_string(stats[1] / 10) +
-                               "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+    // loading in stats from save
+    robot1_gun1_text->SetText("Gun 1\n\nDAM:" + std::to_string(stats[0]) +
+                              "\nROF:" + std::to_string(stats[1] / 10) +
+                              "\nSPE:1" + std::to_string(stats[2] / 10) +
+                              "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
+// sets robot 1's gun to gun number 1
 void Click11();
-MenuButton* player1_gun1 =
+// robot 1 gun 1's gun selector icon
+MenuButton* robot1_gun1 =
     new MenuButton({274, 100, 30, 30}, Click11, Hover11,
                    new MenuText(0, 0, "1", {255, 255, 255, 255}, 24));
 void Click11() {
+  // visual update
   reset1();
-  player1_gun1->SetColorDef({200, 0, 0, 255});
-  player_1_gun = 0;
+  robot1_gun1->SetColorDef({200, 0, 0, 255});
+  // weapon setting
+  robot_1_gun = 0;
 }
 
-
-// p1 gun 2
-MenuText* player1_gun2_text =
+// text displing the robot 1 gun 1 stats
+MenuText* robot1_gun2_text =
     new MenuText(314, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
+// displays gun 2's stats(damage rate of fire, bullet speed and cost) on the
+// robot 1 overlay.
 void Hover12(bool dir) {
-  player1_gun2_text->SetWrap(112);
+  robot1_gun2_text->SetWrap(112);
   Overlay1Show(dir);
   if (dir) {
-    player1_selector = 1;
-    player1_gun2_text->Show();
+    robot1_selector = 1;
+    robot1_gun2_text->Show();
     std::vector<int> stats = save.GetGunStats(1);
-    player1_gun2_text->SetText("Gun 2\n\nDAM:" + std::to_string(stats[0]) +
-                               "\nROF:" + std::to_string(stats[1] / 10) +
-                               "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+    robot1_gun2_text->SetText("Gun 2\n\nDAM:" + std::to_string(stats[0]) +
+                              "\nROF:" + std::to_string(stats[1] / 10) +
+                              "\nSPE:1" + std::to_string(stats[2] / 10) +
+                              "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
+// sets robot 1's gun to gun number 2
 void Click12();
-MenuButton* player1_gun2 =
+// robot 1 gun 1's gun selector icon
+MenuButton* robot1_gun2 =
     new MenuButton({274, 139, 30, 30}, Click12, Hover12,
                    new MenuText(0, 0, "2", {255, 255, 255, 255}, 24));
 void Click12() {
+  // visual update
   reset1();
-  player1_gun2->SetColorDef({200, 0, 0, 255});
-  player_1_gun = 1;
+  robot1_gun2->SetColorDef({200, 0, 0, 255});
+  // weapon setting
+  robot_1_gun = 1;
 }
 
-
-
-// p1 gun 3
-MenuText* player1_gun3_text =
+// text displing the robot 1 gun 3 stats
+MenuText* robot1_gun3_text =
     new MenuText(314, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
+// displays gun 3's stats(damage rate of fire, bullet speed and cost) on the
+// robot 1 overlay.
 void Hover13(bool dir) {
-  player1_gun3_text->SetWrap(112);
+  robot1_gun3_text->SetWrap(112);
   Overlay1Show(dir);
   if (dir) {
-    player1_selector = 2;
-    player1_gun3_text->Show();
+    robot1_selector = 2;
+    robot1_gun3_text->Show();
     std::vector<int> stats = save.GetGunStats(2);
-    player1_gun3_text->SetText("Gun 3\n\nDAM:" + std::to_string(stats[0]) +
-                               "\nROF:" + std::to_string(stats[1] / 10) +
-                               "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+    robot1_gun3_text->SetText("Gun 3\n\nDAM:" + std::to_string(stats[0]) +
+                              "\nROF:" + std::to_string(stats[1] / 10) +
+                              "\nSPE:1" + std::to_string(stats[2] / 10) +
+                              "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
+// sets robot 1's gun to gun number 3
 void Click13();
-MenuButton* player1_gun3 =
+// robot 1 gun 4's gun selector icon
+MenuButton* robot1_gun3 =
     new MenuButton({274, 179, 30, 30}, Click13, Hover13,
                    new MenuText(0, 0, "3", {255, 255, 255, 255}, 24));
 void Click13() {
+  // visual update
   reset1();
-  player1_gun3->SetColorDef({200, 0, 0, 255});
-  player_1_gun = 2;
+  robot1_gun3->SetColorDef({200, 0, 0, 255});
+  // weapon setting
+  robot_1_gun = 2;
 }
 
-
-
-// p1 gun 4
-MenuText* player1_gun4_text =
+// text displing the robot 1 gun 4 stats
+MenuText* robot1_gun4_text =
     new MenuText(314, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
+// displays gun 4's stats(damage rate of fire, bullet speed and cost) on the
+// robot 1 overlay.
 void Hover14(bool dir) {
-  player1_gun4_text->SetWrap(112);
+  robot1_gun4_text->SetWrap(112);
   Overlay1Show(dir);
   if (dir) {
-    player1_selector = 3;
-    player1_gun4_text->Show();
+    robot1_selector = 3;
+    robot1_gun4_text->Show();
     std::vector<int> stats = save.GetGunStats(3);
-    player1_gun4_text->SetText("Gun 4\n\nDAM:" + std::to_string(stats[0]) +
-                               "\nROF:" + std::to_string(stats[1] / 10) +
-                               "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+    robot1_gun4_text->SetText("Gun 4\n\nDAM:" + std::to_string(stats[0]) +
+                              "\nROF:" + std::to_string(stats[1] / 10) +
+                              "\nSPE:1" + std::to_string(stats[2] / 10) +
+                              "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
+// sets robot 1's gun to gun number 4
 void Click14();
-MenuButton* player1_gun4 =
+// robot 1 gun 4's gun selector icon
+MenuButton* robot1_gun4 =
     new MenuButton({274, 219, 30, 30}, Click14, Hover14,
                    new MenuText(0, 0, "4", {255, 255, 255, 255}, 24));
+// sets robot 1's gun to gun number 1
 void Click14() {
+  // visual update
   reset1();
-  player1_gun4->SetColorDef({200, 0, 0, 255});
-  player_1_gun = 3;
+  robot1_gun4->SetColorDef({200, 0, 0, 255});
+  // setting weapon
+  robot_1_gun = 3;
 }
 
-
-
-// p1 gun 5
-MenuText* player1_gun5_text =
+// text displing the robot 1 gun 5 stats
+MenuText* robot1_gun5_text =
     new MenuText(314, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
+// displays gun 5's stats(damage rate of fire, bullet speed and cost) on the
+// robot 1 overlay.
 void Hover15(bool dir) {
-  player1_gun5_text->SetWrap(112);
+  robot1_gun5_text->SetWrap(112);
   Overlay1Show(dir);
   if (dir) {
-    player1_selector = 4;
-    player1_gun5_text->Show();
+    robot1_selector = 4;
+    robot1_gun5_text->Show();
     std::vector<int> stats = save.GetGunStats(4);
-    player1_gun5_text->SetText("Gun 5\n\nDAM:" + std::to_string(stats[0]) +
-                               "\nROF:" + std::to_string(stats[1] / 10) +
-                               "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+    robot1_gun5_text->SetText("Gun 5\n\nDAM:" + std::to_string(stats[0]) +
+                              "\nROF:" + std::to_string(stats[1] / 10) +
+                              "\nSPE:1" + std::to_string(stats[2] / 10) +
+                              "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
+// sets robot 1's gun to gun number 5
 void Click15();
-MenuButton* player1_gun5 =
+// robot 1 gun 5's gun selector icon
+MenuButton* robot1_gun5 =
     new MenuButton({274, 258, 30, 30}, Click15, Hover15,
                    new MenuText(0, 0, "5", {255, 255, 255, 255}, 24));
 void Click15() {
+  // visual update
   reset1();
-  player1_gun5->SetColorDef({200, 0, 0, 255});
-  player_1_gun = 4;
+  robot1_gun5->SetColorDef({200, 0, 0, 255});
+  // weapon setting
+  robot_1_gun = 4;
 }
 
-// hiding of p1 overlay components
 void reset1() {
-  player1_gun1->SetColorDef({60, 60, 60, 255});
-  player1_gun2->SetColorDef({60, 60, 60, 255});
-  player1_gun3->SetColorDef({60, 60, 60, 255});
-  player1_gun4->SetColorDef({60, 60, 60, 255});
-  player1_gun5->SetColorDef({60, 60, 60, 255});
+  // reseting color of all components
+  robot1_gun1->SetColorDef({60, 60, 60, 255});
+  robot1_gun2->SetColorDef({60, 60, 60, 255});
+  robot1_gun3->SetColorDef({60, 60, 60, 255});
+  robot1_gun4->SetColorDef({60, 60, 60, 255});
+  robot1_gun5->SetColorDef({60, 60, 60, 255});
 }
 
+// hiding of r1 overlay components
 void Overlay1Hide() {
-  player1_overlay->Hide();
-  player1_upgrade_weapon->Hide();
-  player1_gun1_text->Hide();
-  player1_gun2_text->Hide();
-  player1_gun3_text->Hide();
-  player1_gun4_text->Hide();
-  player1_gun5_text->Hide();
-  player1_selector = NULL;
+  // hiding components
+  robot1_overlay->Hide();
+  robot1_upgrade_weapon->Hide();
+  robot1_gun1_text->Hide();
+  robot1_gun2_text->Hide();
+  robot1_gun3_text->Hide();
+  robot1_gun4_text->Hide();
+  robot1_gun5_text->Hide();
+  robot1_selector = NULL;
 }
 
-// p1 speed
-MenuText* p1_speed = new MenuText(
-    274, 75, "S: " + std::to_string(save.GetPlayerStats(1)[0] / 10),
-    {0, 0, 0, 255}, 20);
-MenuText* p1_armour =
-    new MenuText(360, 75, "A: " + std::to_string(save.GetPlayerStats(1)[1]),
+// text displaying the speed of robot 1
+MenuText* r1_speed =
+    new MenuText(274, 75, "S: " + std::to_string(save.GetRobotStats(1)[0] / 10),
                  {0, 0, 0, 255}, 20);
-
-void ShowPriceP1Speed(bool dir);
-void UpgradeP1Speed() {
-  if (save.UpgradePlayer(false, 1)) {
+// text displaying the armor of robot 1
+MenuText* r1_armour =
+    new MenuText(360, 75, "A: " + std::to_string(save.GetRobotStats(1)[1]),
+                 {0, 0, 0, 255}, 20);
+// shows the price for robot 1's speed
+void ShowPriceR1Speed(bool dir);
+// upgrades the level of robot 1's speed.
+void UpgradeR1Speed() {
+  if (save.UpgradeRobot(false, 1)) {
+    // payment sucessful, visual update
     credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
-    p1_speed->SetText("S: " + std::to_string(save.GetPlayerStats(1)[0] / 10));
+    r1_speed->SetText("S: " + std::to_string(save.GetRobotStats(1)[0] / 10));
   } else {
+    // payment unsucessful, popup created to display this to the player
     Menu* popup = new Menu(410, 80);
     MenuText* text =
         new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
     popup->menu_items_ = {text};
     popup->Render();
     SDL_Delay(3000);
+    // clean up
     delete popup;
   }
 }
-MenuButton* p1_upgrade_speed =
-    new MenuButton({274, 299, 80, 35}, UpgradeP1Speed, ShowPriceP1Speed,
+// a button used by the player to upgarde robot 1's speed
+MenuButton* r1_upgrade_speed =
+    new MenuButton({274, 299, 80, 35}, UpgradeR1Speed, ShowPriceR1Speed,
                    new MenuText("Speed+", {255, 255, 255, 255}, 15));
-void ShowPriceP1Speed(bool dir) {
-  MenuText* text = dynamic_cast<MenuText*>(p1_upgrade_speed->GetDisplay());
+void ShowPriceR1Speed(bool dir) {
+  // cast for acess to call menutext methods
+  MenuText* text = dynamic_cast<MenuText*>(r1_upgrade_speed->GetDisplay());
   if (dir) {
-    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(1)[2]));
+    // if hovered over, show price
+    text->SetText("\u00A2" + std::to_string(save.GetRobotStats(1)[2]));
   } else {
+    // if not hovered over, which upgarde this button is doing
     text->SetText("Speed+");
   }
 }
 
-
-
-// p1 armour
-void ShowPriceP1Armour(bool dir);
-void UpgradeP1Armour() {
-  if (save.UpgradePlayer(true, 1)) {
+// shows the price to upgrade robot 1's armour
+void ShowPriceR1Armour(bool dir);
+// ugardes the level of robot 1's armour
+void UpgradeR1Armour() {
+  if (save.UpgradeRobot(true, 1)) {
+    // payment sucessful, visual update
     credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
-    p1_armour->SetText("A: " + std::to_string(save.GetPlayerStats(1)[1]));
+    r1_armour->SetText("A: " + std::to_string(save.GetRobotStats(1)[1]));
   } else {
+    // payment unsucessful, popup is shown telling the player this.
     Menu* popup = new Menu(410, 80);
     MenuText* text =
         new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
     popup->menu_items_ = {text};
     popup->Render();
     SDL_Delay(3000);
+    // clean up
     delete popup;
   }
 }
-MenuButton* p1_upgrade_armour =
-    new MenuButton({357, 299, 80, 35}, UpgradeP1Armour, ShowPriceP1Armour,
+// a button used to upgarde the level of robot 1's armour
+MenuButton* r1_upgrade_armour =
+    new MenuButton({357, 299, 80, 35}, UpgradeR1Armour, ShowPriceR1Armour,
                    new MenuText("Armor+", {255, 255, 255, 255}, 15));
-void ShowPriceP1Armour(bool dir) {
-  MenuText* text = dynamic_cast<MenuText*>(p1_upgrade_armour->GetDisplay());
+void ShowPriceR1Armour(bool dir) {
+  // cast for use of acessing menutext methods
+  MenuText* text = dynamic_cast<MenuText*>(r1_upgrade_armour->GetDisplay());
   if (dir) {
-    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(1)[3]));
+    // if hovered over, show the price
+    text->SetText("\u00A2" + std::to_string(save.GetRobotStats(1)[3]));
   } else {
+    // if not hovered over, show the upgrade which this button is doing
     text->SetText("Armor+");
   }
 }
 
-
-// p1 damage / repair
-MenuItem* p1_damagebar =
+// a bar showing how much damage robot 1 has taken
+MenuItem* r1_damagebar =
     new MenuItem({274, 379, static_cast<int>(save.GetDamage(1) * 1.65f), 11},
                  {110, 59, 173, 255});
-MenuItem* p1_damagebar_bkg =
+// a background to the bar showing how much dmage robot 1 has taken
+MenuItem* r1_damagebar_bkg =
     new MenuItem({274, 379, 165, 11}, {26, 34, 38, 255});
 
-void Repairp1() {
+// reapirs robot 1
+void RepairR1() {
+  // code telling the program if the purchase is sucessful, and if not why not
   int code = save.Repair(1);
   if (code != 1) {
+    // if the pruchase is not sucessful, popup a window
     Menu* popup = new Menu(410, 80);
     MenuText* text;
+    // what text to display based or eariler code retreived
     if (code == 0) {
       text = new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
     } else {
@@ -801,295 +862,338 @@ void Repairp1() {
     popup->menu_items_ = {text};
     popup->Render();
     SDL_Delay(3000);
+    // clean up
     delete popup;
   } else {
+    // if the purchase is sucesful, update visuals.
     credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
-    p1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
+    r1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
   }
 }
-void ShowPriceP1Repair(bool dir);
-MenuButton* p1_repair =
-    new MenuButton({274, 339, 165, 35}, Repairp1, ShowPriceP1Repair,
+// shows the cost to repair robot 1 5 damage.
+void ShowPriceR1Repair(bool dir);
+// a button used to repair robot 1
+MenuButton* r1_repair =
+    new MenuButton({274, 339, 165, 35}, RepairR1, ShowPriceR1Repair,
                    new MenuText("Repair", {255, 255, 255, 255}, 15));
-void ShowPriceP1Repair(bool dir) {
-  MenuText* text = dynamic_cast<MenuText*>(p1_repair->GetDisplay());
+void ShowPriceR1Repair(bool dir) {
+  // cast to acess menu text methods
+  MenuText* text = dynamic_cast<MenuText*>(r1_repair->GetDisplay());
   if (dir) {
+    // if hovered over, display the cost of the repair
     text->SetText("\u00A2" + std::to_string(save.GetRepairCost(1)));
   } else {
+    // if not hovered over, display the funcion this button preforms
     text->SetText("Repair");
   }
 }
 
-// player two
-int player_2_gun = NULL;
+// robot 2's selected gun
+int robot_2_gun = NULL;
+// sets the color of all robot 2's gun selctor icons to the defaukt color({60,
+// 60, 60, 255})
 void reset2();
+// hides the image overaly for robot 2
 void Overlay2Hide();
-int player2_selector = NULL;
-MenuItem* player2_overlay =
+// the currently hoverd over gun for robot 2
+int robot2_selector = NULL;
+// the image overlay for robot 2
+MenuItem* robot2_overlay =
     new MenuItem({554, 100, 132, 188}, SDL_Color{30, 30, 30, 120});
+// upgrade the currently hovered over weapon of robot 2
 void UpgradeWeapon2() {
-  if (save.UpgradeWeapon(player2_selector)) {
+  if (save.UpgradeWeapon(robot2_selector)) {
+    // visual updadte if the upgrdade is sucessful
     Overlay2Hide();
     credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
   } else {
+    // if the upgarde is unscessful, then display this to the player though a
+    // pop up
     Menu* popup = new Menu(410, 80);
     MenuText* text =
         new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
     popup->menu_items_ = {text};
     popup->Render();
     SDL_Delay(3000);
+    // clean up
     delete popup;
   }
 }
-MenuButton* player2_upgrade_weapon =
+// a button used to upgrade robot 2's currently hovered over weapon
+MenuButton* robot2_upgrade_weapon =
     new MenuButton({564, 253, 112, 30}, UpgradeWeapon2, NULL,
                    new MenuText("upgrade", {255, 255, 255, 255}, 19));
+// shows the overlay for player 2
 void Overlay2Show(bool dir) {
   if (dir) {
-    player2_overlay->Show();
-    player2_upgrade_weapon->Show();
+    robot2_overlay->Show();
+    robot2_upgrade_weapon->Show();
   }
 }
-// player 2 menu image
-MenuImage* player2_image = new MenuImage(564, 100, "player");
+// robot 2 menu image
+MenuImage* robot2_image = new MenuImage(564, 100, "robot");
 
-
-
-// p2 gun 1
-MenuText* player2_gun1_text =
+// text displaying the stats of gun 1 on the robot 2's overlay
+MenuText* robot2_gun1_text =
     new MenuText(564, 105, "Gun 1\n\nDAM:10\nROF:10\nSPE:1\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
+// displays gun 1's stats(damage rate of fire, bullet speed and cost) on the
+// robot 2 overlay.
 void Hover21(bool dir) {
-  player2_gun1_text->SetWrap(112);
+  robot2_gun1_text->SetWrap(112);
   Overlay2Show(dir);
   if (dir) {
-    player2_selector = 0;
-    player2_gun1_text->Show();
+    robot2_selector = 0;
+    robot2_gun1_text->Show();
     std::vector<int> stats = save.GetGunStats(0);
-    player2_gun1_text->SetText("Gun 1\n\nDAM:" + std::to_string(stats[0]) +
-                               "\nROF:" + std::to_string(stats[1] / 10) +
-                               "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+    robot2_gun1_text->SetText("Gun 1\n\nDAM:" + std::to_string(stats[0]) +
+                              "\nROF:" + std::to_string(stats[1] / 10) +
+                              "\nSPE:1" + std::to_string(stats[2] / 10) +
+                              "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
+// sets robot 2's gun to gun number 1
 void Click21();
-MenuButton* player2_gun1 =
+// robot 2 gun 1's gun selector icon
+MenuButton* robot2_gun1 =
     new MenuButton({524, 100, 30, 30}, Click21, Hover21,
                    new MenuText(0, 0, "1", {255, 255, 255, 255}, 24));
 void Click21() {
   reset2();
-  player2_gun1->SetColorDef({200, 0, 0, 255});
-  player_2_gun = 0;
+  robot2_gun1->SetColorDef({200, 0, 0, 255});
+  robot_2_gun = 0;
 }
 
-
-
-// 21 gun 2
-MenuText* player2_gun2_text =
+// text displing the robot 2 gun 1 stats
+MenuText* robot2_gun2_text =
     new MenuText(564, 105, "Gun 2\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
+// displays gun 2's stats(damage rate of fire, bullet speed and cost) on the
+// robot 2 overlay.
 void Hover22(bool dir) {
-  player2_gun2_text->SetWrap(112);
+  robot2_gun2_text->SetWrap(112);
   Overlay2Show(dir);
   if (dir) {
-    player2_selector = 1;
-    player2_gun2_text->Show();
+    robot2_selector = 1;
+    robot2_gun2_text->Show();
     std::vector<int> stats = save.GetGunStats(1);
-    player2_gun2_text->SetText("Gun 2\n\nDAM:" + std::to_string(stats[0]) +
-                               "\nROF:" + std::to_string(stats[1] / 10) +
-                               "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+    robot2_gun2_text->SetText("Gun 2\n\nDAM:" + std::to_string(stats[0]) +
+                              "\nROF:" + std::to_string(stats[1] / 10) +
+                              "\nSPE:1" + std::to_string(stats[2] / 10) +
+                              "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
+// sets robot 2's gun to gun number 2
 void Click22();
-MenuButton* player2_gun2 =
+// robot 2 gun 2's gun selector icon
+MenuButton* robot2_gun2 =
     new MenuButton({524, 139, 30, 30}, Click22, Hover22,
                    new MenuText(0, 0, "2", {255, 255, 255, 255}, 24));
 void Click22() {
   reset2();
-  player2_gun2->SetColorDef({200, 0, 0, 255});
-  player_2_gun = 1;
+  robot2_gun2->SetColorDef({200, 0, 0, 255});
+  robot_2_gun = 1;
 }
 
-
-
-// p2 gun 3
-MenuText* player2_gun3_text =
+// text displing the robot 2 gun 3 stats
+MenuText* robot2_gun3_text =
     new MenuText(564, 105, "Gun 3\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
+// displays gun 3's stats(damage rate of fire, bullet speed and cost) on the
+// robot 2 overlay.
 void Hover23(bool dir) {
-  player2_gun3_text->SetWrap(112);
+  robot2_gun3_text->SetWrap(112);
   Overlay2Show(dir);
   if (dir) {
-    player2_selector = 2;
-    player2_gun3_text->Show();
+    robot2_selector = 2;
+    robot2_gun3_text->Show();
     std::vector<int> stats = save.GetGunStats(2);
-    player2_gun3_text->SetText("Gun 3\n\nDAM:" + std::to_string(stats[0]) +
-                               "\nROF:" + std::to_string(stats[1] / 10) +
-                               "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+    robot2_gun3_text->SetText("Gun 3\n\nDAM:" + std::to_string(stats[0]) +
+                              "\nROF:" + std::to_string(stats[1] / 10) +
+                              "\nSPE:1" + std::to_string(stats[2] / 10) +
+                              "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
+// sets robot 2's gun to gun number 3
 void Click23();
-MenuButton* player2_gun3 =
+// robot 2 gun 3's gun selector icon
+MenuButton* robot2_gun3 =
     new MenuButton({524, 179, 30, 30}, Click23, Hover23,
                    new MenuText(0, 0, "3", {255, 255, 255, 255}, 24));
 void Click23() {
   reset2();
-  player2_gun3->SetColorDef({200, 0, 0, 255});
-  player_2_gun = 2;
+  robot2_gun3->SetColorDef({200, 0, 0, 255});
+  robot_2_gun = 2;
 }
 
-
-
-// p2 gun 4
-MenuText* player2_gun4_text =
+// text displing the robot 2 gun 4 stats
+MenuText* robot2_gun4_text =
     new MenuText(564, 105, "Gun 4\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
+// displays gun 4's stats(damage rate of fire, bullet speed and cost) on the
+// robot 2 overlay.
 void Hover24(bool dir) {
-  player2_gun4_text->SetWrap(112);
+  robot2_gun4_text->SetWrap(112);
   Overlay2Show(dir);
   if (dir) {
-    player2_selector = 3;
-    player2_gun4_text->Show();
+    robot2_selector = 3;
+    robot2_gun4_text->Show();
     std::vector<int> stats = save.GetGunStats(3);
-    player2_gun4_text->SetText("Gun 4\n\nDAM:" + std::to_string(stats[0]) +
-                               "\nROF:" + std::to_string(stats[1] / 10) +
-                               "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+    robot2_gun4_text->SetText("Gun 4\n\nDAM:" + std::to_string(stats[0]) +
+                              "\nROF:" + std::to_string(stats[1] / 10) +
+                              "\nSPE:1" + std::to_string(stats[2] / 10) +
+                              "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
+// sets robot 2's gun to gun number 1
 void Click24();
-MenuButton* player2_gun4 =
+// robot 2 gun 4's gun selector icon
+MenuButton* robot2_gun4 =
     new MenuButton({524, 219, 30, 30}, Click24, Hover24,
                    new MenuText(0, 0, "4", {255, 255, 255, 255}, 24));
 void Click24() {
   reset2();
-  player2_gun4->SetColorDef({200, 0, 0, 255});
-  player_2_gun = 3;
+  robot2_gun4->SetColorDef({200, 0, 0, 255});
+  robot_2_gun = 3;
 }
 
-
-
-// p1 gun 5
-MenuText* player2_gun5_text =
+// text displing the robot 5 gun 1 stats
+MenuText* robot2_gun5_text =
     new MenuText(564, 105, "Gun 5\n\nDAM:2\nROF:100\nSPE:10\n\nCost:\u00A2100",
                  {0xff, 0xff, 0xff, 0xff}, 17);
+// displays gun 5's stats(damage rate of fire, bullet speed and cost) on the
+// robot 2 overlay.
 void Hover25(bool dir) {
-  player2_gun5_text->SetWrap(112);
+  robot2_gun5_text->SetWrap(112);
   Overlay2Show(dir);
   if (dir) {
-    player2_selector = 4;
-    player2_gun5_text->Show();
+    robot2_selector = 4;
+    robot2_gun5_text->Show();
     std::vector<int> stats = save.GetGunStats(4);
-    player2_gun5_text->SetText("Gun 5\n\nDAM:" + std::to_string(stats[0]) +
-                               "\nROF:" + std::to_string(stats[1] / 10) +
-                               "\nSPE:1" + std::to_string(stats[2] / 10) +
-                               "\n\nCost:\u00A2" + std::to_string(stats[3]));
+    robot2_gun5_text->SetText("Gun 5\n\nDAM:" + std::to_string(stats[0]) +
+                              "\nROF:" + std::to_string(stats[1] / 10) +
+                              "\nSPE:1" + std::to_string(stats[2] / 10) +
+                              "\n\nCost:\u00A2" + std::to_string(stats[3]));
   }
 }
+// sets robot 2's gun to gun number 5
 void Click25();
-MenuButton* player2_gun5 =
+// robot 2 gun 5's gun selector icon
+MenuButton* robot2_gun5 =
     new MenuButton({524, 258, 30, 30}, Click25, Hover25,
                    new MenuText(0, 0, "5", {255, 255, 255, 255}, 24));
 void Click25() {
   reset2();
-  player2_gun5->SetColorDef({200, 0, 0, 255});
-  player_2_gun = 4;
+  robot2_gun5->SetColorDef({200, 0, 0, 255});
+  robot_2_gun = 4;
 }
 
-// hiding of p2 overlay components
 void Overlay2Hide() {
-  player2_overlay->Hide();
-  player2_upgrade_weapon->Hide();
-  player2_gun1_text->Hide();
-  player2_gun2_text->Hide();
-  player2_gun3_text->Hide();
-  player2_gun4_text->Hide();
-  player2_gun5_text->Hide();
-  player2_selector = NULL;
+  robot2_overlay->Hide();
+  robot2_upgrade_weapon->Hide();
+  robot2_gun1_text->Hide();
+  robot2_gun2_text->Hide();
+  robot2_gun3_text->Hide();
+  robot2_gun4_text->Hide();
+  robot2_gun5_text->Hide();
+  robot2_selector = NULL;
 }
 void reset2() {
-  player2_gun1->SetColorDef({60, 60, 60, 255});
-  player2_gun2->SetColorDef({60, 60, 60, 255});
-  player2_gun3->SetColorDef({60, 60, 60, 255});
-  player2_gun4->SetColorDef({60, 60, 60, 255});
-  player2_gun5->SetColorDef({60, 60, 60, 255});
+  robot2_gun1->SetColorDef({60, 60, 60, 255});
+  robot2_gun2->SetColorDef({60, 60, 60, 255});
+  robot2_gun3->SetColorDef({60, 60, 60, 255});
+  robot2_gun4->SetColorDef({60, 60, 60, 255});
+  robot2_gun5->SetColorDef({60, 60, 60, 255});
 }
 
-// p2 speed
-MenuText* p2_speed = new MenuText(
-    524, 75, "S: " + std::to_string(save.GetPlayerStats(2)[0] / 10),
-    {0, 0, 0, 255}, 20);
-MenuText* p2_armour =
-    new MenuText(610, 75, "A: " + std::to_string(save.GetPlayerStats(2)[1]),
+// text displaying the speed of robot 2
+MenuText* r2_speed =
+    new MenuText(524, 75, "S: " + std::to_string(save.GetRobotStats(2)[0] / 10),
                  {0, 0, 0, 255}, 20);
-
-void ShowPriceP2Speed(bool dir);
-void UpgradeP2Speed() {
-  if (save.UpgradePlayer(false, 2)) {
+// text displaying the armour of robot 1
+MenuText* r2_armour =
+    new MenuText(610, 75, "A: " + std::to_string(save.GetRobotStats(2)[1]),
+                 {0, 0, 0, 255}, 20);
+// shows the price to upgrade robot 2's speed
+void ShowPriceR2Speed(bool dir);
+// upgrades the level of robot 1's speed.
+void UpgradeR2Speed() {
+  if (save.UpgradeRobot(false, 2)) {
+    // payment sucessful, visual update
     credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
-    p2_speed->SetText("S: " + std::to_string(save.GetPlayerStats(2)[0] / 10));
+    r2_speed->SetText("S: " + std::to_string(save.GetRobotStats(2)[0] / 10));
   } else {
+    // payment unsucessful, popup created to display this to the player
     Menu* popup = new Menu(410, 80);
     MenuText* text =
         new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
     popup->menu_items_ = {text};
     popup->Render();
     SDL_Delay(3000);
+    // clean up
     delete popup;
   }
 }
-MenuButton* p2_upgrade_speed =
-    new MenuButton({524, 299, 80, 35}, UpgradeP2Speed, ShowPriceP2Speed,
+// a button used by the player to upgarde robot 2's speed
+MenuButton* r2_upgrade_speed =
+    new MenuButton({524, 299, 80, 35}, UpgradeR2Speed, ShowPriceR2Speed,
                    new MenuText("Speed+", {255, 255, 255, 255}, 15));
-void ShowPriceP2Speed(bool dir) {
-  MenuText* text = dynamic_cast<MenuText*>(p2_upgrade_speed->GetDisplay());
+void ShowPriceR2Speed(bool dir) {
+  // cast for acess to call menutext methods
+  MenuText* text = dynamic_cast<MenuText*>(r2_upgrade_speed->GetDisplay());
   if (dir) {
-    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(2)[2]));
+    // if hovered over, show price
+    text->SetText("\u00A2" + std::to_string(save.GetRobotStats(2)[2]));
   } else {
+    // if not hovered over, which upgarde this button is doing
     text->SetText("Speed+");
   }
 }
 
-
-// p2 armour
-void ShowPriceP2Armour(bool dir);
-void UpgradeP2Armour() {
-  if (save.UpgradePlayer(true, 2)) {
+// shows the price to upgarde robot 1's armour
+void ShowPriceR2Armour(bool dir);
+// upgrades the level of robot 2's armour.
+void UpgradeR2Armour() {
+  if (save.UpgradeRobot(true, 2)) {
+    // payment sucessful, visual update
     credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
-    p2_armour->SetText("A: " + std::to_string(save.GetPlayerStats(2)[1]));
+    r2_armour->SetText("A: " + std::to_string(save.GetRobotStats(2)[1]));
   } else {
+    // payment unsucessful, popup created to display this to the player
     Menu* popup = new Menu(410, 80);
     MenuText* text =
         new MenuText(25, 25, "Insufficent Funds!", {0, 0, 0, 255}, 30);
     popup->menu_items_ = {text};
     popup->Render();
     SDL_Delay(3000);
+    // clean up
     delete popup;
   }
 }
-MenuButton* p2_upgrade_armour =
-    new MenuButton({607, 299, 80, 35}, UpgradeP2Armour, ShowPriceP2Armour,
+// a button used by the player to upgarde robot 2's armour
+MenuButton* r2_upgrade_armour =
+    new MenuButton({607, 299, 80, 35}, UpgradeR2Armour, ShowPriceR2Armour,
                    new MenuText("Armor+", {255, 255, 255, 255}, 15));
-void ShowPriceP2Armour(bool dir) {
-  MenuText* text = dynamic_cast<MenuText*>(p2_upgrade_armour->GetDisplay());
+void ShowPriceR2Armour(bool dir) {
+  // cast for acess to call menutext methods
+  MenuText* text = dynamic_cast<MenuText*>(r2_upgrade_armour->GetDisplay());
   if (dir) {
-    text->SetText("\u00A2" + std::to_string(save.GetPlayerStats(2)[3]));
+    // if hovered over, show price
+    text->SetText("\u00A2" + std::to_string(save.GetRobotStats(2)[3]));
   } else {
+    // if not hovered over, which upgarde this button is doing
     text->SetText("Armor+");
   }
 }
 
-
-// p2 repair / damage
-void ShowPriceP2Repair(bool dir);
-MenuItem* p2_damagebar =
+// r2 repair / damage
+void ShowPriceR2Repair(bool dir);
+MenuItem* r2_damagebar =
     new MenuItem({524, 379, static_cast<int>(save.GetDamage(2) * 1.65f), 11},
                  {110, 59, 173, 255});
-MenuItem* p2_damagebar_bkg =
+MenuItem* r2_damagebar_bkg =
     new MenuItem({524, 379, 165, 11}, {26, 34, 38, 255});
-void Repairp2() {
+void Repairr2() {
   int code = save.Repair(2);
   if (code != 1) {
     Menu* popup = new Menu(410, 80);
@@ -1105,24 +1209,30 @@ void Repairp2() {
     delete popup;
   } else {
     credits->SetText("Cr: \u00A2" + std::to_string(save.GetCredits()));
-    p2_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(2) * 1.65f);
+    r2_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(2) * 1.65f);
   }
 }
-MenuButton* p2_repair =
-    new MenuButton({524, 339, 165, 35}, Repairp2, ShowPriceP2Repair,
+// a button used to repair robot 2
+MenuButton* r2_repair =
+    new MenuButton({524, 339, 165, 35}, Repairr2, ShowPriceR2Repair,
                    new MenuText("Repair", {255, 255, 255, 255}, 15));
-void ShowPriceP2Repair(bool dir) {
-  MenuText* text = dynamic_cast<MenuText*>(p2_repair->GetDisplay());
+// shows the cost to repair robot 2 5 damage.
+void ShowPriceR2Repair(bool dir) {
+  // cast for acess to call menutext methods
+  MenuText* text = dynamic_cast<MenuText*>(r2_repair->GetDisplay());
   if (dir) {
+    // if hovered over, display the cost of the repair
     text->SetText("\u00A2" + std::to_string(save.GetRepairCost(2)));
   } else {
+    // if not hovered over, display the funcion this button preforms
     text->SetText("Repair");
   }
 }
+#endif  // !SPLITSCREEN_MENU_ITEMS_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef MENU_TEXT_H_
-#define MENU_TEXT_H_
+#ifndef SPLITSCREEN_MENU_TEXT_H_
+#define SPLITSCREEN_MENU_TEXT_H_
 
 #include <string>
 
@@ -1162,11 +1272,11 @@ class MenuText : public MenuItem {
   int size_ = 28;
 };
 
-#endif  // !MENU_TEXT_H_
+#endif  // !SPLITSCREEN_MENU_TEXT_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef PLAYER_H_
-#define PLAYER_H_
+#ifndef SPLITSCREEN_ROBOT_H_
+#define SPLITSCREEN_ROBOT_H_
 
 #include "game_object.h"
 #include "gun.h"
@@ -1175,14 +1285,14 @@ class MenuText : public MenuItem {
 
 // foward declations
 class Gun;
-// player class, used by the game to represnt a robot within the game
-class Player : public GameObject {
+// robot class, used by the game to represnt a robot within the game
+class Robot : public GameObject {
  private:
   // translation speed, set in constructor
   int speed_ = 200;
-  // rotation speed of the player, always 1/100000 of the translational speed
+  // rotation speed of the robot, always 1/100000 of the translational speed
   float rotation_speed_ = 0.002;
-  // the gun the player is holding, assigned in constructor
+  // the gun the robot is holding, assigned in constructor
   Gun* gun_ = nullptr;
   // how much damage the robot has incured
   int damage_ = 0;
@@ -1192,44 +1302,44 @@ class Player : public GameObject {
   // reduced
   int armour_ = 0;
   // unique identification number used to load in stats, based off what order
-  // the objects are constructed in. e.g first player has id of 1, next intilise
+  // the objects are constructed in. e.g first robot has id of 1, next intilise
   // has id of 2 ect...
   // initilised in constructor
   int id_;
 
  public:
-  // initise the player with what gun they are holding and a reference to the
+  // initise the robot with what gun they are holding and a reference to the
   // current save.
-  Player(SaveManager* save, int gun);
+  Robot(SaveManager* save, int gun);
   // destruct and unitilise in memory safe way.
-  ~Player();
+  ~Robot();
   // convert the speed(magnitude) and rotation(angle) into x and y components to
-  // feed to parent move function, and then move the player.(smoothed with delta
+  // feed to parent move function, and then move the robot.(smoothed with delta
   // time)
   void Step(int delta_time);
-  // change the rotation of the player, true is colcokwise, false is
-  // anticlockwise, will rotate the player based upon the rotation speed and is
+  // change the rotation of the robot, true is colcokwise, false is
+  // anticlockwise, will rotate the robot based upon the rotation speed and is
   // smoothed by delta time.
   void Rotate(bool direction, int delta_time);
   // retuns a pointer to the current gun the robot is weilding
   Gun* GetGun();
-  // called when the player receives damage, retuns wether or not the player is
+  // called when the robot receives damage, retuns wether or not the robot is
   // alive.
   bool Damage(int amount);
   UIBar* GetBar();
-  // if the player has been disabled(damgage == 100), then it will not be active
+  // if the robot has been disabled(damgage == 100), then it will not be active
   // (fasle), so it cannot move or shoot
   bool active_ = true;
-  // statitc variable used to assign ids to players
+  // statitc variable used to assign ids to robots
   inline static int new_id_;
   int GetDamage();
 };
 
-#endif  // !PLAYER_H_
+#endif  // !SPLITSCREEN_ROBOT_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef ROOM_H_
-#define ROOM_H_
+#ifndef SPLITSCREEN_ROOM_H_
+#define SPLITSCREEN_ROOM_H_
 
 #include <utility>
 #include <vector>
@@ -1256,7 +1366,7 @@ class Room {
   // eneimes
   std::vector<std::pair<int, int>> GetFree();
   ~Room();
-  // retruns wether or not room has been visited by the player, also sets that
+  // retruns wether or not room has been visited by the robot, also sets that
   // the room has been visited. Used by the ship class to spawn in enemies.
   bool Visit();
 
@@ -1272,17 +1382,17 @@ class Room {
   std::vector<GameObject*> walls_ = {};
   // a list of free spaces (global coorinates at center of space)
   std::vector<std::pair<int, int>> free_;
-  // wether or not this room has been visited by the player
+  // wether or not this room has been visited by the robot
   bool visited_ = false;
   // enemy objects from map generation
   std::vector<Enemy*> enemies_ = {};
 };
 
-#endif  // !ROOM_H_
+#endif  // !SPLITSCREEN_ROOM_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef SAVE_MANAGER_H_
-#define SAVE_MANAGER_H_
+#ifndef SPLITSCREEN_SAVE_MANAGER_H_
+#define SPLITSCREEN_SAVE_MANAGER_H_
 
 #include <vector>
 
@@ -1292,10 +1402,10 @@ class SaveManager {
   SaveManager();
   // uninitalise and destruct in mem safe way
   ~SaveManager();
-  // retuns the number of credits the player has
+  // retuns the number of credits the robot has
   unsigned int GetCredits();
-  // called if the player clears the enitre ship, gives the player a reward in
-  // credits based on the avarege level of the player's robots
+  // called if the robot clears the enitre ship, gives the robot a reward in
+  // credits based on the avarege level of the robot's robots
   unsigned int Reward();
   // returns a 4 element vector of the guns stats given a type(0 based):
   // element 1 [0] - damage,
@@ -1303,7 +1413,7 @@ class SaveManager {
   // element 3 [2] - bullet speed,
   // element 4 [3] - cost of upgrade.
   std::vector<int> GetGunStats(int type);
-  // upgrade the weapon of the given type, retuns false if the player does not
+  // upgrade the weapon of the given type, retuns false if the robot does not
   // have enough credits to make the purchase, retuns true the the purcahes was
   // made sucessfully
   bool UpgradeWeapon(int type);
@@ -1312,10 +1422,10 @@ class SaveManager {
   // element 2 [1] - robot armour,
   // element 3 [2] - cost of speed upgrade,
   // element 4 [3] - cost of armour upgrade.
-  std::vector<int> GetPlayerStats(int player);
+  std::vector<int> GetRobotStats(int robot);
   // upgrades a robot given the robot's id(1 based), and the elemet to upgarde,
   // with fasle for speed upgarde and true for armour upgrade.
-  bool UpgradePlayer(bool upgrade, int player);
+  bool UpgradeRobot(bool upgrade, int robot);
   // money, bought full health
   // Repairs (decreses taken damge) of a robot gievn its id(1 based) if
   // condtions are met. if conditions (has sufficient funds and not going to
@@ -1324,14 +1434,14 @@ class SaveManager {
   // if not met:
   // returns 1 for insufficent funds present,
   // returns 2 for damage being too low
-  int Repair(int player);
-  // writes the damage attined by the player to the save, used by the mainb game
-  // loop to save the player's progress after completing or fleeing a ship
-  void SetMenuDamage(int player, int damage);
+  int Repair(int robot);
+  // writes the damage attined by the robot to the save, used by the mainb game
+  // loop to save the robot's progress after completing or fleeing a ship
+  void SetMenuDamage(int robot, int damage);
   // retuns the repair cost given a givens robot's id(1 based)
-  int GetRepairCost(int player);
+  int GetRepairCost(int robot);
   // retuns the damage of a givens robot's id(1 based)
-  int GetDamage(int player);
+  int GetDamage(int robot);
   // returns the mean level of both robot's upgrades, used as a multiplier to
   // increase difficulty
   int GetLevel();
@@ -1348,16 +1458,16 @@ class SaveManager {
   // attain the robots's stats. in the from of a 2 element array where:
   // [0] is the robot's base speed,
   // [1] is the robot's base armour.
-  const int kBasePlayer[2] = {200, 2};
+  const int kBaseRobot[2] = {200, 2};
 
   // 12 element vector of data loaded in from the save file where:
   // [0] is the amount of credits,
-  // [1] is the damage of player 1,
-  // [2] is the level of player 1's speed,
-  // [3] is the level of player 1's armour,
-  // [4] is the damage of player 2,
-  // [5] is the level of player 2's speed,
-  // [6] is the level of player 2's armour,
+  // [1] is the damage of robot 1,
+  // [2] is the level of robot 1's speed,
+  // [3] is the level of robot 1's armour,
+  // [4] is the damage of robot 2,
+  // [5] is the level of robot 2's speed,
+  // [6] is the level of robot 2's armour,
   // [7] is the level of gun 0,
   // [8] is the level of gun 1,
   // [9] is the level of gun 2,
@@ -1365,11 +1475,11 @@ class SaveManager {
   // [11] is the level of gun 4.
   std::vector<int> data_;
 };
-#endif  // !SAVE_MANAGER_H_
+#endif  // !SPLITSCREEN_SAVE_MANAGER_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef SCREEN_H_
-#define SCREEN_H_
+#ifndef SPLITSCREEN_SCREEN_H_
+#define SPLITSCREEN_SCREEN_H_
 
 #include <iostream>
 #include <utility>
@@ -1378,7 +1488,7 @@ class SaveManager {
 #include "SDL2/include/SDL.h"
 
 #include "game_object.h"
-#include "player.h"
+#include "robot.h"
 #include "ui_bar.h"
 
 // object to control a window on screen, used by the main.cc to create a window,
@@ -1399,7 +1509,7 @@ class Screen {
   // camera pos y
   float y_ = 0;
   // object following
-  Player* following_ = nullptr;
+  Robot* following_ = nullptr;
   // the camera offset
   std::pair<int, int> offset_ = {0, 0};
   // the list of UI_Bars this screen should currently be displaying
@@ -1415,24 +1525,24 @@ class Screen {
   // render all objects in veiw of camrea on screen, called in main method every
   // frame
   void Render(std::vector<std::vector<GameObject*>> game_ojbects);
-  // bind camrea position to the inputted player's position, and disply the
-  // health of that player on screen
-  void Attach(Player* target);
+  // bind camrea position to the inputted robot's position, and disply the
+  // health of that robot on screen
+  void Attach(Robot* target);
   // adds a bar to the list of bars, and consequently to the screen
   UIBar* AddBar(int max_value, SDL_Color color, SDL_Rect rect, int value);
   // removes a given bar from the screen object.
   void RemoveBar(UIBar* bar_to_remove);
-  // returns a pointer to the currently attached player
-  Player* GetAttached();
+  // returns a pointer to the currently attached robot
+  Robot* GetAttached();
   // retuns a pointer to the screen's bars
   std::vector<UIBar*>* GetBars();
 };
 
-#endif  // !SCREEN_H_
+#endif  // !SPLITSCREEN_SCREEN_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef SHIP_H_
-#define SHIP_H_
+#ifndef SPLITSCREEN_SHIP_H_
+#define SPLITSCREEN_SHIP_H_
 
 #include <iostream>
 #include <utility>
@@ -1460,7 +1570,7 @@ class Ship {
   // current room will decrease by 1.
   // Retuns whether or not this navigation is outside the range of the number of
   // rooms.
-  // Used by the main game lopop when the player needs to be moved to the next
+  // Used by the main game lopop when the robot needs to be moved to the next
   // or previous level
   bool MoveRoom(bool dir);
 
@@ -1477,18 +1587,18 @@ class Ship {
   void LoadRoom(int room_number);
 };
 
-#endif  // !SHIP_H_
+#endif  // !SPLITSCREEN_SHIP_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef UI_BAR_H_
-#define UI_BAR_H_
+#ifndef SPLITSCREEN_UI_BAR_H_
+#define SPLITSCREEN_UI_BAR_H_
 
 #include <iostream>
 #include <utility>
 
 #include "SDL2/include/SDL.h"
 
-// a class used to display infomation to the player in the from of a bar, theese
+// a class used to display infomation to the robot in the from of a bar, theese
 // bars are assigned to an induvidular screen object which will display them.
 class UIBar {
  public:
@@ -1532,11 +1642,11 @@ class UIBar {
   static const int border = 2;
 };
 
-#endif  // !UI_BAR_H_
+#endif  // !SPLITSCREEN_UI_BAR_H_
 // Copyright 2024 Hugh Thompson
 
-#ifndef VECTOR_H_
-#define VECTOR_H_
+#ifndef SPLITSCREEN_VECTOR_H_
+#define SPLITSCREEN_VECTOR_H_
 
 #include <cmath>
 // a structure containing a 2d vector mathmatical/physics sense.
@@ -1563,17 +1673,17 @@ struct Vector {
   }
 };
 
-#endif  // !VECTOR_H_
+#endif  // !SPLITSCREEN_VECTOR_H_
 // Copyright (C) 2024 Hugh Thompson
 
-#ifndef WALL_H_
-#define WALL_H_
+#ifndef SPLITSCREEN_WALL_H_
+#define SPLITSCREEN_WALL_H_
 
 #include <iostream>
 #include <vector>
 
 #include "game_object.h"
-#include "player.h"
+#include "robot.h"
 
 // An in game wall peice, can collide with other objects using the collide
 // method, used to add visable wall objects to the game.
@@ -1588,7 +1698,7 @@ class Wall : public GameObject {
   bool Collision(GameObject* obj);
 };
 
-#endif  // !WALL_H_
+#endif  // !SPLITSCREEN_WALL_H_
 // Copyright 2024 Hugh Thompson
 
 #include "bullet.h"
@@ -1658,16 +1768,16 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
             +kEnemies;
           }
         }
-        // players take damage
-        if (i == kPlayers) {
-          Player* player = dynamic_cast<Player*>(obj);
-          if (player) {
+        // robots take damage
+        if (i == kRobots) {
+          Robot* robot = dynamic_cast<Robot*>(obj);
+          if (robot) {
             Vector diff = {(rotation_center_.x + rect_.x) -
                                (obj->GetCenter()->x + obj->GetRect().x),
                            (rotation_center_.y + rect_.y) -
                                (obj->GetCenter()->y + obj->GetRect().y)};
             if (diff.Norm() <= obj->GetCenter()->x) {
-              player->Damage(damage_);
+              robot->Damage(damage_);
               destruct = true;
               break;
             }
@@ -1682,7 +1792,7 @@ bool Bullet::Update(std::vector<std::vector<GameObject*>>* objects) {
   while (!to_remove.empty()) {
     GameObject* removed = to_remove.top();
     to_remove.pop();
-    for (int i = kPlayers; i < kBullets; i++) {
+    for (int i = kRobots; i < kBullets; i++) {
       objects->at(i).erase(
           std::remove(objects->at(i).begin(), objects->at(i).end(), removed),
           objects->at(i).end());
@@ -1816,18 +1926,18 @@ bool Enemy::Damage(int amount) {
 
 void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
   std::vector<Vector> diff;
-  // looping through players and adding to lists
-  for (GameObject* player : game_objects->at(kPlayers)) {
-    if (static_cast<Player*>(player)) {
-      diff.push_back({(player->GetRect().x + player->GetCenter()->x) -
+  // looping through robots and adding to lists
+  for (GameObject* robot : game_objects->at(kRobots)) {
+    if (static_cast<Robot*>(robot)) {
+      diff.push_back({(robot->GetRect().x + robot->GetCenter()->x) -
                           (rect_.x + rotation_center_.x),
-                      (player->GetRect().y + player->GetCenter()->y) -
+                      (robot->GetRect().y + robot->GetCenter()->y) -
                           (rect_.y + rotation_center_.y)});
     } else {
       std::cout << "incorrect type allocated to list" << std::endl;
     }
   }
-  // cehcking if in range of player
+  // cehcking if in range of robot
   if (!dead_ && (diff[0].Norm() < 500 || diff[1].Norm() < 500)) {
     if (delta == 0) {
       delta = 1;
@@ -1860,9 +1970,9 @@ void Enemy::AI(std::vector<std::vector<GameObject*>>* game_objects, int delta) {
             }
           }
         }
-        // if player in range, add to interest, if low health, add inverse to
+        // if robot in range, add to interest, if low health, add inverse to
         // interest, if in attack range attack
-        if (i == kPlayers) {
+        if (i == kRobots) {
           Vector diff = {(obj->GetRect().x + obj->GetCenter()->x) -
                              (rect_.x + rotation_center_.x),
                          (obj->GetRect().y + obj->GetCenter()->y) -
@@ -1957,7 +2067,6 @@ Enemy::~Enemy() {
         std::remove(room_emenies->begin(), room_emenies->end(), this),
         room_emenies->end());
   }
-  std::cout << "enemy destroyed!" << std::endl;
   delete health_bar_;
   delete gun_;
 }
@@ -2035,23 +2144,23 @@ std::vector<float> Enemy::SetDanger(std::vector<GameObject*> objects) {
   return danger_aray;
 }
 
-bool Enemy::Intersect(SDL_Point p1, SDL_Point q1, SDL_Point p2, SDL_Point q2) {
+bool Enemy::Intersect(SDL_Point r1, SDL_Point q1, SDL_Point r2, SDL_Point q2) {
   // algorithm from:
   // https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/,
   // checks orientation of the two tragnes formed by the lines, if diffrent
   // the the lines intersect
-  int o1 = Orientation(p1, q1, p2);
-  int o2 = Orientation(p1, q1, q2);
-  int o3 = Orientation(p2, q2, p1);
-  int o4 = Orientation(p2, q2, q1);
+  int o1 = Orientation(r1, q1, r2);
+  int o2 = Orientation(r1, q1, q2);
+  int o3 = Orientation(r2, q2, r1);
+  int o4 = Orientation(r2, q2, q1);
   if (o1 != o2 && o3 != o4) {
     return true;
   }
   return false;
 }
 
-int Enemy::Orientation(SDL_Point p1, SDL_Point p2, SDL_Point p3) {
-  int val = (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y);
+int Enemy::Orientation(SDL_Point r1, SDL_Point r2, SDL_Point p3) {
+  int val = (r2.y - r1.y) * (p3.x - r2.x) - (r2.x - r1.x) * (p3.y - r2.y);
   if (val == 0) return 0;    // collinear
   return (val > 0) ? 1 : 2;  // clock or counterclock wise
 }
@@ -2112,6 +2221,7 @@ GameObject::GameObject(int x, int y, std::string name) {
           IMG_Load(((animation_entry.path()).string()).c_str());
       if (!surface_buffer) {
         std::cout << "image" + (animation_entry.path()).string() + "not found"
+                  << "reinstalling the program should fix this error"
                   << std::endl;
       }
       surfaces_[index_pointer].emplace_back(surface_buffer);
@@ -2231,7 +2341,7 @@ Bullet* Gun::Shoot() {
 #include "menu_button.h"
 #include "menu_image.h"
 #include "menu_text.h"
-#include "player.h"
+#include "robot.h"
 #include "room.h"
 #include "save_manager.h"
 #include "screen.h"
@@ -2254,46 +2364,46 @@ int main(int argc, char* args[]) {
     printf("error initializing SDL: %s\n", SDL_GetError());
   }
   // adding menuitems from menu_items.h
-  menu->menu_items_ = {player1_image,
-                       player2_image,
-                       player1_gun1,
-                       player1_gun2,
-                       player1_gun3,
-                       player1_gun4,
-                       player1_gun5,
-                       player2_gun1,
-                       player2_gun2,
-                       player2_gun3,
-                       player2_gun4,
-                       player2_gun5,
-                       player1_overlay,
-                       player1_upgrade_weapon,
-                       player1_gun1_text,
-                       player1_gun2_text,
-                       player1_gun3_text,
-                       player1_gun4_text,
-                       player1_gun5_text,
-                       player2_overlay,
-                       player2_upgrade_weapon,
-                       player2_gun1_text,
-                       player2_gun2_text,
-                       player2_gun3_text,
-                       player2_gun4_text,
-                       player2_gun5_text,
-                       p1_speed,
-                       p1_armour,
-                       p1_upgrade_speed,
-                       p1_upgrade_armour,
-                       p1_repair,
-                       p1_damagebar_bkg,
-                       p1_damagebar,
-                       p2_speed,
-                       p2_armour,
-                       p2_upgrade_speed,
-                       p2_upgrade_armour,
-                       p2_repair,
-                       p2_damagebar_bkg,
-                       p2_damagebar,
+  menu->menu_items_ = {robot1_image,
+                       robot2_image,
+                       robot1_gun1,
+                       robot1_gun2,
+                       robot1_gun3,
+                       robot1_gun4,
+                       robot1_gun5,
+                       robot2_gun1,
+                       robot2_gun2,
+                       robot2_gun3,
+                       robot2_gun4,
+                       robot2_gun5,
+                       robot1_overlay,
+                       robot1_upgrade_weapon,
+                       robot1_gun1_text,
+                       robot1_gun2_text,
+                       robot1_gun3_text,
+                       robot1_gun4_text,
+                       robot1_gun5_text,
+                       robot2_overlay,
+                       robot2_upgrade_weapon,
+                       robot2_gun1_text,
+                       robot2_gun2_text,
+                       robot2_gun3_text,
+                       robot2_gun4_text,
+                       robot2_gun5_text,
+                       r1_speed,
+                       r1_armour,
+                       r1_upgrade_speed,
+                       r1_upgrade_armour,
+                       r1_repair,
+                       r1_damagebar_bkg,
+                       r1_damagebar,
+                       r2_speed,
+                       r2_armour,
+                       r2_upgrade_speed,
+                       r2_upgrade_armour,
+                       r2_repair,
+                       r2_damagebar_bkg,
+                       r2_damagebar,
                        play,
                        title,
                        quit,
@@ -2301,8 +2411,8 @@ int main(int argc, char* args[]) {
                        credits};
   // setting speicilsed things about the items in menu_items.h
   title->SetWrap(200);
-  player1_gun1->SetColorDef({200, 0, 0, 255});
-  player2_gun1->SetColorDef({200, 0, 0, 255});
+  robot1_gun1->SetColorDef({200, 0, 0, 255});
+  robot2_gun1->SetColorDef({200, 0, 0, 255});
   menu->ChangeVisability();
   SDL_Event e;
   // full game loop
@@ -2312,8 +2422,8 @@ int main(int argc, char* args[]) {
     menu->ChangeVisability();
     menu->Render();
     // updating bars
-    p1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
-    p2_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(2) * 1.65f);
+    r1_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(1) * 1.65f);
+    r2_damagebar->GetRect()->w = static_cast<int>(save.GetDamage(2) * 1.65f);
     if (death_menu) {
       // death popup
       MenuText* dead = new MenuText(120, 25, "You Died", {255, 0, 0, 255}, 30);
@@ -2350,14 +2460,14 @@ int main(int argc, char* args[]) {
         }
       }
       // hovering over the overlays
-      SDL_Rect rect = *player1_overlay->GetRect();
+      SDL_Rect rect = *robot1_overlay->GetRect();
       int x, y;
       SDL_GetMouseState(&x, &y);
       if (!(x > rect.x && x < rect.x + rect.w && y > rect.y &&
             y < rect.y + rect.h)) {
         Overlay1Hide();
       }
-      SDL_Rect rect2 = *player2_overlay->GetRect();
+      SDL_Rect rect2 = *robot2_overlay->GetRect();
       if (!(x > rect2.x && x < rect2.x + rect2.w && y > rect2.y &&
             y < rect2.y + rect2.h)) {
         Overlay2Hide();
@@ -2374,24 +2484,24 @@ int main(int argc, char* args[]) {
       UIBar* swtich_bar = nullptr;
 
       // robot intitilastion
-      Player::new_id_ = 1;
-      Player player1(&save, player_1_gun);
-      Player player2(&save, player_2_gun);
-      player1.SetPos(256, 256);
-      player2.SetPos(256, 256);
+      Robot::new_id_ = 1;
+      Robot robot1(&save, robot_1_gun);
+      Robot robot2(&save, robot_2_gun);
+      robot1.SetPos(256, 256);
+      robot2.SetPos(256, 256);
 
       // game objects list, indexed by type
       std::vector<std::vector<GameObject*>> game_objects = {{}, {}, {}, {}, {}};
       // adding objects to lists
-      game_objects[kPlayers].push_back(&player1);
-      game_objects[kPlayers].push_back(&player2);
+      game_objects[kRobots].push_back(&robot1);
+      game_objects[kRobots].push_back(&robot2);
 
       // ship
-      Ship ship1(&game_objects, &save);
+      Ship shir1(&game_objects, &save);
 
       // assign robots to screens
-      screen2.Attach(&player2);
-      screen1.Attach(&player1);
+      screen2.Attach(&robot2);
+      screen1.Attach(&robot1);
       // game vars
       Screen* controlling = &screen1;
       int swich_cooldown = 0;
@@ -2429,7 +2539,6 @@ int main(int argc, char* args[]) {
           // switching robots
           if (swtich_bar) {
             swtich_bar->ChangeValue(2 * (delta_time / 10));
-            std::cout << swtich_bar->GetValue() << std::endl;
             if (swtich_bar->Full()) {
               controlling->RemoveBar(swtich_bar);
               swtich_bar = nullptr;
@@ -2457,33 +2566,33 @@ int main(int argc, char* args[]) {
           }
         }
         // death
-        if (!player1.active_ && !player2.active_) {
+        if (!robot1.active_ && !robot2.active_) {
           game_run = false;
           death_menu = new Menu(400, 80);
         }
         // room advancing / ship completion / fleeing
-        for (GameObject* obj : game_objects[kPlayers]) {
-          Player* player = dynamic_cast<Player*>(obj);
-          if (player) {
-            SDL_FRect rect = player->GetRect();
+        for (GameObject* obj : game_objects[kRobots]) {
+          Robot* robot = dynamic_cast<Robot*>(obj);
+          if (robot) {
+            SDL_FRect rect = robot->GetRect();
             if (rect.x < 0 || rect.y < 0) {
-              if (!ship1.MoveRoom(false)) {
-                player1.SetPos(ship1.GetDimensions().first - 256,
-                               ship1.GetDimensions().second - 256);
-                player2.SetPos(ship1.GetDimensions().first - 256,
-                               ship1.GetDimensions().second - 256);
+              if (!shir1.MoveRoom(false)) {
+                robot1.SetPos(shir1.GetDimensions().first - 256,
+                               shir1.GetDimensions().second - 256);
+                robot2.SetPos(shir1.GetDimensions().first - 256,
+                               shir1.GetDimensions().second - 256);
               } else {
                 game_run = false;
-                save.SetMenuDamage(1, player1.GetDamage());
-                save.SetMenuDamage(2, player2.GetDamage());
+                save.SetMenuDamage(1, robot1.GetDamage());
+                save.SetMenuDamage(2, robot2.GetDamage());
               }
               break;
             }
-            if (rect.x > ship1.GetDimensions().first + 64 ||
-                rect.y > ship1.GetDimensions().second + 64) {
-              if (!ship1.MoveRoom(true)) {
-                player1.SetPos(256, 256);
-                player2.SetPos(256, 256);
+            if (rect.x > shir1.GetDimensions().first + 64 ||
+                rect.y > shir1.GetDimensions().second + 64) {
+              if (!shir1.MoveRoom(true)) {
+                robot1.SetPos(256, 256);
+                robot2.SetPos(256, 256);
               } else {
                 game_run = false;
                 int amount = save.Reward();
@@ -2492,8 +2601,8 @@ int main(int argc, char* args[]) {
                     {255, 0, 0, 255}, 30);
                 reward_menu = new Menu(dead->GetRect()->w + 50, 80);
                 reward_menu->menu_items_ = {dead};
-                save.SetMenuDamage(1, player1.GetDamage());
-                save.SetMenuDamage(1, player2.GetDamage());
+                save.SetMenuDamage(1, robot1.GetDamage());
+                save.SetMenuDamage(1, robot2.GetDamage());
               }
               break;
             }
@@ -2529,7 +2638,7 @@ int main(int argc, char* args[]) {
             std::cout << "incorrect type allocated to list" << std::endl;
           }
         }
-        // switching players
+        // switching robots
         if (swich_cooldown > 0) {
           swich_cooldown -= delta_time;
         }
@@ -2598,15 +2707,24 @@ Menu::Menu() {
   win_ = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED,
                           SDL_WINDOWPOS_CENTERED, 750, 465, 0);
   if (win_ == NULL) {
-    std::cout << "Error window creation";
+    std::cout
+        << "Error window creation, try reinstalling the program, if that does "
+           "not work, contact devloper at thompshw20@cashmere.school.nz"
+        << std::endl;
   }
   renderer_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
   if (renderer_ == NULL) {
-    std::cout << "Error renderer creation";
+    std::cout << "Error renderer creation, try reinstalling the program, if "
+                 "that does "
+                 "not work, contact devloper at thompshw20@cashmere.school.nz"
+              << std::endl;
   }
   // font initilasation
   if (TTF_Init() < 0) {
-    std::cout << "Error initializing SDL_ttf: " << TTF_GetError();
+    std::cout << "Error initializing SDL_ttf: " << TTF_GetError()
+              << "try reinstalling the program, if that does "
+                 "not work, contact devloper at thompshw20@cashmere.school.nz"
+              << std::endl;
   }
   // make it so that alpha values work correctly for transparency
   SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
@@ -2690,15 +2808,24 @@ Menu::Menu(int x, int y) {
   win_ = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED,
                           SDL_WINDOWPOS_CENTERED, x, y, SDL_WINDOW_BORDERLESS);
   if (win_ == NULL) {
-    std::cout << "Error window creation";
+    std::cout
+        << "Error window creation try reinstalling the program, if that does "
+           "not work, contact devloper at thompshw20@cashmere.school.nz"
+        << std::endl;
   }
   renderer_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
   if (renderer_ == NULL) {
-    std::cout << "Error renderer creation";
+    std::cout
+        << "Error renderer creation try reinstalling the program, if that does "
+           "not work, contact devloper at thompshw20@cashmere.school.nz"
+        << std::endl;
   }
   // font initialisation
   if (TTF_Init() < 0) {
-    std::cout << "Error initializing SDL_ttf: " << TTF_GetError();
+    std::cout << "Error initializing SDL_ttf: " << TTF_GetError()
+              << "try reinstalling the program, if that does "
+                 "not work, contact devloper at thompshw20@cashmere.school.nz"
+              << std::endl;
   }
   // set so alpha values / tarnsparrence work on screen
   SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
@@ -2782,10 +2909,13 @@ void MenuButton::SetColorDef(SDL_Color color) { color_def_ = color; }
 
 MenuImage::MenuImage(int x, int y, std::string name) : MenuItem(x, y) {
   // loading in image from given name
-  SetSurface(IMG_Load(("assets/menu/" + name + ".png").c_str()));
-  if (!surface_) {
-    std::cout << "image assets/menu/" + name + ".png not found" << std::endl;
+  SDL_Surface* surface_buffer =
+      IMG_Load(("assets/menu/" + name + ".png").c_str());
+  if (!surface_buffer) {
+    std::cout << "image assets/menu/" + name + ".png not found, "
+              << "reinstalling this program will fix this error" << std::endl;
   }
+  SetSurface(surface_buffer);
 }
 // Copyright 2024 Hugh Thompson
 
@@ -2846,7 +2976,10 @@ MenuText::MenuText(std::string text, SDL_Color text_color, int size)
   // loading in font and error capture
   font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", size);
   if (!font_) {
-    std::cout << TTF_GetError() << std::endl;
+    std::cout << TTF_GetError() << std::endl
+              << "try reinstalling the program, if that does "
+                 "not work, contact devloper at thompshw20@cashmere.school.nz"
+              << std::endl;
   }
   // setting text color if given, otherwise will default to {0,0,0,255}(black)
   if (text_color.r) {
@@ -2865,7 +2998,10 @@ MenuText::MenuText(int x, int y, std::string text, SDL_Color text_color,
   // loading in font and error capture
   font_ = TTF_OpenFont("assets/menu/VeniteAdoremus.ttf", size_);
   if (!font_) {
-    std::cout << TTF_GetError() << std::endl;
+    std::cout << TTF_GetError() << std::endl
+              << "try reinstalling the program, if that does "
+                 "not work, contact devloper at thompshw20@cashmere.school.nz"
+              << std::endl;
   }
   // setting text color if given, otherwise will default to {0,0,0,255}(black)
   if (text_color.r) {
@@ -2896,21 +3032,21 @@ void MenuText::SetWrap(int wrap) { wrap_ = wrap; }
 void MenuText::SetText(std::string text) { text_ = text; }
 // Copyright 2024 Hugh Thompson
 
-#include "player.h"
+#include "robot.h"
 
 #include <cmath>
 
-Player::Player(SaveManager* save, int gun) : GameObject(0, 0, "player") {
+Robot::Robot(SaveManager* save, int gun) : GameObject(0, 0, "robot") {
   // setting id
   id_ = new_id_;
   new_id_++;
   // loading in from save
-  std::vector<int> stats = save->GetPlayerStats(id_);
+  std::vector<int> stats = save->GetRobotStats(id_);
   speed_ = stats[0];
   rotation_speed_ = static_cast<float>(stats[0]) / 100000;
   armour_ = stats[1];
   damage_ = save->GetDamage(id_);
-  // roataion center to center of player charter
+  // roataion center to center of robot charter
   rotation_center_.y = (rect_.h - 28) + rect_.y;
   // gun initialisation
   gun_ = new Gun(gun, this, save);
@@ -2921,9 +3057,9 @@ Player::Player(SaveManager* save, int gun) : GameObject(0, 0, "player") {
   damage_bar_->SetValue(damage_);
 }
 
-Player::~Player() { delete gun_; }
+Robot::~Robot() { delete gun_; }
 
-void Player::Step(int delta_time) {
+void Robot::Step(int delta_time) {
   // caluclating the componets of the vector to move given the rotation and
   // speed (scaled by delta time) if active
   if (active_) {
@@ -2934,7 +3070,7 @@ void Player::Step(int delta_time) {
   }
 }
 
-void Player::Rotate(bool dir, int delta_time) {
+void Robot::Rotate(bool dir, int delta_time) {
   // roatate based on direction if active
   if (active_) {
     if (dir == 1) {
@@ -2946,12 +3082,12 @@ void Player::Rotate(bool dir, int delta_time) {
   }
 }
 
-Gun* Player::GetGun() { return gun_; }
+Gun* Robot::GetGun() { return gun_; }
 
-bool Player::Damage(int amount) {
+bool Robot::Damage(int amount) {
   bool rv = false;
   int real_damage = amount - ((amount * armour_) / 100);
-  // conditions based on if the player has reached the maximim damage
+  // conditions based on if the robot has reached the maximim damage
   damage_ += real_damage;
   if (damage_ >= 100) {
     rv = true;
@@ -2964,9 +3100,9 @@ bool Player::Damage(int amount) {
   return rv;
 }
 
-UIBar* Player::GetBar() { return damage_bar_; }
+UIBar* Robot::GetBar() { return damage_bar_; }
 
-int Player::GetDamage() { return damage_; }
+int Robot::GetDamage() { return damage_; }
 // Copyright 2024 Hugh Thompson
 
 #include "room.h"
@@ -2996,7 +3132,6 @@ Room::Room(SaveManager* save) {
       }
     }
     walls_.push_back(new Wall((map[0].size() - 1) * 128, y * 128));
-    std::cout << std::endl;
   }
   // edge
   for (int x = 0; x < map[0].size(); x++) {
@@ -3411,7 +3546,7 @@ SaveManager::~SaveManager() {
 unsigned int SaveManager::GetCredits() { return data_[0]; }
 
 unsigned int SaveManager::Reward() {
-  // calculation of reward based on player level
+  // calculation of reward based on robot level
   float avrgae_level = (data_[2] + data_[3] + data_[5] + data_[6]) / 4.0f;
   int reward = avrgae_level * 100.0f;
   data_[0] += reward;
@@ -3443,10 +3578,10 @@ bool SaveManager::UpgradeWeapon(int type) {
   return bought;
 }
 
-std::vector<int> SaveManager::GetPlayerStats(int player) {
+std::vector<int> SaveManager::GetRobotStats(int robot) {
   // setting index base off robot inputted
   int index = 2;
-  if (player == 2) {
+  if (robot == 2) {
     index = 5;
   }
   float speed_mul = static_cast<float>(data_[index]) / 100.0f;
@@ -3454,19 +3589,19 @@ std::vector<int> SaveManager::GetPlayerStats(int player) {
   int speed_cost = 100 * pow(1.1, data_[index]);
   int armour_cost = 100 * pow(1.1, data_[index + 1]);
   return {
-      static_cast<int>(static_cast<float>(kBasePlayer[0]) * (1.0f + speed_mul)),
-      static_cast<int>(static_cast<float>(kBasePlayer[1]) *
+      static_cast<int>(static_cast<float>(kBaseRobot[0]) * (1.0f + speed_mul)),
+      static_cast<int>(static_cast<float>(kBaseRobot[1]) *
                        (1.0f + armour_mul)),
       speed_cost, armour_cost};
 }
 
-bool SaveManager::UpgradePlayer(bool upgrade, int player) {
+bool SaveManager::UpgradeRobot(bool upgrade, int robot) {
   // setting index base off robot inputted
   int index = 2;
-  if (player == 2) {
+  if (robot == 2) {
     index = 5;
   }
-  int cost = GetPlayerStats(player)[2 + upgrade];
+  int cost = GetRobotStats(robot)[2 + upgrade];
   bool bought = false;
   if (cost <= data_[0]) {
     data_[index + upgrade] += 1;
@@ -3476,13 +3611,13 @@ bool SaveManager::UpgradePlayer(bool upgrade, int player) {
   return bought;
 }
 
-int SaveManager::Repair(int player) {
+int SaveManager::Repair(int robot) {
   // setting index base off robot inputted
   int index = 1;
-  if (player == 2) {
+  if (robot == 2) {
     index = 4;
   }
-  int cost = GetRepairCost(player);
+  int cost = GetRepairCost(robot);
   int bought = 0;
   if (cost <= data_[0]) {
     bought = 2;
@@ -3495,19 +3630,19 @@ int SaveManager::Repair(int player) {
   return bought;
 }
 
-void SaveManager::SetMenuDamage(int player, int damage) {
+void SaveManager::SetMenuDamage(int robot, int damage) {
   // setting index base off robot inputted
   int index = 1;
-  if (player == 2) {
+  if (robot == 2) {
     index = 4;
   }
   data_[index] = damage;
 }
 
-int SaveManager::GetRepairCost(int player) {
+int SaveManager::GetRepairCost(int robot) {
   // setting index base off robot inputted
   int index = 1;
-  if (player == 2) {
+  if (robot == 2) {
     index = 4;
   }
   int avg_level = (data_[index + 1] + data_[index + 2]) / 2;
@@ -3518,10 +3653,10 @@ int SaveManager::GetRepairCost(int player) {
   return cost;
 }
 
-int SaveManager::GetDamage(int player) {
+int SaveManager::GetDamage(int robot) {
   // setting index base off robot inputted
   int index = 1;
-  if (player == 2) {
+  if (robot == 2) {
     index = 4;
   }
   return data_[index];
@@ -3544,11 +3679,15 @@ Screen::Screen(int x, int y) {
   // window creation using SDL
   win_ = SDL_CreateWindow("Window", x, y, 500, 500, SDL_WINDOW_BORDERLESS);
   if (win_ == NULL) {
-    std::cout << "Error window creation";
+    std::cout << "Error window creation, try reinstalling the program, if that does "
+           "not work, contact devloper at thompshw20@cashmere.school.nz"
+        << std::endl;
   }
   renderer_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
   if (renderer_ == NULL) {
-    std::cout << "Error renderer creation";
+    std::cout << "Error renderer creation try reinstalling the program, if that does "
+           "not work, contact devloper at thompshw20@cashmere.school.nz"
+        << std::endl;
   }
   // setting window id
   window_id_ = SDL_GetWindowID(win_);
@@ -3639,7 +3778,7 @@ void Screen::Render(std::vector<std::vector<GameObject*>> game_objects) {
   SDL_RenderPresent(renderer_);
 }
 
-void Screen::Attach(Player* target) {
+void Screen::Attach(Robot* target) {
   // set target
   following_ = target;
   // set offset so target is centered on screen
@@ -3662,7 +3801,7 @@ void Screen::RemoveBar(UIBar* bar_to_remove) {
   delete bar_to_remove;
 }
 
-Player* Screen::GetAttached() { return following_; }
+Robot* Screen::GetAttached() { return following_; }
 
 std::vector<UIBar*>* Screen::GetBars() { return &bars_; }
 // Copyright 2024 Hugh Thompson

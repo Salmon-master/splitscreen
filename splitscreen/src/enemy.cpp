@@ -197,7 +197,6 @@ Enemy::~Enemy() {
         std::remove(room_emenies->begin(), room_emenies->end(), this),
         room_emenies->end());
   }
-  std::cout << "enemy destroyed!" << std::endl;
   delete health_bar_;
   delete gun_;
 }
